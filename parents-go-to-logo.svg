@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 20 620 258" role="img" aria-label="Parents Go To — everything in one place">
+  <style>
+    .t { font-family: "Public Sans", "Helvetica Neue", Arial, sans-serif; }
+    .ink { fill: #1B4332; }
+    .go { fill: #4DB386; }
+    .tag { fill: #5E6B66; }
+    .p { fill: #1B4332; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #E6F2EA; }
+      .go { fill: #6CCB9A; }
+      .tag { fill: #A9B8B1; }
+      .p { fill: #CFE8D8; }
+    }
+  </style>
+  <g class="tree">
+    <rect x="58" y="266" width="184" height="8" rx="4" fill="#DDF2E1"/>
+    <path d="M150 168 161 273H139Z" fill="#8B5A3C"/>
+    <circle cx="105" cy="116" r="42" fill="#3F9669"/>
+    <circle cx="195" cy="118" r="42" fill="#3F9669"/>
+    <circle cx="150" cy="108" r="54" fill="#55B583"/>
+    <circle cx="120" cy="80" r="38" fill="#6CC093"/>
+    <circle cx="182" cy="82" r="38" fill="#6CC093"/>
+    <circle cx="158" cy="56" r="32" fill="#96D5B1"/>
+    <circle cx="133" cy="68" r="7" fill="#F9CF5E"/>
+    <circle cx="186" cy="100" r="9" fill="#F9CF5E"/>
+    <circle cx="86" cy="135" r="7" fill="#F9CF5E"/>
+    <circle cx="168" cy="62" r="6" fill="#4A9CE0"/>
+    <circle cx="150" cy="135" r="9" fill="#4A9CE0"/>
+    <circle cx="212" cy="138" r="6" fill="#4A9CE0"/>
+    <circle cx="114" cy="112" r="8" fill="#F47C62"/>
+    <circle cx="172" cy="133" r="8" fill="#F47C62"/>
+    <circle cx="106" cy="219" r="10" class="p"/>
+    <rect x="96" y="232" width="20" height="37" rx="10" class="p"/>
+    <circle cx="194" cy="219" r="10" class="p"/>
+    <rect x="184" y="232" width="20" height="37" rx="10" class="p"/>
+    <circle cx="221" cy="238" r="7" fill="#F28C6B"/>
+    <rect x="214" y="249" width="14" height="21" rx="7" fill="#F28C6B"/>
+  </g>
+  <text class="t ink" x="290" y="140" font-size="72" font-weight="700" letter-spacing="-1">Parents</text>
+  <text class="t go" x="292" y="210" font-size="56" font-weight="700" letter-spacing="-.5">Go To</text>
+  <text class="t tag" x="293" y="250" font-size="19" font-weight="500" letter-spacing="3.4">EVERYTHING IN ONE PLACE</text>
+</svg>

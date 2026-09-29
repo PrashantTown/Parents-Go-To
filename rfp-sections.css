@@ -1,0 +1,78 @@
+/* "What is included" and "How it works" on the Reading for Pleasure landing.
+   The card stack itself comes from stack.css; this file fits it to the landing's
+   header, type and theme setting. */
+
+#page-landing .rfp-included,
+#page-landing .rfp-how { scroll-margin-top: 76px; }
+
+#page-landing .rfp-wide-head { max-width: 62ch; margin-bottom: clamp(2rem, 5vw, 3rem); }
+
+/* The landing header is 76px tall, not the 72px stack.css assumes. */
+#page-landing .stack { --stack-top: calc(76px + clamp(.75rem, 2.5vw, 1.5rem)); }
+
+#page-landing .stack__head h3 {
+  font-family: var(--display); font-weight: 600;
+}
+#page-landing .stack__num { font-family: var(--display); }
+#page-landing .stack__item h4 { font-family: var(--body); font-weight: 700; line-height: 1.25; }
+#page-landing .stack__item p,
+#page-landing .stack__lede { line-height: 1.55; }
+
+/* ---- How it works ---- */
+#page-landing .rfp-steps {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 1.8rem;
+  grid-template-columns: minmax(0, 1fr);
+  counter-reset: step;
+}
+@media (min-width: 780px) {
+  #page-landing .rfp-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.2rem; }
+}
+#page-landing .rfp-steps li {
+  counter-increment: step;
+  border-top: 2px solid var(--pine);
+  padding-top: .9rem;
+  max-width: 44ch;
+}
+#page-landing .rfp-steps li::before {
+  content: "0" counter(step);
+  display: block; margin-bottom: .55rem;
+  font-family: var(--display); font-size: 1.5rem; font-weight: 600;
+  color: var(--marigold);
+}
+#page-landing .rfp-steps h3 {
+  margin: 0 0 .35rem;
+  font-family: var(--display); font-weight: 600; font-size: 1.12rem;
+  color: var(--brand-ink);
+}
+#page-landing .rfp-steps p { margin: 0; font-size: .95rem; line-height: 1.55; color: var(--ink-60); }
+
+/* ---- Follow the site's own theme setting (light / dark / auto) ---- */
+html[data-theme="dark"] .stack__card { --card-icon-bg: rgba(121,216,184,.12); }
+html[data-theme="dark"] .stack__card::after { background: #000; }
+html[data-theme="dark"] .stack__card--2 { --card-bg: #0F332B; --card-line: rgba(255,255,255,.1); }
+html[data-theme="dark"] .stack__card--3 {
+  --card-bg: #2A2416; --card-ink: #F6ECD8; --card-soft: #CDBF9F;
+  --card-accent: #F0B45C; --card-icon-bg: rgba(240,180,92,.14); --card-line: rgba(240,180,92,.18);
+}
+html[data-theme="dark"] .stack__card--4 {
+  --card-bg: #0F2F2C; --card-ink: #E2F6F2; --card-soft: #A3C9C2;
+  --card-accent: #4FD8CA; --card-icon-bg: rgba(79,216,202,.13); --card-line: rgba(79,216,202,.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="light"] .stack__card { --card-icon-bg: rgba(13,59,50,.09); }
+  html[data-theme="light"] .stack__card::after { background: var(--pine-900); }
+  html[data-theme="light"] .stack__card--2 { --card-bg: #0D3B32; --card-line: rgba(255,255,255,.14); }
+  html[data-theme="light"] .stack__card--3 {
+    --card-bg: #F6E6C6; --card-ink: #2B2110; --card-soft: #5E5039;
+    --card-accent: #8A5A12; --card-icon-bg: rgba(138,90,18,.12); --card-line: rgba(138,90,18,.2);
+  }
+  html[data-theme="light"] .stack__card--4 {
+    --card-bg: #CFEDE7; --card-ink: #0B2F2B; --card-soft: #3D5E58;
+    --card-accent: #016E66; --card-icon-bg: rgba(1,110,102,.12); --card-line: rgba(1,110,102,.2);
+  }
+}
+
+/* Honour the in-app "reduce motion" setting as well as the system one. */
+html.ptg-reduce .stack__card { transform: none; will-change: auto; }

@@ -1,0 +1,30 @@
+html.rv-on .rv {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity var(--dur-slow) var(--ease-emphasis),
+    transform var(--dur-slow) var(--ease-emphasis);
+  transition-delay: calc(var(--rv-i, 0) * 70ms);
+}
+html.rv-on .rv.is-in { opacity: 1; transform: none; }
+/* reveal.js adds .rv-done once the entrance has played, so hover is not delayed by the stagger. */
+html.rv-on .rv.rv-done {
+  transition: opacity var(--dur-base) var(--ease-standard),
+              transform var(--dur-base) var(--ease-standard),
+              box-shadow var(--dur-base) var(--ease-standard);
+}
+
+.card,
+.steps > li,
+.details > li {
+  transition: transform var(--dur-base) var(--ease-standard), box-shadow var(--dur-base) var(--ease-standard);
+}
+@media (hover: hover) {
+  .card:hover,
+  html.rv-on .card.rv.is-in:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.rv-on .rv { opacity: 1; transform: none; transition: none; }
+  .card:hover { transform: none; }
+}

@@ -1,0 +1,288 @@
+:is(#page-app, #page-admin, #page-auth){
+  --r-card: var(--radius-lg, 14px);
+  --r-ctl: var(--radius-sm, 9px);
+  --elev-1: var(--shadow-1);
+  --elev-2: var(--shadow-2);
+  --hover-bg: rgba(13,59,50,.055);
+  --ring: 0 0 0 3px rgba(13,59,50,.16);
+  --line-card: var(--line-soft);
+}
+html[data-theme="dark"] :is(#page-app, #page-admin, #page-auth){
+  --hover-bg: rgba(121,216,184,.08);
+  --ring: 0 0 0 3px rgba(121,216,184,.22);
+}
+@media (prefers-color-scheme: dark){
+  html[data-theme="auto"] :is(#page-app, #page-admin, #page-auth){
+    --hover-bg: rgba(121,216,184,.08);
+    --ring: 0 0 0 3px rgba(121,216,184,.22);
+  }
+}
+
+:is(#page-app, #page-admin) .app-bar{
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  border-bottom-color: var(--line-card);
+  box-shadow: 0 1px 0 rgba(19,34,30,.02), 0 6px 18px -16px rgba(13,59,50,.35);
+}
+:is(#page-app, #page-admin) .app-bar-inner{ min-height: 64px; }
+:is(#page-app, #page-admin) .bar-search input{
+  height: 42px;
+  background: var(--paper);
+  border-color: transparent;
+  border-radius: var(--r-ctl);
+}
+:is(#page-app, #page-admin) .bar-search input:hover{ border-color: var(--line-soft); }
+:is(#page-app, #page-admin) .bar-search input:focus{
+  background: var(--card); border-color: var(--pine); box-shadow: var(--ring);
+}
+:is(#page-app, #page-admin) .who:hover{ background: var(--paper); border-color: transparent; }
+
+:is(#page-app, #page-admin) .app-nav{ gap: .25rem; padding-block: .35rem; border-top-color: var(--line-card); }
+:is(#page-app, #page-admin) .app-nav button{
+  min-height: 40px; padding: 0 .8rem;
+  font-size: .9rem; font-weight: 600;
+  border-radius: var(--r-ctl);
+  transition: color .18s var(--ease-out), background .18s var(--ease-out);
+}
+:is(#page-app, #page-admin) .app-nav button:hover{ background: var(--hover-bg); color: var(--ink); }
+:is(#page-app, #page-admin) .app-nav button[aria-selected="true"]{ color: var(--pine); background: var(--hover-bg); }
+:is(#page-app, #page-admin) .app-nav button::after{ display: none; }
+:is(#page-app, #page-admin) .app-nav .count{
+  min-width: 19px; height: 19px;
+  font-size: .7rem; font-variant-numeric: tabular-nums;
+  color: var(--ink-60); background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+:is(#page-app, #page-admin) .app-nav button[aria-selected="true"] .count{
+  color: #fff; background: var(--pine); box-shadow: none;
+}
+#page-admin .app-nav button[aria-selected="true"] .count{ background: #123F5B; }
+/* The rules above are for the top/side tab strip. This file loads after responsive.css,
+   so restore the phone bottom bar's sizing here or the labels get clipped and the bar
+   loses its safe-area padding under the iPhone home indicator. */
+@media (max-width: 720px){
+  :is(#page-app, #page-admin) .app-nav{ gap: 0; padding-block: 0 var(--safe-b, 0px); }
+  :is(#page-app, #page-admin) .app-nav button{ min-height: 62px; padding: 8px 2px; font-size: .7rem; border-radius: 0; }
+  #page-admin .app-nav button{ font-size: .63rem; padding-inline: 0; }
+}
+@media (max-width: 340px){
+  :is(#page-app, #page-admin) .app-nav button{ font-size: 0; gap: 0; }
+}
+@media (max-width: 360px){
+  #page-admin .app-nav button{ font-size: 0; gap: 0; }
+}
+@media (max-height: 460px) and (orientation: landscape){
+  :is(#page-app, #page-admin) .app-nav{ padding: 0; }
+  :is(#page-app, #page-admin) .app-nav button{ min-height: 46px; padding: 0 .8rem; font-size: .88rem; gap: .45rem; }
+}
+#page-admin .app-nav .count--alert[data-lit="1"]{ color: #fff; background: var(--flag); box-shadow: none; }
+html[data-theme="dark"] :is(#page-app, #page-admin) .app-nav button[aria-selected="true"] .count{ color: #06201B; background: var(--pine); }
+html[data-theme="dark"] #page-admin .app-nav .count--alert[data-lit="1"]{ color: #2A0D08; background: var(--flag); }
+html[data-theme="dark"] :is(#page-app, #page-admin) .bar-search input{ border-color: var(--line-soft); }
+@media (prefers-color-scheme: dark){
+  html[data-theme="auto"] :is(#page-app, #page-admin) .app-nav button[aria-selected="true"] .count{ color: #06201B; background: var(--pine); }
+  html[data-theme="auto"] #page-admin .app-nav .count--alert[data-lit="1"]{ color: #2A0D08; background: var(--flag); }
+  html[data-theme="auto"] :is(#page-app, #page-admin) .bar-search input{ border-color: var(--line-soft); }
+}
+
+:is(#page-app, #page-admin) .panel-head{
+  align-items: flex-end;
+  padding-bottom: 1.5rem; margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--line-card);
+}
+:is(#page-app, #page-admin) .panel-head .eyebrow,
+:is(#page-app, #page-admin) .eyebrow{ color: var(--pine); letter-spacing: .1em; }
+:is(#page-app, #page-admin) h1{ letter-spacing: -.025em; }
+:is(#page-app, #page-admin) .sub{ line-height: 1.6; }
+:is(#page-app, #page-admin) .row-head h2{ font-size: 1.15rem; }
+:is(#page-app, #page-admin) .row-head .btn--quiet{ color: var(--pine); }
+
+:is(#page-app, #page-admin) .greet{
+  padding-bottom: 1.5rem; margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--line-card);
+}
+:is(#page-app, #page-admin) .greet .avatar{ box-shadow: 0 0 0 4px var(--card), 0 0 0 5px var(--line-soft); }
+
+:is(#page-app, #page-admin) .btn{ border-radius: var(--r-ctl); letter-spacing: -.005em; }
+:is(#page-app, #page-admin) .btn--primary{
+  box-shadow: 0 1px 2px rgba(8,37,31,.25), inset 0 1px 0 rgba(255,255,255,.08);
+}
+:is(#page-app, #page-admin) .btn--primary:hover{ box-shadow: 0 4px 12px -4px rgba(8,37,31,.45); }
+:is(#page-app, #page-admin) .btn--ghost{
+  background: var(--card); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-soft), var(--elev-1);
+}
+:is(#page-app, #page-admin) .btn--ghost:hover{
+  background: var(--card); color: var(--pine);
+  box-shadow: inset 0 0 0 1px var(--line), var(--elev-1);
+}
+:is(#page-app, #page-admin) .btn--quiet:hover,
+:is(#page-app, #page-admin) .icon-btn:hover{ background: var(--hover-bg); }
+:is(#page-app, #page-admin) .btn--danger{ background: var(--card); box-shadow: inset 0 0 0 1px rgba(179,64,46,.35); }
+:is(#page-app, #page-admin) .btn:focus-visible,
+:is(#page-app, #page-admin) .chip:focus-visible{ outline: 2px solid var(--pine); outline-offset: 2px; }
+
+:is(#page-app, #page-admin) :is(.stat, .toolbar, .whofor, .empty, .profile, .reader, .suggest, .cat, .tonight),
+#page-admin :is(.triage, .sub-card, .adm-table-wrap),
+:is(#page-app, #page-admin) :is(.set-rail, .set-card){
+  border-radius: var(--r-card);
+  border-color: var(--line-card);
+  box-shadow: var(--elev-1);
+}
+
+:is(#page-app, #page-admin) .stat{
+  padding: 1.25rem 1.3rem 1.2rem;
+  transition: box-shadow .2s var(--ease-out), transform .2s var(--ease-out);
+}
+:is(#page-app, #page-admin) .stat::before{
+  left: auto; right: 1.3rem; top: 1.45rem; bottom: auto;
+  width: 8px; height: 8px; border-radius: 50%;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, var(--pine)) 16%, transparent);
+}
+:is(#page-app, #page-admin) .stat:hover{ box-shadow: var(--elev-2); transform: translateY(-1px); }
+:is(#page-app, #page-admin) .stat .n{ font-size: 2.2rem; font-variant-numeric: tabular-nums; color: var(--ink); }
+:is(#page-app, #page-admin) .stat .k{ margin-top: .45rem; font-size: .88rem; font-weight: 600; color: var(--ink); }
+:is(#page-app, #page-admin) .stat .s{
+  margin-top: .75rem; padding-top: .7rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: .8rem;
+}
+
+:is(#page-app, #page-admin) .whofor{ padding: .7rem .9rem; }
+:is(#page-app, #page-admin) .chip:not([aria-pressed="true"]){ background: var(--card); }
+:is(#page-app, #page-admin) .chip{ min-height: 36px; }
+:is(#page-app, #page-admin) .chip:not([aria-pressed="true"]):hover{ background: var(--paper); }
+
+:is(#page-app, #page-admin) .tonight{ padding: 1rem 1.25rem; }
+
+:is(#page-app, #page-admin) .toolbar{ padding: 1rem 1.1rem; gap: .9rem; }
+:is(#page-app, #page-admin) .tool label{ font-size: .7rem; letter-spacing: .08em; }
+:is(#page-app, #page-admin) .tool select{
+  height: 40px; min-width: 160px;
+  background-color: var(--card);
+  border-color: var(--line-soft);
+  border-radius: var(--r-ctl);
+  box-shadow: var(--elev-1);
+  transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+:is(#page-app, #page-admin) .tool select:hover{ border-color: var(--line); }
+:is(#page-app, #page-admin) .tool select:focus{ border-color: var(--pine); box-shadow: var(--ring); }
+:is(#page-app, #page-admin) .toolbar .btn--quiet{ color: var(--pine); }
+:is(#page-app, #page-admin) .result-count{ font-weight: 600; }
+
+:is(#page-app, #page-admin) .vswitch{
+  display: inline-flex; max-width: 100%;
+  padding: 4px; gap: 2px;
+  background: var(--paper-warm);
+  border-color: var(--line-card);
+  border-radius: 11px;
+}
+:is(#page-app, #page-admin) .vswitch-btn{
+  flex: 0 0 auto;
+  min-height: 36px; padding: .35rem 1.15rem;
+  font-weight: 600; border-radius: 8px;
+  transition: color .18s var(--ease-out), background .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+:is(#page-app, #page-admin) .vswitch-btn[aria-selected="true"]{
+  text-decoration: none;
+  color: var(--pine);
+  border-color: transparent;
+  box-shadow: var(--elev-2);
+}
+/* On narrow phones the two labels do not fit side by side at their natural width. */
+@media (max-width: 479.98px){
+  :is(#page-app, #page-admin) .vswitch{ display: flex; width: 100%; }
+  :is(#page-app, #page-admin) .vswitch-btn{ flex: 1 1 0; min-width: 0; padding-inline: .6rem; white-space: normal; }
+}
+@media (pointer: coarse){
+  :is(#page-app, #page-admin) .vswitch-btn{ min-height: 44px; }
+}
+
+:is(#page-app, #page-admin) .empty{ padding: 3.25rem 1.5rem; }
+:is(#page-app, #page-admin) .empty svg{
+  box-sizing: content-box;
+  padding: 14px; border-radius: 50%;
+  background: var(--paper); color: var(--pine);
+}
+:is(#page-app, #page-admin) :is(.add-card, .add-book){
+  border: 1.5px dashed var(--line-soft);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--card) 55%, transparent);
+  transition: border-color .2s var(--ease-out), background .2s var(--ease-out), color .2s var(--ease-out);
+}
+:is(#page-app, #page-admin) :is(.add-card, .add-book):hover{
+  border-color: var(--pine); background: var(--card);
+}
+:is(#page-app, #page-admin) :is(.add-card, .add-book) .plus{
+  border: 0; background: var(--hover-bg); color: var(--pine);
+}
+
+:is(#page-app, #page-admin) .profile{ transition: box-shadow .2s var(--ease-out); }
+:is(#page-app, #page-admin) .profile:hover{ box-shadow: var(--elev-2); }
+
+:is(#page-app, #page-admin) .set-rail{ padding: .4rem; }
+:is(#page-app, #page-admin) .set-rail-link{ border-radius: var(--r-ctl); }
+:is(#page-app, #page-admin) .set-rail-link:hover{ background: var(--hover-bg); }
+:is(#page-app, #page-admin) .set-rail-link svg{ color: var(--pine); }
+
+#page-admin .notice{ border-radius: var(--r-card); }
+#page-admin .triage{ transition: box-shadow .2s var(--ease-out); }
+#page-admin .triage:hover{ box-shadow: var(--elev-2); }
+
+#page-admin .adm-table-wrap{ overflow: auto; }
+#page-admin .adm-table thead th{
+  position: sticky; top: 0; z-index: 1;
+  padding-block: .7rem;
+  font-size: .7rem;
+  background: var(--paper);
+  border-bottom-color: var(--line-soft);
+}
+#page-admin .adm-table td{ padding-block: .85rem; }
+#page-admin .adm-table tbody tr{ transition: background .15s var(--ease-out); }
+#page-admin .adm-table tbody tr:hover{ background: var(--hover-bg); }
+#page-admin .adm-table .row-acts{ gap: .35rem; }
+#page-admin .adm-table .row-acts .btn--sm{ min-height: 34px; }
+#page-admin .adm-table .row-acts .btn--quiet{ box-shadow: inset 0 0 0 1px var(--line-soft); background: var(--card); color: var(--ink); }
+#page-admin .adm-table .row-acts .btn--quiet:hover:not(:disabled){ box-shadow: inset 0 0 0 1px var(--line); color: var(--pine); }
+#page-admin .adm-table .row-acts .btn:disabled{ opacity: .45; cursor: not-allowed; }
+
+#page-admin .pill{
+  display: inline-flex; align-items: center; gap: .38rem;
+  padding: .2rem .6rem;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone, var(--ink-60)) 18%, transparent);
+}
+#page-admin :is(.pill--active, .pill--suspended, .pill--pending, .pill--approved, .pill--rejected, .pill--published, .pill--draft)::before{
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; flex: none;
+}
+
+#page-auth .card{
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(19,34,30,.05), 0 24px 60px -30px rgba(13,59,50,.35);
+}
+#page-auth :is(input[type="email"], input[type="password"], input[type="text"], input[type="tel"], select){
+  border-radius: var(--r-ctl);
+  transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+#page-auth :is(input[type="email"], input[type="password"], input[type="text"], input[type="tel"], select):hover{ border-color: var(--line); }
+#page-auth :is(input[type="email"], input[type="password"], input[type="text"], input[type="tel"], select):focus{
+  border-color: var(--pine); box-shadow: var(--ring);
+}
+#page-auth .submit{
+  border-radius: var(--r-ctl);
+  box-shadow: 0 1px 2px rgba(8,37,31,.25), 0 8px 18px -10px rgba(8,37,31,.5);
+}
+
+html[data-theme="dark"] #page-auth .submit--ghost{ color: var(--pine); }
+html[data-theme="dark"] #page-auth .submit--ghost:hover{ background: rgba(121,216,184,.08); }
+@media (prefers-color-scheme: dark){
+  html[data-theme="auto"] #page-auth .submit--ghost{ color: var(--pine); }
+  html[data-theme="auto"] #page-auth .submit--ghost:hover{ background: rgba(121,216,184,.08); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  :is(#page-app, #page-admin) :is(.stat, .profile),
+  #page-admin .triage{ transition: none; }
+  :is(#page-app, #page-admin) .stat:hover{ transform: none; }
+}

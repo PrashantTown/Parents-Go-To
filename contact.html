@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contact &mdash; Parents Go To</title>
+<meta name="description" content="Contact Parents Go To: ask a question, suggest a session, list your own service, or report a problem with a listing.">
+<link rel="icon" type="image/svg+xml" href="parents-go-to-mark.svg">
+<meta name="theme-color" content="#EDF1EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101B18" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="reveal.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap topbar__inner">
+    <a class="brand" href="index.html">
+      <img class="brand__mark" src="parents-go-to-mark.svg" alt="" width="33" height="44">
+      <span class="brand__text">Parents Go To</span>
+    </a>
+    <button class="navtoggle" id="navtoggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="reading-for-pleasure.html">Reading for pleasure</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="pagehead">
+    <div class="wrap">
+      <p class="crumb"><a href="index.html">Home</a> &rsaquo; Contact</p>
+      <h1>Get in touch</h1>
+      <p>Tell us what your family needs, suggest a service that belongs on here, or let us
+         know if something on the site is not working. A real person reads every message.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="split">
+
+        <div>
+          <p class="eyebrow">Ways to reach us</p>
+
+          <ul class="details">
+            <li>
+              <span class="ico" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.2" y="4.2" width="15.6" height="11.6" rx="2"/><path d="M2.6 5.4 10 11l7.4-5.6"/></svg>
+              </span>
+              <span>
+                <b>Email</b>
+                <a href="mailto:hello@parentsgoto.example">hello@parentsgoto.example</a>
+              </span>
+            </li>
+            <li>
+              <span class="ico" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6.6 3.2 8.4 7 6.6 8.7a11 11 0 0 0 4.7 4.7L13 11.6l3.8 1.8v3a1.6 1.6 0 0 1-1.8 1.6A14.2 14.2 0 0 1 2.6 5a1.6 1.6 0 0 1 1.6-1.8Z"/></svg>
+              </span>
+              <span>
+                <b>Phone</b>
+                <a href="tel:1800551800">1800 551 800</a>
+              </span>
+            </li>
+            <li>
+              <span class="ico" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7.4"/><path d="M10 5.8V10l2.8 1.8"/></svg>
+              </span>
+              <span>
+                <b>Hours</b>
+                Monday to Friday, 9am to 5pm
+              </span>
+            </li>
+            <li>
+              <span class="ico" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 17.5s6-4.9 6-9a6 6 0 1 0-12 0c0 4.1 6 9 6 9Z"/><circle cx="10" cy="8.4" r="2.2"/></svg>
+              </span>
+              <span>
+                <b>Post</b>
+                PO Box 1180, Northside
+              </span>
+            </li>
+          </ul>
+
+          <div class="note">
+            <b>Already using Reading for pleasure?</b> Questions about a family account, a
+            shelf or a wishlist are quickest through the contact form inside the app, because
+            it reaches a moderator who can see the account.
+            <a href="reading-for-pleasure.html#contact">Contact us there instead</a>.
+          </div>
+        </div>
+
+        <div>
+          <div class="formcard">
+            <h2>Send a message</h2>
+
+            <label for="cf-name">Your name</label>
+            <input type="text" id="cf-name" autocomplete="name">
+
+            <label for="cf-email">Email address</label>
+            <input type="email" id="cf-email" autocomplete="email">
+
+            <label for="cf-topic">What is it about?</label>
+            <select id="cf-topic">
+              <option>A question about Reading for pleasure</option>
+              <option>Suggesting a session or resource to list</option>
+              <option>Listing my own service</option>
+              <option>Reporting a problem with a listing</option>
+              <option>Accessibility barrier</option>
+              <option>Something else</option>
+            </select>
+
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message"></textarea>
+
+            <button class="btn" id="cf-send" type="button">Send message</button>
+            <p class="result" id="cf-result" role="status"></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--warm" id="questions">
+    <div class="narrow">
+      <div class="sectionhead">
+        <p class="eyebrow">Common questions</p>
+        <h2>The things people write in about most often.</h2>
+      </div>
+
+      <details>
+        <summary>What can I use right now?</summary>
+        <p>Reading for pleasure is open today: the family shelf, the resources, the reading
+           log and the wishlists are all live. The <a href="services.html">services page</a>
+           sets out everything a family account includes.</p>
+      </details>
+
+      <details>
+        <summary>Who sees my family&rsquo;s details?</summary>
+        <p>Only the provider you chose to book with, and only what they need to run the
+           session. Nothing is shared with advertisers, and you can delete your profile at any
+           time.</p>
+      </details>
+
+      <details>
+        <summary>How do I list my service?</summary>
+        <p>Use the form above and pick &ldquo;Listing my own service&rdquo;. We will ask for
+           your insurance certificate, staff clearances and an address before the listing
+           goes live &mdash; see <a href="about.html#checks">how we check providers</a>.</p>
+      </details>
+
+      <details>
+        <summary>Something on a listing is wrong. What now?</summary>
+        <p>Tell us through the form above. The report goes to a moderator rather than to the
+           provider, and we will pause the listing while we look into it.</p>
+      </details>
+
+      <details>
+        <summary>I cannot use part of this site.</summary>
+        <p>Please tell us, and say which page and what happened. Accessibility reports go to
+           the top of the queue. If you are already signed in to Reading for pleasure, the
+           accessibility statement in that app has a direct route as well.</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <div class="wrap">
+    <div class="footgrid">
+      <div>
+        <p class="footbrand">
+          <img class="brand__mark" src="parents-go-to-mark.svg" alt="" width="30" height="40">
+          <span>Parents Go To</span>
+        </p>
+        <p>One place to find, save and share the reading your family does.</p>
+      </div>
+      <div>
+        <h4>Reading for pleasure</h4>
+        <ul>
+          <li><a href="reading-for-pleasure.html">Open the app</a></li>
+          <li><a href="reading-for-pleasure.html#included">What is included</a></li>
+          <li><a href="services.html#sessions">Sessions near you</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Parents Go To</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="about.html#checks">How we check providers</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="contact.html#questions">Common questions</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get in touch</h4>
+        <ul>
+          <li><a href="mailto:hello@parentsgoto.example">hello@parentsgoto.example</a></li>
+          <li>Monday to Friday, 9am to 5pm</li>
+          <li><a href="contact.html">Send us a message</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footbase">
+      <span>&copy; <span class="year">2026</span> Parents Go To. Every provider is checked before it is listed.</span>
+      <span>All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="site.js"></script>
+<script src="reveal.js"></script>
+<script src="contact-form.js"></script>
+</body>
+</html>

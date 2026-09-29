@@ -1,0 +1,409 @@
+:root {
+  --dust-thread: #E8E6DF;
+  --dust-ink: #6C6A63;
+}
+
+html[data-theme="dark"] {
+  --dust-thread: #C9C6BC;
+  --dust-ink: #A8A49A;
+}
+
+:is(#page-app, #page-admin) .cover .dust-veil,
+.dust-stage .dust-veil {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 3;
+  border-radius: inherit;
+  mix-blend-mode: normal;
+}
+
+:is(#page-app, #page-admin) .cover.is-dusty {
+  filter: saturate(.78) brightness(.94);
+  transition: filter .5s var(--ease-out);
+}
+
+:is(#page-app, #page-admin) .book:hover .cover.is-dusty,
+:is(#page-app, #page-admin) .book:focus-within .cover.is-dusty {
+  filter: saturate(.92) brightness(.99);
+}
+
+:is(#page-app, #page-admin) .dust-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: .34rem;
+  padding: .16rem .5rem .16rem .42rem;
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--dust-ink);
+  background: color-mix(in srgb, var(--dust-ink) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dust-ink) 26%, transparent);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+:is(#page-app, #page-admin) .dust-flag svg {
+  flex: none;
+  opacity: .85;
+}
+
+:is(#page-app, #page-admin) .cover .dust-flag {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  z-index: 4;
+  color: #fff;
+  background: rgba(18, 17, 15, .58);
+  border-color: rgba(255, 255, 255, .3);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+:is(#page-app, #page-admin) .prog-block {
+  margin-top: .6rem;
+}
+
+:is(#page-app, #page-admin) .prog-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .6rem;
+  margin-bottom: .34rem;
+}
+
+:is(#page-app, #page-admin) .prog-top .prog-label {
+  font-size: .76rem;
+  font-weight: 600;
+  color: var(--ink-60);
+  font-variant-numeric: tabular-nums;
+}
+
+:is(#page-app, #page-admin) .prog-top .prog-val {
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--pine-700);
+  font-variant-numeric: tabular-nums;
+}
+
+:is(#page-app, #page-admin) .prog {
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .10);
+}
+
+:is(#page-app, #page-admin) .prog i {
+  position: relative;
+  overflow: hidden;
+}
+
+:is(#page-app, #page-admin) .prog--live i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+      transparent 20%,
+      rgba(255, 255, 255, .38) 50%,
+      transparent 80%);
+  transform: translateX(-100%);
+  animation: prog-sheen 2.8s var(--ease-out) infinite;
+}
+
+@keyframes prog-sheen {
+  0%, 55% { transform: translateX(-100%); }
+  100%    { transform: translateX(100%); }
+}
+
+:is(#page-app, #page-admin) .prog--done i {
+  background: linear-gradient(90deg, var(--pine-700), var(--pine));
+}
+
+:is(#page-app, #page-admin) .prog--done ~ .prog-val,
+:is(#page-app, #page-admin) .prog-top .prog-val.is-done {
+  color: var(--pine);
+}
+
+:is(#page-app, #page-admin) .prog--idle i {
+  background: color-mix(in srgb, var(--ink-60) 34%, transparent);
+}
+
+:is(#page-app, #page-admin) .prog--stalled i {
+  background: linear-gradient(90deg,
+      color-mix(in srgb, var(--dust-ink) 70%, var(--pine-700)),
+      color-mix(in srgb, var(--dust-ink) 45%, var(--pine)));
+}
+
+:is(#page-app, #page-admin) .prog--stalled i::after {
+  animation: none;
+  content: none;
+}
+
+:is(#page-app, #page-admin) .prog-note {
+  margin: .3rem 0 0;
+  font-size: .74rem;
+  color: var(--ink-60);
+}
+
+:is(#page-app, #page-admin) .prog-note.is-stalled {
+  color: var(--dust-ink);
+  font-weight: 600;
+}
+
+:is(#page-app, #page-admin) .prog--ticks {
+  background-image: repeating-linear-gradient(90deg,
+      transparent 0 calc(10% - 1px),
+      color-mix(in srgb, var(--ink) 9%, transparent) calc(10% - 1px) 10%);
+}
+
+.dust-demo {
+  margin: 0 0 1.35rem;
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.dust-demo-head {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  width: 100%;
+  padding: 1rem 1.15rem;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--pine) 7%, transparent), transparent);
+  border: 0;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+}
+
+.dust-demo-head:focus-visible {
+  outline: 2px solid var(--pine);
+  outline-offset: -2px;
+}
+
+.dust-demo.is-open .dust-demo-head {
+  border-bottom-color: var(--line-soft);
+}
+
+.dust-demo-head .dd-txt {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dust-demo-head h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.dust-demo-head p {
+  margin: .15rem 0 0;
+  font-size: .82rem;
+  color: var(--ink-60);
+}
+
+.dust-demo-head .dd-chev {
+  flex: none;
+  transition: transform .22s var(--ease-out);
+}
+
+.dust-demo.is-open .dust-demo-head .dd-chev {
+  transform: rotate(180deg);
+}
+
+.dust-demo-body {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: start;
+  padding: 1.25rem 1.15rem 1.35rem;
+}
+
+.dust-demo[hidden] {
+  display: none;
+}
+
+.dust-stage {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: .85rem .8rem;
+  color: #fff;
+  overflow: hidden;
+  background: var(--spine, #0D3B32);
+  border-radius: 2px 6px 6px 2px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .22);
+}
+
+.dust-stage .dd-kicker {
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .72;
+}
+
+.dust-stage .dd-title {
+  margin-top: .5rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.22;
+}
+
+.dust-stage .dd-author {
+  margin-top: .3rem;
+  font-size: .78rem;
+  opacity: .78;
+}
+
+.dust-stage .dd-prog {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: rgba(0, 0, 0, .34);
+  z-index: 4;
+}
+
+.dust-stage .dd-prog i {
+  display: block;
+  height: 100%;
+  background: var(--marigold);
+  transition: width .4s var(--ease-out);
+}
+
+.dust-controls .dd-row {
+  margin-bottom: 1rem;
+}
+
+.dust-controls label {
+  display: block;
+  margin-bottom: .4rem;
+  font-size: .84rem;
+  font-weight: 600;
+}
+
+.dust-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--pine);
+}
+
+.dust-readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: .9rem;
+}
+
+.dust-readout .pill {
+  padding: .28rem .62rem;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--pine-700);
+  background: color-mix(in srgb, var(--pine) 12%, transparent);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dust-readout .pill.is-warn {
+  color: var(--dust-ink);
+  background: color-mix(in srgb, var(--dust-ink) 15%, transparent);
+}
+
+.dust-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-bottom: 1rem;
+}
+
+.dust-steps button {
+  padding: .34rem .68rem;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--ink-60);
+  background: var(--paper);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .16s var(--ease-out), color .16s var(--ease-out),
+              border-color .16s var(--ease-out);
+}
+
+.dust-steps button:hover {
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.dust-steps button[aria-pressed="true"] {
+  color: #fff;
+  background: var(--pine);
+  border-color: var(--pine);
+}
+
+.dust-steps button:focus-visible {
+  outline: 2px solid var(--pine);
+  outline-offset: 2px;
+}
+
+.dust-explain {
+  margin: 0;
+  font-size: .84rem;
+  line-height: 1.6;
+  color: var(--ink-60);
+}
+
+.dust-explain b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.dust-renderer {
+  margin: .7rem 0 0;
+  font-size: .74rem;
+  color: var(--ink-60);
+}
+
+@media (max-width: 640px) {
+  .dust-demo-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dust-stage {
+    max-width: 175px;
+    margin: 0 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(#page-app, #page-admin) .prog--live i::after {
+    animation: none;
+    content: none;
+  }
+}
+
+.ptg-reduce :is(#page-app, #page-admin) .prog--live i::after {
+  animation: none;
+  content: none;
+}
+
+@media (forced-colors: active) {
+  :is(#page-app, #page-admin) .dust-veil {
+    display: none;
+  }
+
+  :is(#page-app, #page-admin) .dust-flag {
+    border: 1px solid CanvasText;
+    color: CanvasText;
+    background: Canvas;
+  }
+}

@@ -1,0 +1,268 @@
+#page-app .fam-block{
+  margin:2.25rem 0 0;
+  padding:1.5rem 0 0;
+  border-top:1px solid var(--line-soft);
+}
+
+#page-app .fam-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-end;
+  gap:.85rem;
+  margin:0 0 1.1rem;
+}
+#page-app .fam-head .grow{ flex:1 1 20rem; min-width:0; }
+#page-app .fam-head h2{
+  margin:0;
+  font-family:var(--display);
+  font-size:1.25rem;
+  font-weight:600;
+  color:var(--ink);
+}
+#page-app .fam-sub{
+  margin:.3rem 0 0;
+  max-width:56ch;
+  font-size:.92rem;
+  line-height:1.55;
+  color:var(--ink-60);
+}
+
+#page-app .fam-list{
+  display:grid;
+  gap:.9rem;
+  grid-template-columns:repeat(auto-fit,minmax(min(258px, 100%), 1fr));
+}
+
+:is(#page-app) .profile--carer{ border-left:4px solid var(--sky); }
+:is(#page-app) .fam-avatar{
+  color:var(--card);
+  background:var(--sky);
+}
+
+:is(#page-app) .fam-state{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.45rem;
+  margin:.8rem 0 0;
+  font-size:.83rem;
+  line-height:1.5;
+  color:var(--ink-60);
+}
+
+#page-app .fam-note{
+  margin:0 0 1.1rem;
+  padding:.75rem .9rem;
+  font-size:.87rem;
+  line-height:1.55;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--sky);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+#page-app .fam-note b{ color:var(--ink); }
+
+#page-app .fam-full{
+  margin:0 0 1.1rem;
+  padding:.75rem .9rem;
+  font-size:.87rem;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--marigold);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+
+#page-app .fam-past-wrap{
+  margin:1.35rem 0 0;
+  padding:1rem 1.1rem;
+  background:var(--paper-warm);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+}
+#page-app .fam-past-wrap h3{
+  margin:0;
+  font-size:.95rem;
+  font-weight:600;
+  color:var(--ink);
+}
+#page-app .fam-past{
+  margin:.6rem 0 0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:.5rem;
+}
+#page-app .fam-past li{
+  font-size:.88rem;
+  color:var(--ink-60);
+  overflow-wrap:anywhere;
+}
+#page-app .fam-past li b{ color:var(--ink); }
+#page-app .fam-past-when{
+  display:block;
+  font-size:.82rem;
+  color:var(--ink-60);
+}
+
+#familyDialog .fam-sees{
+  margin:0 0 1.1rem;
+  padding:.85rem .95rem;
+  font-size:.9rem;
+  line-height:1.6;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--marigold);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+#familyDialog .fam-sees b{ color:var(--ink); }
+
+#familyDialog .fam-can{
+  margin:1.1rem 0 0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:.5rem;
+}
+#familyDialog .fam-can li{
+  display:flex;
+  gap:.55rem;
+  align-items:flex-start;
+  font-size:.9rem;
+  line-height:1.5;
+  color:var(--ink-60);
+}
+#familyDialog .fam-can svg{ flex:none; margin-top:.15rem; }
+#familyDialog .fam-can .yes svg{ color:var(--moss); }
+#familyDialog .fam-can .no svg{ color:var(--flag); }
+#familyDialog .fam-can b{ color:var(--ink); }
+
+#familyDialog .fam-limit{
+  margin:1.1rem 0 0;
+  padding:.7rem .85rem;
+  font-size:.85rem;
+  line-height:1.55;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--sky);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+#familyDialog .fam-limit b{ color:var(--ink); }
+
+#familyWithdrawDialog .fam-who{
+  margin:0 0 .85rem;
+  font-size:1rem;
+  font-weight:600;
+  color:var(--ink);
+  overflow-wrap:anywhere;
+}
+#familyWithdrawDialog .fam-limit{
+  margin:0;
+  padding:.7rem .85rem;
+  font-size:.87rem;
+  line-height:1.55;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--sky);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+#familyWithdrawDialog .fam-limit b{ color:var(--ink); }
+
+#page-app .fam-block .empty[hidden]{ display:none; }
+#page-app .fam-block .empty{ display:block; }
+
+#page-app .cf-panel{
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-left:4px solid var(--moss);
+  border-radius:var(--r-lg);
+  padding:1.35rem;
+}
+#page-app .cf-panel:focus{ outline:none; }
+#page-app .cf-panel:focus-visible{
+  outline:3px solid var(--pine);
+  outline-offset:3px;
+}
+#page-app .cf-panel h3{
+  margin:.6rem 0 0;
+  font-family:var(--display);
+  font-size:1.15rem;
+  font-weight:600;
+  color:var(--ink);
+}
+#page-app .cf-panel p{
+  margin:.55rem 0 0;
+  font-size:.92rem;
+  line-height:1.6;
+  color:var(--ink-60);
+}
+#page-app .cf-panel p b{ color:var(--ink); }
+#page-app .cf-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  margin:0;
+  font-size:.8rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:var(--moss);
+}
+#page-app .cf-ref{
+  margin:.85rem 0 0;
+  padding:.5rem .7rem;
+  font-family:var(--mono);
+  font-size:.95rem;
+  font-weight:600;
+  color:var(--ink);
+  background:var(--paper-warm);
+  border-radius:var(--r-sm);
+  display:inline-block;
+}
+#page-app .cf-fail{
+  border-left-color:var(--flag);
+}
+#page-app .cf-fail .cf-badge{ color:var(--flag); }
+
+#familyDialog .fam-outcome[hidden]{ display:none; }
+
+@media (prefers-reduced-motion: reduce){
+  #page-app .fam-list .btn{ transition:none; }
+}
+
+@media (forced-colors: active){
+  #page-app .fam-block{ border-top:1px solid CanvasText; }
+  :is(#page-app) .profile--carer{ border-left:4px solid CanvasText; }
+  :is(#page-app) .fam-avatar{
+    forced-color-adjust:none;
+    color:Canvas;
+    background:CanvasText;
+    border:1px solid CanvasText;
+  }
+  #page-app .fam-note,
+  #page-app .fam-full,
+  #familyDialog .fam-sees,
+  #familyDialog .fam-limit,
+  #familyWithdrawDialog .fam-limit{
+    border-left:3px solid CanvasText;
+    background:Canvas;
+  }
+  #page-app .fam-past-wrap{
+    border:1px solid CanvasText;
+    background:Canvas;
+  }
+  #familyDialog .fam-can .yes svg,
+  #familyDialog .fam-can .no svg{ color:CanvasText; }
+
+  #page-app .cf-panel{
+    border:1px solid CanvasText;
+    border-left:4px solid CanvasText;
+    background:Canvas;
+  }
+  #page-app .cf-badge,
+  #page-app .cf-fail .cf-badge{ color:CanvasText; }
+  #page-app .cf-ref{
+    border:1px solid CanvasText;
+    background:Canvas;
+  }
+  #page-app .cf-panel:focus-visible{ outline:3px solid CanvasText; }
+}

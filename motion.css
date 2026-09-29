@@ -1,0 +1,134 @@
+#app-main,
+#admin-main { view-transition-name: app-main; }
+
+::view-transition-old(app-main) {
+  animation: vtOut var(--dur-fast) var(--ease-standard) both;
+}
+::view-transition-new(app-main) {
+  animation: vtIn var(--dur-base) var(--ease-emphasis) both;
+}
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; }
+@keyframes vtOut { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes vtIn { from { opacity: 0; transform: translateY(10px); } }
+
+html.vt-tabs :is(#page-app, #page-admin) .panel.is-active { animation: none; }
+
+:is(#page-app, #page-admin) .panel.is-active { animation: none; }
+:is(#page-app, #page-admin) .panel.is-active > * {
+  animation: riseIn var(--dur-slow) var(--ease-emphasis) both;
+}
+:is(#page-app, #page-admin) .panel.is-active > :nth-child(2) { animation-delay: calc(var(--stagger) * 1); }
+:is(#page-app, #page-admin) .panel.is-active > :nth-child(3) { animation-delay: calc(var(--stagger) * 2); }
+:is(#page-app, #page-admin) .panel.is-active > :nth-child(4) { animation-delay: calc(var(--stagger) * 3); }
+:is(#page-app, #page-admin) .panel.is-active > :nth-child(5) { animation-delay: calc(var(--stagger) * 4); }
+:is(#page-app, #page-admin) .panel.is-active > :nth-child(6) { animation-delay: calc(var(--stagger) * 5); }
+:is(#page-app, #page-admin) .panel.is-active > :nth-child(n+7) { animation-delay: calc(var(--stagger) * 6); }
+@keyframes riseIn { from { opacity: 0; transform: translateY(12px); } }
+
+:is(#page-app, #page-admin) .panel.is-active :is(.books, .profiles, .cats, .adm-queue) > * {
+  animation: riseIn var(--dur-slow) var(--ease-emphasis) both;
+}
+:is(#page-app, #page-admin) .panel.is-active :is(.books, .profiles, .cats, .adm-queue) > :nth-child(2) { animation-delay: 30ms; }
+:is(#page-app, #page-admin) .panel.is-active :is(.books, .profiles, .cats, .adm-queue) > :nth-child(3) { animation-delay: 60ms; }
+:is(#page-app, #page-admin) .panel.is-active :is(.books, .profiles, .cats, .adm-queue) > :nth-child(4) { animation-delay: 90ms; }
+:is(#page-app, #page-admin) .panel.is-active :is(.books, .profiles, .cats, .adm-queue) > :nth-child(5) { animation-delay: 120ms; }
+:is(#page-app, #page-admin) .panel.is-active :is(.books, .profiles, .cats, .adm-queue) > :nth-child(n+6) { animation-delay: 150ms; }
+
+:is(#page-app, #page-admin) :is(.btn, .chip, .icon-btn, .pg-tool, .side-kid, .vswitch-btn) {
+  transition-property: background, color, box-shadow, border-color, transform;
+  transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease-standard);
+}
+:is(#page-app, #page-admin) :is(.btn, .chip, .icon-btn, .pg-tool, .side-kid):active:not(:disabled) {
+  transform: scale(.97);
+}
+:is(#page-app, #page-admin) .btn--primary:hover:not(:disabled) { transform: translateY(-1px); }
+:is(#page-app, #page-admin) .btn--primary:active:not(:disabled) { transform: scale(.97); }
+
+:is(#page-app, #page-admin) :is(.book, .profile, .triage, .sub-card, .cat) {
+  transition: transform var(--dur-base) var(--ease-standard), box-shadow var(--dur-base) var(--ease-standard);
+}
+:is(#page-app, #page-admin) :is(.book, .cat):hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+
+:is(#page-app, #page-admin) .sw-track,
+:is(#page-app, #page-admin) .sw-track::before {
+  transition-duration: var(--dur-base) !important;
+  transition-timing-function: var(--ease-bounce) !important;
+}
+
+#page-app .pg-b {
+  transform-origin: bottom;
+  animation: barGrow var(--dur-slow) var(--ease-emphasis) both;
+}
+#page-app .pg-day:nth-child(2) .pg-b { animation-delay: 40ms; }
+#page-app .pg-day:nth-child(3) .pg-b { animation-delay: 80ms; }
+#page-app .pg-day:nth-child(4) .pg-b { animation-delay: 120ms; }
+#page-app .pg-day:nth-child(5) .pg-b { animation-delay: 160ms; }
+#page-app .pg-day:nth-child(6) .pg-b { animation-delay: 200ms; }
+#page-app .pg-day:nth-child(7) .pg-b { animation-delay: 240ms; }
+#page-app .pg-day:nth-child(8) .pg-b { animation-delay: 280ms; }
+@keyframes barGrow { from { transform: scaleY(0); } }
+
+#page-app .pg-dial line.on {
+  animation: tickOn var(--dur-base) var(--ease-standard) both;
+  animation-delay: calc(var(--t, 0) * 14ms);
+}
+@keyframes tickOn { from { stroke: var(--line-soft); } }
+
+:is(#page-app, #page-admin) .prog > i,
+#page-app .lib-go-bar > i {
+  transform-origin: left;
+  animation: fillIn var(--dur-slow) var(--ease-emphasis) both;
+}
+@keyframes fillIn { from { transform: scaleX(0); } }
+
+#kids.kids--night:not([hidden]) { animation: nightFall 1.2s var(--ease-standard) both; }
+@keyframes nightFall { from { filter: brightness(1.7) saturate(.7); } }
+
+#kids :is(.kids-go, .kids-quiet, #kidsBack, #kidsExit, .kids-exit) { min-height: var(--tap-kid); }
+#kids #kidsTabs button { min-height: var(--tap-kid); }
+#kids :is(.kids-go, .kids-quiet) { transition: transform var(--dur-fast) var(--ease-standard); }
+#kids :is(.kids-go, .kids-quiet, #kidsTabs button, .kids-who button, .kids-book):active { transform: scale(.96); }
+
+#kidsStepDone:not([hidden]) .kids-badge { animation: badgePop var(--dur-slow) var(--ease-bounce) both; }
+@keyframes badgePop { from { transform: scale(.6); opacity: 0; } }
+#kids #kidsStepDone.is-finished .kids-badge::before,
+#kids #kidsStepDone.is-finished .kids-badge::after {
+  inset: -54px;
+  background:
+    radial-gradient(7px 7px at 50% 2%, #F6C801 98%, transparent),
+    radial-gradient(6px 6px at 85% 15%, #E9A13B 98%, transparent),
+    radial-gradient(7px 7px at 98% 50%, #5BCF7C 98%, transparent),
+    radial-gradient(6px 6px at 85% 85%, #01A79A 98%, transparent),
+    radial-gradient(7px 7px at 50% 98%, #F6C801 98%, transparent),
+    radial-gradient(6px 6px at 15% 85%, #E9A13B 98%, transparent),
+    radial-gradient(7px 7px at 2% 50%, #5BCF7C 98%, transparent),
+    radial-gradient(6px 6px at 15% 15%, #01A79A 98%, transparent);
+  animation-duration: 1.3s;
+}
+#kids #kidsStepDone.is-finished .kids-badge::after { inset: -30px; animation-delay: .35s; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(app-main),
+  ::view-transition-new(app-main) { animation: none; }
+  :is(#page-app, #page-admin) .panel.is-active > *,
+  :is(#page-app, #page-admin) .panel.is-active :is(.books, .profiles, .cats, .adm-queue) > *,
+  #page-app .pg-b, #page-app .pg-dial line.on,
+  :is(#page-app, #page-admin) .prog > i, #page-app .lib-go-bar > i,
+  #kids.kids--night:not([hidden]), #kidsStepDone .kids-badge { animation: none !important; }
+  :is(#page-app, #page-admin) :is(.btn, .chip, .icon-btn, .pg-tool, .side-kid, .book, .cat, .kids-go):is(:hover, :active) { transform: none !important; }
+}
+html.ptg-reduce::view-transition-old(app-main),
+html.ptg-reduce::view-transition-new(app-main) { animation: none; }
+html.ptg-reduce :is(#page-app, #page-admin) .panel.is-active > *,
+html.ptg-reduce :is(#page-app, #page-admin) .panel.is-active :is(.books, .profiles, .cats, .adm-queue) > *,
+html.ptg-reduce #page-app .pg-b,
+html.ptg-reduce #page-app .pg-dial line.on,
+html.ptg-reduce :is(#page-app, #page-admin) .prog > i,
+html.ptg-reduce #page-app .lib-go-bar > i,
+html.ptg-reduce #kids.kids--night:not([hidden]),
+html.ptg-reduce #kidsStepDone .kids-badge { animation: none !important; }
+html.ptg-reduce #kids .kids-badge::before,
+html.ptg-reduce #kids .kids-badge::after { animation: none !important; opacity: 0 !important; }
+html.ptg-reduce :is(#page-app, #page-admin) :is(.btn, .chip, .icon-btn, .pg-tool, .side-kid, .book, .cat, .kids-go):is(:hover, :active) { transform: none !important; }

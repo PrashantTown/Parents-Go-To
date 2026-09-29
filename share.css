@@ -1,0 +1,325 @@
+#shareDialog .share-row{
+  display:flex; gap:.6rem; align-items:stretch; flex-wrap:wrap;
+}
+#shareDialog .share-row input{
+  flex:1 1 16rem; min-width:0;
+  font-family:var(--mono); font-size:.85rem;
+  background:var(--paper-warm);
+}
+#shareDialog .share-row input:read-only{ cursor:text; }
+#shareDialog .share-row .btn{ flex:0 0 auto; }
+
+#shareDialog .share-hint{
+  margin:.45rem 0 0;
+  font-size:.83rem; line-height:1.45; color:var(--ink-60);
+}
+
+#shareDialog .share-said{
+  margin:.5rem 0 0;
+  font-size:.85rem; font-weight:600; color:var(--moss);
+}
+#shareDialog .share-said:empty{ display:none; }
+
+#shareDialog .share-set{
+  margin:0; padding:0; border:0; min-width:0;
+}
+#shareDialog .share-set legend{
+  padding:0; margin-bottom:.5rem;
+  font-size:.85rem; font-weight:600; color:var(--ink);
+}
+
+#shareDialog .f label.share-opt{
+  display:flex; gap:.7rem; align-items:flex-start;
+  margin:0 0 .5rem;
+  padding:.75rem .9rem;
+  font-size:.92rem; font-weight:400;
+  background:var(--paper);
+  border:1px solid var(--line-soft); border-radius:var(--r-sm);
+  cursor:pointer;
+  transition:border-color .18s var(--ease-out), background .18s var(--ease-out);
+}
+#shareDialog .f label.share-opt:last-of-type{ margin-bottom:0; }
+#shareDialog .f label.share-opt:hover{ border-color:var(--line); }
+#shareDialog .f label.share-opt:has(input:checked){
+  border-color:var(--pine);
+  background:var(--card);
+  box-shadow:inset 0 0 0 1px var(--pine);
+}
+#shareDialog .f label.share-opt input{
+  width:20px; height:20px; min-height:0; flex:none;
+  margin:.12rem 0 0; padding:0;
+  accent-color:var(--pine);
+  cursor:pointer;
+}
+#shareDialog .f label.share-opt input:focus-visible{
+  outline:2px solid var(--pine); outline-offset:2px;
+}
+#shareDialog .share-opt-text{ display:block; }
+#shareDialog .share-opt-lead{ display:block; font-weight:600; }
+#shareDialog .share-opt-sub{
+  display:block; margin-top:.2rem;
+  font-size:.84rem; line-height:1.45; color:var(--ink-60);
+}
+
+#shareDialog .share-warn{
+  display:flex; gap:.5rem; align-items:flex-start;
+  margin:.65rem 0 0; padding:.6rem .75rem;
+  font-size:.83rem; line-height:1.45;
+  color:var(--ink); background:rgba(233,161,59,.16);
+  border-left:3px solid var(--marigold);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+#shareDialog .share-warn svg{ flex:none; margin-top:.15rem; color:var(--ink-60); }
+#shareDialog .share-warn[hidden]{ display:none; }
+
+#shareDialog .share-to-lbl{
+  display:block; margin-bottom:.5rem;
+  font-size:.85rem; font-weight:600; color:var(--ink);
+}
+
+#shareDialog .share-tos{
+  display:grid; gap:.4rem;
+  grid-template-columns:repeat(auto-fill, minmax(min(84px, 100%), 1fr));
+}
+
+#shareDialog .share-to{
+  display:flex; flex-direction:column; align-items:center; gap:.4rem;
+  min-height:76px; padding:.65rem .3rem .55rem;
+  font:inherit; color:var(--ink);
+  background:var(--paper-warm);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+  cursor:pointer;
+  transition:background .18s var(--ease-out), border-color .18s var(--ease-out),
+             transform .1s var(--ease-out);
+}
+#shareDialog .share-to:hover{
+  background:var(--card); border-color:var(--pine);
+}
+#shareDialog .share-to:active{ transform:translateY(1px); }
+#shareDialog .share-to:focus-visible{
+  outline:2px solid var(--pine); outline-offset:2px;
+}
+
+#shareDialog .share-to-ic{
+  display:grid; place-items:center;
+  width:34px; height:34px;
+  border-radius:999px;
+  color:#fff;
+  background:var(--pine);
+}
+#shareDialog .share-to-nm{
+  font-size:.74rem; font-weight:600; line-height:1.2;
+  text-align:center; color:var(--ink-60);
+}
+#shareDialog .share-to:hover .share-to-nm{ color:var(--ink); }
+
+#shareDialog [data-share-to="whatsapp"]  .share-to-ic{ background:#25D366; }
+#shareDialog [data-share-to="instagram"] .share-to-ic{
+  background:radial-gradient(circle at 30% 107%, #FDF497 0%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
+}
+#shareDialog [data-share-to="facebook"]  .share-to-ic{ background:#1877F2; }
+#shareDialog [data-share-to="telegram"]  .share-to-ic{ background:#229ED9; }
+#shareDialog [data-share-to="x"]         .share-to-ic{ background:#000; }
+#shareDialog [data-share-to="reddit"]    .share-to-ic{ background:#FF4500; }
+#shareDialog [data-share-to="pinterest"] .share-to-ic{ background:#BD081C; }
+#shareDialog [data-share-to="gmail"]     .share-to-ic{ background:#EA4335; }
+#shareDialog [data-share-to="messenger"] .share-to-ic{ background:#2C6B4F; }
+#shareDialog [data-share-to="email"]     .share-to-ic{ background:var(--sky); }
+
+#shareDialog [data-share-to="native"] .share-to-ic{ background:var(--marigold); color:#08251F; }
+
+@media (max-width: 480px){
+  #shareDialog .share-tos{ grid-template-columns:repeat(auto-fill, minmax(min(72px, 100%), 1fr)); }
+  #shareDialog .share-to{ min-height:70px; padding:.55rem .25rem .5rem; }
+  #shareDialog .share-to-ic{ width:30px; height:30px; }
+  #shareDialog .share-to-nm{ font-size:.69rem; }
+}
+
+@media (pointer: coarse){
+  #shareDialog .share-to{ min-height:80px; }
+}
+
+#page-share{
+  display:flex; flex-direction:column;
+  min-height:100vh;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+}
+#page-share[hidden]{ display:none; }
+
+#page-share .sh-wrap{
+  width:min(100%, 900px);
+  margin-inline:auto;
+  padding-inline:clamp(1.1rem, 5vw, 2.5rem);
+}
+
+#page-share .sh-bar{
+  padding:1rem 0;
+  background:var(--pine);
+  color:#fff;
+}
+#page-share .sh-bar-in{
+  display:flex; align-items:center; flex-wrap:wrap; gap:.85rem;
+}
+#page-share .sh-brand{
+  display:inline-flex; align-items:center; gap:.6rem;
+  font-family:var(--display); font-weight:600; font-size:1.06rem;
+}
+#page-share .sh-mark{ width:32px; height:29px; flex:none; }
+#page-share .sh-badge{
+  display:inline-flex; align-items:center; gap:.4rem;
+  margin-left:auto;
+  padding:.32rem .7rem;
+  font-size:.78rem; font-weight:600;
+  letter-spacing:.02em;
+  background:rgba(255,255,255,.16);
+  border-radius:999px;
+}
+
+#page-share .sh-main{
+  flex:1 1 auto;
+  padding:clamp(2rem, 6vw, 3.4rem) 0 3rem;
+}
+
+#page-share .sh-eyebrow{
+  margin:0 0 .4rem;
+  font-size:.735rem; font-weight:700;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--ink-60);
+}
+#page-share h1{
+  margin:0;
+  font-family:var(--display); font-weight:600;
+  font-size:clamp(1.7rem, 4.2vw, 2.4rem);
+  line-height:1.12; letter-spacing:-.02em;
+  color:var(--brand-ink);
+}
+#page-share .sh-sub{
+  margin:.75rem 0 0;
+  font-size:1.02rem; line-height:1.55; color:var(--ink-60);
+  max-width:58ch;
+}
+#page-share .sh-meta{
+  display:flex; flex-wrap:wrap; gap:.4rem .9rem;
+  margin:1rem 0 0;
+  font-size:.85rem; color:var(--ink-60);
+}
+#page-share .sh-meta span{ display:inline-flex; align-items:center; gap:.35rem; }
+
+#page-share .sh-note{
+  display:flex; gap:.6rem; align-items:flex-start;
+  margin:1.4rem 0 0; padding:.8rem 1rem;
+  font-size:.89rem; line-height:1.5;
+  background:rgba(233,161,59,.16);
+  border-left:3px solid var(--marigold);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+#page-share .sh-note svg{ flex:none; margin-top:.15rem; color:var(--ink-60); }
+
+#page-share .sh-books{
+  list-style:none;
+  display:grid; gap:.9rem;
+  grid-template-columns:repeat(auto-fill, minmax(min(15.5rem, 100%), 1fr));
+  margin:2rem 0 0; padding:0;
+}
+#page-share .sh-book{
+  display:flex; gap:.85rem;
+  padding:.95rem 1rem;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+}
+#page-share .sh-spine{
+  flex:none; width:7px; border-radius:3px;
+  background:var(--sky);
+}
+#page-share .sh-book-body{ min-width:0; }
+#page-share .sh-title{
+  margin:0;
+  font-family:var(--display); font-size:1.03rem; font-weight:600;
+  line-height:1.25; letter-spacing:-.01em;
+}
+#page-share .sh-author{
+  margin:.2rem 0 0;
+  font-size:.87rem; color:var(--ink-60);
+}
+#page-share .sh-tags{
+  display:flex; flex-wrap:wrap; gap:.35rem;
+  margin:.6rem 0 0;
+}
+#page-share .sh-tag{
+  padding:.2rem .55rem;
+  font-size:.755rem; font-weight:600;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-radius:999px;
+}
+#page-share .sh-tag--for{
+  color:var(--pine); background:rgba(13,59,50,.1);
+}
+
+#page-share .sh-state{
+  margin:2rem 0 0;
+  padding:3rem 1.5rem;
+  text-align:center;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+}
+#page-share .sh-state svg{ color:var(--line); margin-bottom:.9rem; }
+#page-share .sh-state h2{
+  margin:0;
+  font-family:var(--display); font-size:1.3rem; font-weight:600;
+}
+#page-share .sh-state p{
+  margin:.6rem auto 0; max-width:44ch;
+  font-size:.95rem; line-height:1.55; color:var(--ink-60);
+}
+
+#page-share .sh-foot{
+  padding:1.6rem 0 2.4rem;
+  border-top:1px solid var(--line-soft);
+  font-size:.86rem; line-height:1.55; color:var(--ink-60);
+}
+#page-share .sh-foot p{ margin:0 0 .5rem; max-width:60ch; }
+#page-share .sh-foot p:last-child{ margin-bottom:0; }
+#page-share .sh-link{
+  color:var(--pine); font-weight:600;
+  text-underline-offset:3px;
+}
+#page-share .sh-link:hover{ text-decoration:none; }
+#page-share .sh-link:focus-visible{
+  outline:2px solid var(--pine); outline-offset:3px; border-radius:3px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  #shareDialog .f label.share-opt{ transition:none; }
+}
+
+@media (forced-colors: active){
+  #shareDialog .f label.share-opt{ border:1px solid ButtonBorder; }
+  #shareDialog .f label.share-opt:has(input:checked){
+    border-color:Highlight; box-shadow:none; outline:2px solid Highlight;
+  }
+  #shareDialog .share-warn,
+  #page-share .sh-note{ border:1px solid CanvasText; border-left-width:3px; }
+  #shareDialog .share-to{ border:1px solid ButtonBorder; background:ButtonFace; }
+  #shareDialog .share-to:hover{ border-color:Highlight; }
+  #shareDialog .share-to-ic{
+    background:ButtonFace; color:ButtonText;
+    border:1px solid ButtonBorder;
+    forced-color-adjust:none;
+  }
+  #shareDialog .share-to-nm{ color:ButtonText; }
+  #page-share .sh-bar{ background:Canvas; color:CanvasText; border-bottom:1px solid CanvasText; }
+  #page-share .sh-badge{ border:1px solid CanvasText; }
+  #page-share .sh-book,
+  #page-share .sh-state{ border:1px solid CanvasText; }
+  #page-share .sh-tag{ border:1px solid CanvasText; }
+  #page-share .sh-spine{ background:CanvasText; }
+}
+
+@supports not selector(:has(*)){
+  #shareDialog .f label.share-opt input:checked{ outline:2px solid var(--pine); }
+}

@@ -1,0 +1,381 @@
+:is(#page-app, #page-admin) .vswitch{
+  display:flex;
+  gap:.35rem;
+  margin:0 0 1.25rem;
+  padding:.3rem;
+  background:var(--paper-warm);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+}
+
+:is(#page-app, #page-admin) .vswitch-btn{
+  flex:1 1 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+  min-height:44px;
+  padding:.5rem 1rem;
+  font:inherit;
+  font-size:.9rem;
+  font-weight:500;
+  color:var(--ink-60);
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  cursor:pointer;
+  text-align:center;
+}
+
+:is(#page-app, #page-admin) .vswitch-btn:hover{
+  color:var(--ink);
+}
+
+:is(#page-app, #page-admin) .vswitch-btn[aria-selected="true"]{
+  color:var(--ink);
+  font-weight:700;
+  background:var(--card);
+  border-color:var(--line-soft);
+  text-decoration:underline;
+  text-underline-offset:3px;
+  text-decoration-thickness:2px;
+}
+
+:is(#page-app, #page-admin) .vswitch-btn:focus-visible{
+  outline:3px solid var(--pine);
+  outline-offset:2px;
+}
+
+:is(#page-admin) .vswitch-n{
+  min-width:1.35rem;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  text-decoration:none;
+}
+
+#page-app .bd-compose{
+  margin:0 0 1.5rem;
+  padding:1.1rem 1.15rem;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-lg);
+}
+
+#page-app .bd-compose h3{
+  margin:0 0 .3rem;
+  font-family:var(--display);
+  font-size:1.05rem;
+}
+
+#page-app .bd-compose textarea{
+  width:100%;
+  min-height:5.5rem;
+  resize:vertical;
+}
+
+#page-app .bd-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.85rem;
+  align-items:flex-end;
+  margin-top:.75rem;
+}
+
+#page-app .bd-row .bd-band-field{
+  flex:1 1 12rem;
+  min-width:0;
+}
+
+#page-app .bd-row .bd-band-field label{
+  display:block;
+  margin-bottom:.3rem;
+  font-size:.85rem;
+  font-weight:600;
+}
+
+#page-app .bd-row .bd-band-field select{
+  width:100%;
+}
+
+#page-app .bd-chars{
+  margin:.35rem 0 0;
+  font-size:.8rem;
+  color:var(--ink-60);
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+
+#page-app .bd-chars.is-over{
+  color:var(--flag);
+  font-weight:600;
+}
+
+#page-app .bd-guard{
+  display:flex;
+  gap:.65rem;
+  align-items:flex-start;
+  margin:.9rem 0 0;
+  padding:.8rem .95rem;
+  font-size:.85rem;
+  line-height:1.55;
+  background:var(--paper-warm);
+  border:1px solid var(--line-soft);
+  border-left:3px solid var(--marigold);
+  border-radius:var(--r-sm);
+}
+
+#page-app .bd-guard svg{
+  flex:0 0 auto;
+  margin-top:.15rem;
+  color:var(--marigold);
+}
+
+#page-app .bd-list{
+  display:flex;
+  flex-direction:column;
+  gap:.85rem;
+  margin:0;
+  padding:0;
+}
+
+#page-app .bd-post{
+  padding:1rem 1.1rem;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+}
+
+#page-app .bd-post.is-quiet,
+#page-app .bd-reply.is-quiet{
+  background:var(--paper-warm);
+  border-style:dashed;
+}
+
+#page-app .bd-meta{
+  margin:0;
+  font-size:.83rem;
+  color:var(--ink-60);
+  overflow-wrap:anywhere;
+}
+
+#page-app .bd-meta b{
+  color:var(--ink);
+  font-size:.9rem;
+}
+
+#page-app .bd-band{
+  white-space:nowrap;
+}
+
+#page-app .bd-body{
+  margin:.5rem 0 0;
+  font-size:.92rem;
+  line-height:1.6;
+  color:var(--ink);
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+
+#page-app .bd-why{
+  margin:.6rem 0 0;
+  padding:.6rem .8rem;
+  font-size:.85rem;
+  line-height:1.5;
+  border-left:3px solid var(--flag);
+  background:color-mix(in srgb, var(--flag) 7%, transparent);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  overflow-wrap:anywhere;
+}
+
+#page-app .bd-replies{
+  list-style:none;
+  margin:.85rem 0 0;
+  padding:0 0 0 .95rem;
+  border-left:2px solid var(--line-soft);
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+}
+
+#page-app .bd-reply{
+  padding:.65rem .8rem;
+  background:var(--paper);
+  border-radius:var(--r-sm);
+}
+
+#page-app .bd-reply .bd-body{
+  font-size:.88rem;
+}
+
+:is(#page-app, #page-admin) .bd-acts{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:.85rem;
+}
+
+#page-app .bd-sub{
+  margin-top:.85rem;
+  padding:.9rem 1rem;
+  background:var(--paper-warm);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+}
+
+#page-app .bd-sub label{
+  display:block;
+  margin-bottom:.3rem;
+  font-size:.85rem;
+  font-weight:600;
+}
+
+#page-app .bd-sub textarea,
+#page-app .bd-sub select{
+  width:100%;
+}
+
+#page-app .bd-sub textarea{
+  resize:vertical;
+}
+
+#page-app .bd-sub-other{
+  margin-top:.75rem;
+}
+
+#page-app .bd-hint{
+  margin:.45rem 0 0;
+  font-size:.82rem;
+  line-height:1.5;
+  color:var(--ink-60);
+}
+
+#page-app .bd-sub-foot{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  justify-content:flex-end;
+  margin-top:.85rem;
+}
+
+#page-admin .bd-adm{
+  padding:1rem 1.1rem;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+}
+
+#page-admin .bd-adm + .bd-adm{
+  margin-top:.85rem;
+}
+
+#page-admin .bd-meta{
+  margin:0;
+  font-size:.83rem;
+  color:var(--ink-60);
+  overflow-wrap:anywhere;
+}
+
+#page-admin .bd-meta b{
+  color:var(--ink);
+  font-size:.9rem;
+}
+
+#page-admin .bd-quote{
+  margin:.65rem 0 0;
+  padding:.7rem .9rem;
+  font-size:.92rem;
+  line-height:1.6;
+  background:var(--paper-warm);
+  border-left:3px solid var(--line-soft);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+
+#page-admin .bd-verdict{
+  margin:.65rem 0 0;
+  font-size:.85rem;
+  line-height:1.5;
+  color:var(--ink-60);
+  overflow-wrap:anywhere;
+}
+
+#boardRemoveDialog .bd-quote{
+  margin:0;
+  padding:.7rem .9rem;
+  font-size:.9rem;
+  line-height:1.6;
+  background:var(--paper-warm);
+  border-left:3px solid var(--line-soft);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+
+#boardRemoveDialog .bd-note{
+  margin:.9rem 0 0;
+  font-size:.83rem;
+  line-height:1.55;
+  color:var(--ink-60);
+}
+
+@media (prefers-reduced-motion: reduce){
+  :is(#page-app, #page-admin) .vswitch-btn,
+  :is(#page-app, #page-admin) .bd-acts .btn{
+    transition:none;
+  }
+}
+
+@media (forced-colors: active){
+  :is(#page-app, #page-admin) .vswitch{
+    border:1px solid CanvasText;
+  }
+  :is(#page-app, #page-admin) .vswitch-btn{
+    border:1px solid transparent;
+    forced-color-adjust:none;
+    color:CanvasText;
+    background:Canvas;
+  }
+  :is(#page-app, #page-admin) .vswitch-btn[aria-selected="true"]{
+    border:1px solid CanvasText;
+    color:Canvas;
+    background:CanvasText;
+    text-decoration:underline;
+  }
+  :is(#page-app, #page-admin) .vswitch-btn:focus-visible{
+    outline:3px solid CanvasText;
+  }
+  :is(#page-admin) .vswitch-n{
+    border:1px solid CanvasText;
+    color:CanvasText;
+    background:Canvas;
+    forced-color-adjust:none;
+  }
+  #page-app .bd-post,
+  #page-app .bd-sub,
+  #page-app .bd-guard,
+  #page-app .bd-compose,
+  #page-admin .bd-adm{
+    border:1px solid CanvasText;
+  }
+  #page-app .bd-post.is-quiet,
+  #page-app .bd-reply.is-quiet{
+    border:1px dashed CanvasText;
+  }
+  #page-app .bd-why{
+    border-left:3px solid CanvasText;
+    background:Canvas;
+  }
+  #page-app .bd-replies{
+    border-left:2px solid CanvasText;
+  }
+  #page-app .bd-guard{
+    border-left:3px solid CanvasText;
+  }
+  #page-admin .bd-quote,
+  #boardRemoveDialog .bd-quote{
+    border-left:3px solid CanvasText;
+    background:Canvas;
+  }
+  #page-app .bd-chars.is-over{ color:CanvasText; }
+}

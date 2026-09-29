@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parents Go To &mdash; your family&rsquo;s shelf, in one place</title>
+<meta name="description" content="Keep track of what everyone is reading, pick up where you left off, and find the next book together.">
+<link rel="icon" type="image/svg+xml" href="parents-go-to-mark.svg">
+<meta name="theme-color" content="#EDF1EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101B18" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap topbar__inner">
+    <a class="brand" href="index.html">
+      <img class="brand__mark" src="parents-go-to-mark.svg" alt="" width="33" height="44">
+      <span class="brand__text">Parents Go To</span>
+    </a>
+    <button class="navtoggle" id="navtoggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="reading-for-pleasure.html">Reading for pleasure</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <svg class="hero__sky" viewBox="0 4 96 40" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMax meet">
+      <defs>
+        <linearGradient id="sky-dome" x1="48" y1="1" x2="48" y2="39" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#5BCF7C"/><stop offset=".5" stop-color="#25C497"/><stop offset="1" stop-color="#01A79A"/>
+          </linearGradient>
+          <radialGradient id="sky-sun" cx="48" cy="39" r="27" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#FFD200"/><stop offset=".33" stop-color="#F8CB01" stop-opacity=".97"/>
+            <stop offset=".64" stop-color="#EDC70B" stop-opacity=".48"/><stop offset="1" stop-color="#DFC61E" stop-opacity="0"/>
+          </radialGradient>
+          <clipPath id="sky-clip"><path d="M11 39A37 37 0 0 1 85 39Z"/></clipPath>
+        </defs>
+        <g clip-path="url(#sky-clip)">
+          <path d="M11 39A37 37 0 0 1 85 39Z" fill="url(#sky-dome)"/>
+          <circle cx="48" cy="39" r="27" fill="url(#sky-sun)"/>
+        </g>
+        <g stroke="#fff" stroke-width=".8" stroke-linecap="round" opacity=".5">
+          <path d="M34.5 30.4 25.1 25.8"/><path d="M38.0 25.9 30.9 18.0"/>
+          <path d="M42.9 22.9 39.3 13.0"/><path d="M48.5 22.0 48.9 11.5"/>
+          <path d="M54.1 23.3 58.4 13.7"/><path d="M58.8 26.6 66.3 19.3"/>
+          <path d="M61.9 31.4 71.6 27.4"/>
+        </g>
+    </svg>
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="hero__haze" aria-hidden="true"></div>
+    <div class="wrap hero__inner">
+      <img class="hero__logo" src="parents-go-to-logo.svg" alt="Parents Go To — everything in one place" width="360" height="150">
+
+      <h1 class="hero__title">Your family&rsquo;s shelf, in one place.</h1>
+
+      <p class="hero__lede">
+        Keep track of what everyone is reading, pick up where you left off, and find
+        the next book together. One account for the whole family.
+      </p>
+
+      <div class="actions centre">
+        <a class="btn btn--lg" href="reading-for-pleasure.html">Create a family account <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg></a>
+        <a class="btn btn--ghost btn--lg" href="#services">See what we offer</a>
+      </div>
+
+      <p class="hero__note">Every provider is checked before it appears here.</p>
+    </div>
+  </section>
+
+  <section class="section section--pine">
+    <div class="wrap">
+      <ul class="points points--2">
+        <li>
+          <h3>One account, not twelve</h3>
+          <p>Register your family once. Every provider you book gets the details they need, and nothing more.</p>
+        </li>
+        <li>
+          <h3>Checked before listed</h3>
+          <p>We confirm insurance, staff clearances and a real address for every provider on the site.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="wrap">
+      <div class="sectionhead centre">
+        <p class="eyebrow">What we offer</p>
+        <h2>One service open now, another on the way.</h2>
+        <p>Reading for pleasure is live today &mdash; no reading test and no reading level,
+           just books your family actually wants to read. Four Voices is coming next.</p>
+      </div>
+
+      <div class="offers">
+        <div class="feature offer" data-href="reading-for-pleasure.html">
+          <img class="feature__mark" src="logo.svg" alt="" width="56" height="51" aria-hidden="true">
+          <p class="feature__tag">Open now</p>
+          <h3><a href="reading-for-pleasure.html">Reading for pleasure</a></h3>
+          <p>
+            Story sessions, reading buddies and book swaps run by libraries, bookshops and
+            volunteers near you &mdash; plus a shelf that keeps track of what everyone at
+            home is reading.
+          </p>
+          <div class="actions">
+            <a class="btn btn--light" href="reading-for-pleasure.html">Open Reading for pleasure <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg></a>
+            <a class="btn btn--onpine" href="services.html">Read the full details</a>
+          </div>
+        </div>
+
+        <div class="feature offer offer--soon" data-href="four-voices.html">
+          <span class="offer__logo">
+            <img src="four-voices-logo.jpg" alt="" width="669" height="605" loading="lazy" decoding="async">
+          </span>
+          <p class="feature__tag feature__tag--soon">Coming soon</p>
+          <h3><a href="four-voices.html">Four Voices</a></h3>
+          <p>
+            Four voices at the table, nurturing children&rsquo;s talk. We are still building
+            this service &mdash; take a look at what is on the way.
+          </p>
+          <div class="actions">
+            <a class="btn" href="four-voices.html">Take a look <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--warm">
+    <div class="wrap">
+      <div class="sectionhead">
+        <p class="eyebrow">Why parents use it</p>
+        <h2>The search is the hard part.</h2>
+      </div>
+      <div class="split">
+        <div class="prose">
+          <p>
+            Most families do not struggle to attend a session. They struggle to find out it
+            exists. Council pages, school newsletters and community noticeboards rarely talk
+            to each other, so good programmes stay half empty while parents look for them.
+          </p>
+          <h3>Your details stay yours</h3>
+          <p>
+            We share only what a provider needs to run the session, and only with the provider
+            you picked. Nothing is shared with advertisers, and you can delete your profile at any
+            time.
+          </p>
+        </div>
+        <div class="prose">
+          <h3 style="margin-top:0;">Built for the whole family</h3>
+          <p>
+            One profile can hold several children of different ages. Search results show which
+            of your children a session actually suits, so you are not doing the maths every
+            time.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--pine">
+    <div class="narrow" style="text-align:center;">
+      <h2 style="font-size:clamp(1.5rem,4vw,2.2rem); margin:0 0 .6rem;">Hear when a service opens</h2>
+      <p style="margin:0 0 1.6rem;">One short email when a new category goes live in your area. Nothing else.</p>
+
+      <div style="max-width:26rem; margin-inline:auto; text-align:left;">
+        <label for="signup-email">Email address</label>
+        <input type="email" id="signup-email" autocomplete="email" placeholder="you@example.com">
+        <button class="btn btn--light" id="signup-btn" type="button">Keep me posted</button>
+        <p class="result" id="signup-result" role="status"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <div class="wrap">
+    <div class="footgrid">
+      <div>
+        <p class="footbrand">
+          <img class="brand__mark" src="parents-go-to-mark.svg" alt="" width="30" height="40">
+          <span>Parents Go To</span>
+        </p>
+        <p>One place to find, save and share the reading your family does.</p>
+      </div>
+      <div>
+        <h4>Reading for pleasure</h4>
+        <ul>
+          <li><a href="reading-for-pleasure.html">Open the app</a></li>
+          <li><a href="reading-for-pleasure.html#included">What is included</a></li>
+          <li><a href="services.html#sessions">Sessions near you</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Parents Go To</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="about.html#checks">How we check providers</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="contact.html#questions">Common questions</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get in touch</h4>
+        <ul>
+          <li><a href="mailto:hello@parentsgoto.example">hello@parentsgoto.example</a></li>
+          <li>Monday to Friday, 9am to 5pm</li>
+          <li><a href="contact.html">Send us a message</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footbase">
+      <span>&copy; <span class="year">2026</span> Parents Go To. Every provider is checked before it is listed.</span>
+      <span>All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="site.js"></script>
+<script src="signup.js"></script>
+</body>
+</html>

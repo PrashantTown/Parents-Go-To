@@ -1,0 +1,183 @@
+#page-auth .card:has(#view-genres.is-active){
+  --gn-pad: clamp(1.25rem, 3.4vw, 2.5rem);
+  width: min(820px, 100%);
+  padding: var(--gn-pad) var(--gn-pad) 0;
+  transition: width .4s var(--ease-out);
+}
+#page-auth:has(#view-genres.is-active) #shelf{ opacity: .22; transition: opacity .6s var(--ease-out); }
+
+#page-auth .gn-head{ max-width: 58ch; }
+#page-auth .gn-step{
+  margin: 0 0 .6rem;
+  font-size: .78rem; font-weight: 600; color: var(--ink-60);
+}
+#page-auth .gn-step span{ color: var(--pine); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+#page-auth .gn-progress{
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  width: 160px; margin: 0 0 1.35rem;
+}
+#page-auth .gn-progress span{ height: 4px; border-radius: 4px; background: var(--pine); }
+#page-auth .gn-progress span:last-child{
+  background: linear-gradient(90deg, var(--pine) 50%, var(--line-soft) 50%) right / 200% 100%;
+  animation: gnFill .9s .35s var(--ease-out) forwards;
+}
+@keyframes gnFill{ to{ background-position: left; } }
+#page-auth #view-genres h1{ font-size: clamp(1.6rem, 3.2vw, 2.1rem); }
+#page-auth #view-genres .lede{ margin-bottom: 1.4rem; }
+
+#page-auth .gn-tools{
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .7rem 0; margin-bottom: .4rem;
+  border-top: 1px solid var(--line-soft);
+}
+#page-auth .gn-tally{ font-size: .88rem; color: var(--ink-60); }
+#page-auth .gn-tally b{ color: var(--ink); font-variant-numeric: tabular-nums; }
+#page-auth .gn-tools-btns{ display: flex; gap: .25rem; }
+#page-auth .gn-link{
+  min-height: 36px; padding: 0 .75rem;
+  font: inherit; font-size: .86rem; font-weight: 600; color: var(--pine);
+  background: none; border: 0; border-radius: 8px; cursor: pointer;
+  transition: background .18s var(--ease-out), opacity .18s var(--ease-out);
+}
+#page-auth .gn-link:hover:not(:disabled){ background: rgba(13,59,50,.07); }
+#page-auth .gn-link:focus-visible{ outline: 2px solid var(--pine); outline-offset: 2px; }
+#page-auth .gn-link:disabled{ opacity: .4; cursor: default; }
+
+#page-auth .gn-group{ border: 0; margin: 0 0 1.35rem; padding: 0; min-inline-size: 0; }
+#page-auth .gn-legend{
+  padding: 0; margin: 0 0 .65rem;
+  font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-60);
+}
+#page-auth .gn-grid{
+  display: grid; gap: .7rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+#page-auth .gn-grid--4{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#page-auth .gn-grid--2{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 700px){
+  #page-auth :is(.gn-grid, .gn-grid--4){ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+#page-auth .gn-tile{
+  --tint: color-mix(in srgb, var(--tone) 12%, var(--card));
+  position: relative;
+  display: flex; flex-direction: column; align-items: flex-start;
+  min-height: 100%;
+  padding: 1rem 1rem 1.05rem;
+  background: var(--card);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color .2s var(--ease-out), background .2s var(--ease-out),
+              box-shadow .2s var(--ease-out), transform .2s var(--ease-out);
+}
+#page-auth .gn-tile:hover{
+  border-color: color-mix(in srgb, var(--tone) 45%, var(--line-soft));
+  box-shadow: 0 10px 22px -16px color-mix(in srgb, var(--tone) 70%, transparent);
+  transform: translateY(-2px);
+}
+#page-auth .gn-tile:active{ transform: translateY(0) scale(.99); }
+
+#page-auth .gn-tile input{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; margin: 0;
+  opacity: 0; cursor: pointer;
+}
+
+#page-auth .gn-ic{
+  display: grid; place-items: center;
+  width: 44px; height: 44px; margin-bottom: .8rem;
+  border-radius: 12px;
+  color: var(--tone);
+  background: var(--tint);
+  transition: background .2s var(--ease-out), color .2s var(--ease-out), transform .3s var(--ease-shelf);
+}
+#page-auth .gn-name{ font-size: .95rem; font-weight: 700; line-height: 1.3; color: var(--ink); }
+#page-auth .gn-sub{ margin-top: .25rem; font-size: .8rem; line-height: 1.45; color: var(--ink-60); }
+
+#page-auth .gn-check{
+  position: absolute; top: .8rem; right: .8rem;
+  display: grid; place-items: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  color: #fff;
+  border: 1.5px solid var(--line-soft);
+  background: var(--card);
+  transition: background .2s var(--ease-out), border-color .2s var(--ease-out);
+}
+#page-auth .gn-check svg{ transform: scale(0); transition: transform .25s var(--ease-shelf); }
+
+#page-auth .gn-tile:has(input:checked){
+  border-color: var(--tone);
+  background: var(--tint);
+}
+#page-auth .gn-tile:has(input:checked) .gn-ic{ background: var(--tone); color: #fff; transform: rotate(-6deg); }
+#page-auth .gn-tile:has(input:checked) .gn-check{ background: var(--tone); border-color: var(--tone); }
+#page-auth .gn-tile:has(input:checked) .gn-check svg{ transform: scale(1); }
+#page-auth .gn-tile:has(input:focus-visible){ outline: 2px solid var(--pine); outline-offset: 3px; }
+
+#page-auth .gn-foot{
+  position: sticky; bottom: 0; z-index: 2;
+  display: flex; align-items: center; gap: 1rem 1.5rem; flex-wrap: wrap;
+  margin: .4rem calc(-1 * var(--gn-pad)) 0;
+  padding: 1rem var(--gn-pad) calc(1rem + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line-soft);
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+#page-auth .gn-foot-text{ flex: 1 1 220px; min-width: 0; }
+#page-auth .gn-count{ margin: 0; font-size: .88rem; font-weight: 600; line-height: 1.45; color: var(--ink); }
+#page-auth .gn-picked{
+  margin: .15rem 0 0;
+  font-size: .8rem; color: var(--ink-60);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#page-auth .gn-picked:empty{ display: none; }
+#page-auth #view-genres .actions{
+  display: flex; gap: .6rem; flex: 0 1 auto;
+  width: auto; margin: 0;
+}
+#page-auth #view-genres .actions .submit{ width: auto; min-height: 48px; padding: 0 1.3rem; white-space: nowrap; }
+#page-auth #view-genres #genresSubmit{ min-width: 190px; }
+
+@media (max-width: 560px){
+  #page-auth #view-genres .actions{ flex: 1 1 100%; }
+  #page-auth #view-genres .actions .submit{ flex: 1 1 0; min-width: 0; padding: 0 .9rem; }
+  #page-auth .gn-tile{ padding: .85rem .85rem .9rem; }
+  #page-auth .gn-ic{ width: 38px; height: 38px; margin-bottom: .6rem; }
+  #page-auth .gn-sub{ font-size: .76rem; }
+}
+
+html[data-theme="dark"] #page-auth .gn-tile{ --tint: color-mix(in srgb, var(--tone) 20%, var(--card)); }
+html[data-theme="dark"] #page-auth .gn-ic{ color: color-mix(in srgb, var(--tone) 55%, #fff); }
+html[data-theme="dark"] #page-auth .gn-link:hover:not(:disabled){ background: rgba(121,216,184,.1); }
+@media (prefers-color-scheme: dark){
+  html[data-theme="auto"] #page-auth .gn-tile{ --tint: color-mix(in srgb, var(--tone) 20%, var(--card)); }
+  html[data-theme="auto"] #page-auth .gn-ic{ color: color-mix(in srgb, var(--tone) 55%, #fff); }
+  html[data-theme="auto"] #page-auth .gn-link:hover:not(:disabled){ background: rgba(121,216,184,.1); }
+}
+
+@supports not selector(:has(*)){
+  #page-auth .gn-tile input{
+    position: static; width: 18px; height: 18px; opacity: 1;
+    order: -1; margin-bottom: .5rem;
+  }
+  #page-auth .gn-check{ display: none; }
+  #page-auth .gn-foot{ margin-inline: 0; padding-inline: 0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  #page-auth .gn-tile, #page-auth .gn-ic, #page-auth .gn-check svg{ transition: none; }
+  #page-auth .gn-tile:hover, #page-auth .gn-tile:active,
+  #page-auth .gn-tile:has(input:checked) .gn-ic{ transform: none; }
+  #page-auth .gn-progress span:last-child{ animation: none; background-position: left; }
+}
+
+@media (forced-colors: active){
+  #page-auth .gn-tile{ border: 1px solid ButtonBorder; }
+  #page-auth .gn-tile:has(input:checked){ border: 3px solid Highlight; }
+  #page-auth .gn-check{ forced-color-adjust: none; border-color: CanvasText; background: Canvas; }
+  #page-auth .gn-tile:has(input:checked) .gn-check{ background: Highlight; color: HighlightText; }
+}

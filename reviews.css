@@ -1,0 +1,356 @@
+:is(#page-app, #page-admin) .rv-stars{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  color:var(--line);
+}
+:is(#page-app, #page-admin) .rv-stars-t{
+  margin-left:.5rem;
+  font-size:.85rem;
+  font-weight:600;
+  color:var(--ink-60);
+}
+:is(#page-app, #page-admin) .rv-star{ display:block; }
+:is(#page-app, #page-admin) .rv-star.is-on{ color:var(--pine); }
+
+:is(#page-app,#page-admin) .stars{ color:var(--pine); }
+:is(#page-app,#page-admin) .rate button.on{ color:var(--pine); }
+
+:is(#page-app) .rv-rate{
+  display:flex;
+  align-items:center;
+  gap:.1rem;
+}
+:is(#page-app) .rv-pick{
+  display:grid;
+  place-items:center;
+  width:44px;
+  height:44px;
+  padding:0;
+  color:var(--line);
+  background:none;
+  border:1px solid transparent;
+  border-radius:var(--r-sm);
+  cursor:pointer;
+  transition:color .16s var(--ease-out), transform .16s var(--ease-out);
+}
+:is(#page-app) .rv-pick.is-on{ color:var(--pine); }
+:is(#page-app) .rv-pick:hover{ transform:scale(1.1); }
+:is(#page-app) .rv-pick:focus-visible{
+  outline:3px solid var(--pine);
+  outline-offset:2px;
+}
+:is(#page-app) .rv-rate[aria-invalid="true"]{
+  border-radius:var(--r-sm);
+  box-shadow:0 0 0 2px var(--flag);
+}
+
+:is(#page-app) .rv-rate-out{
+  margin:.35rem 0 0;
+  font-size:.88rem;
+  font-weight:600;
+  color:var(--ink-60);
+}
+:is(#page-app) .rv-rate-out.is-set{ color:var(--ink); }
+
+#page-app .rv-picker{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-end;
+  gap:.75rem;
+  margin:0 0 1.15rem;
+}
+#page-app .rv-picker .f{ flex:1 1 320px; margin:0; }
+
+#page-app .rv-none{
+  margin:0 0 1.15rem;
+  padding:1rem 1.1rem;
+  font-size:.92rem;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+}
+
+#page-app .rv-book{
+  display:flex;
+  gap:1rem;
+  align-items:flex-start;
+  margin:0 0 1.25rem;
+  padding:1.1rem 1.15rem;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-lg);
+}
+#page-app .rv-cover{
+  flex:0 0 auto;
+  width:46px;
+  height:66px;
+  background:var(--pine);
+  border-radius:3px 6px 6px 3px;
+}
+#page-app .rv-book-body{ min-width:0; }
+#page-app .rv-book-t{
+  margin:0;
+  font-family:var(--display);
+  font-size:1.15rem;
+  font-weight:600;
+  color:var(--ink);
+}
+#page-app .rv-book-a{
+  margin:.15rem 0 0;
+  font-size:.92rem;
+  color:var(--ink-60);
+}
+#page-app .rv-book-m{
+  margin:.35rem 0 0;
+  font-size:.85rem;
+  color:var(--ink-60);
+}
+#page-app .rv-book-s{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.5rem;
+  margin:.6rem 0 0;
+}
+#page-app .rv-n{
+  font-size:.85rem;
+  color:var(--ink-60);
+}
+
+#page-app .rv-form{
+  margin:0 0 1.5rem;
+  padding:1.15rem;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-lg);
+}
+#page-app .rv-form h3{
+  margin:0;
+  font-family:var(--display);
+  font-size:1.05rem;
+  font-weight:600;
+  color:var(--ink);
+}
+#page-app .rv-form .rv-lbl{
+  display:block;
+  margin:.9rem 0 .3rem;
+  font-size:.85rem;
+  font-weight:600;
+  color:var(--ink);
+}
+#page-app .rv-chars{
+  margin:.3rem 0 0;
+  font-size:.8rem;
+  color:var(--ink-60);
+}
+#page-app .rv-chars.is-over{
+  color:var(--flag);
+  font-weight:600;
+}
+#page-app .rv-mine{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.5rem;
+  margin:.75rem 0 0;
+}
+#page-app .rv-note{
+  margin:.75rem 0 0;
+  padding:.6rem .8rem;
+  font-size:.85rem;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--sky);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+
+#page-app .rv-guard{
+  display:flex;
+  gap:.6rem;
+  align-items:flex-start;
+  margin:.9rem 0 0;
+  padding:.7rem .85rem;
+  font-size:.85rem;
+  line-height:1.5;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--marigold);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+#page-app .rv-guard svg{ flex:0 0 auto; margin-top:.1rem; color:var(--ink-60); }
+#page-app .rv-guard b{ color:var(--ink); }
+
+#page-app .rv-foot{
+  display:flex;
+  justify-content:flex-end;
+  margin:1rem 0 0;
+}
+
+#page-app .rv-list{
+  display:grid;
+  gap:.85rem;
+}
+#page-app .rv-item{
+  padding:1rem 1.1rem;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-lg);
+}
+#page-app .rv-item.is-quiet{
+  background:var(--paper-warm);
+  border:1px dashed var(--line);
+}
+#page-app .rv-item.is-own{ border-left:3px solid var(--pine); }
+
+#page-app .rv-meta,
+#page-admin .rv-meta{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.4rem;
+  margin:0;
+  font-size:.85rem;
+  color:var(--ink-60);
+}
+#page-app .rv-meta b,
+#page-admin .rv-meta b{ color:var(--ink); }
+#page-app .rv-you{
+  padding:.05rem .4rem;
+  font-size:.75rem;
+  font-weight:600;
+  color:var(--pine);
+  background:var(--paper-warm);
+  border-radius:var(--r-sm);
+}
+#page-app .rv-rating,
+#page-admin .rv-rating{ margin:.5rem 0 0; }
+#page-app .rv-body{
+  margin:.5rem 0 0;
+  font-size:.95rem;
+  line-height:1.6;
+  color:var(--ink);
+  overflow-wrap:break-word;
+}
+#page-app .rv-why{
+  margin:.6rem 0 0;
+  padding:.55rem .75rem;
+  font-size:.87rem;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--flag);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+#page-app .rv-why b{ color:var(--ink); }
+
+#page-admin .rv-adm{
+  padding:1rem 1.1rem;
+  margin:0 0 .85rem;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-lg);
+}
+#page-admin .rv-adm-book{
+  margin:.4rem 0 0;
+  font-size:.9rem;
+  color:var(--ink-60);
+}
+#page-admin .rv-adm-book b{ color:var(--ink); }
+#page-admin .rv-edited{
+  font-weight:600;
+  color:var(--flag);
+}
+#page-admin .rv-quote,
+#reviewRemoveDialog .rv-quote{
+  margin:.6rem 0 0;
+  padding:.65rem .85rem;
+  font-size:.95rem;
+  line-height:1.6;
+  color:var(--ink);
+  background:var(--paper-warm);
+  border-left:3px solid var(--line);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  overflow-wrap:break-word;
+}
+#page-admin .rv-verdict{
+  margin:.6rem 0 0;
+  font-size:.87rem;
+  color:var(--ink-60);
+}
+#page-admin .rv-verdict b{ color:var(--ink); }
+#page-app .rv-acts,
+#page-admin .rv-acts{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin:.85rem 0 0;
+}
+#reviewRemoveDialog .rv-on{
+  margin:0 0 .2rem;
+  font-size:.87rem;
+  color:var(--ink-60);
+}
+#reviewRemoveDialog .rv-note{
+  margin:1rem 0 0;
+  padding:.6rem .8rem;
+  font-size:.85rem;
+  color:var(--ink-60);
+  background:var(--paper-warm);
+  border-left:3px solid var(--sky);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+}
+
+@media (prefers-reduced-motion: reduce){
+  :is(#page-app) .rv-pick{ transition:none; }
+  :is(#page-app) .rv-pick:hover{ transform:none; }
+}
+
+@media (forced-colors: active){
+  :is(#page-app, #page-admin) .rv-stars,
+  :is(#page-app) .rv-pick{ forced-color-adjust:none; color:CanvasText; }
+  :is(#page-app, #page-admin) .rv-star.is-on,
+  :is(#page-app) .rv-pick.is-on{ color:CanvasText; }
+  :is(#page-app) .rv-pick[aria-checked="true"]{
+    border:1px solid CanvasText;
+  }
+  :is(#page-app) .rv-pick:focus-visible{ outline:3px solid CanvasText; }
+  :is(#page-app) .rv-rate[aria-invalid="true"]{
+    box-shadow:none;
+    outline:2px solid CanvasText;
+  }
+
+  #page-app .rv-book,
+  #page-app .rv-form,
+  #page-app .rv-item,
+  #page-app .rv-none,
+  #page-admin .rv-adm{
+    border:1px solid CanvasText;
+  }
+  #page-app .rv-item.is-quiet{ border:1px dashed CanvasText; }
+  #page-app .rv-item.is-own{ border-left:3px solid CanvasText; }
+  #page-app .rv-cover{
+    border:1px solid CanvasText;
+    background:Canvas;
+    forced-color-adjust:none;
+  }
+  #page-app .rv-guard,
+  #page-app .rv-note,
+  #page-app .rv-why,
+  #reviewRemoveDialog .rv-note{
+    border-left:3px solid CanvasText;
+    background:Canvas;
+  }
+  #page-admin .rv-quote,
+  #reviewRemoveDialog .rv-quote{
+    border-left:3px solid CanvasText;
+    background:Canvas;
+  }
+  #page-app .rv-you{
+    border:1px solid CanvasText;
+    background:Canvas;
+    forced-color-adjust:none;
+  }
+  #page-app .rv-chars.is-over{ color:CanvasText; }
+  #page-admin .rv-edited{ color:CanvasText; }
+}

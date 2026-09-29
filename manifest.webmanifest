@@ -1,0 +1,22 @@
+{
+  "name": "Parents Go To — Reading for Pleasure",
+  "short_name": "Parents Go To",
+  "description": "Find, save and share trusted reading resources for children aged 0 to 18.",
+  "start_url": "reading-for-pleasure.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EDF1EC",
+  "theme_color": "#0D3B32",
+  "lang": "en-AU",
+  "dir": "ltr",
+  "categories": ["education", "books", "lifestyle"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 88'%3E%3ClinearGradient id='d' x1='48' y1='1' x2='48' y2='39' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%235BCF7C'/%3E%3Cstop offset='.5' stop-color='%2325C497'/%3E%3Cstop offset='1' stop-color='%2301A79A'/%3E%3C/linearGradient%3E%3ClinearGradient id='h' x1='48' y1='26' x2='48' y2='66' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%232BC48F'/%3E%3Cstop offset='.45' stop-color='%2301AF9F'/%3E%3Cstop offset='1' stop-color='%230A6C86'/%3E%3C/linearGradient%3E%3Cpath d='M11 39A37 37 0 0 1 85 39Z' fill='url(%23d)'/%3E%3Cpath d='M48 65 23 40.2A12.6 12.6 0 0 1 48 39.2 12.6 12.6 0 0 1 73 40.2Z' fill='url(%23h)' stroke='%23fff' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
