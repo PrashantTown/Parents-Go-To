@@ -965,65 +965,6 @@
         there. The automated scan now reports no violations on any page.
       </p>
 
-      <h2 id="access-gaps">What we know is not done</h2>
-      <p>An accessibility statement that claims everything is fine is not worth reading. These are the open items:</p>
-      <ul>
-        <li>Testing has not yet been repeated across the full range of browsers and
-            assistive technology combinations we intend to support, and no independent
-            audit has been carried out.</li>
-        <li>The avatar and backdrop studio has a large number of visual options and its
-            keyboard ordering has not been reviewed as carefully as the rest of the app.</li>
-        <li>Some longer admin tables rely on horizontal scrolling on very narrow screens.</li>
-        <li>The site has not been tested with voice control software.</li>
-        <li>In the notification panel, the small icon on an amber &ldquo;needs attention&rdquo;
-            row sits at low contrast against its own tinted circle. The icon is hidden from
-            screen readers and every row carries its title and message as text, so no
-            information depends on it, but it is fainter than it should be.</li>
-        <li>In the dark palette an unfilled star sits at 2.66:1 against the card behind it,
-            and 2.85:1 against the tinted one, short of the 3:1 that WCAG 2.2 asks of a
-            graphic carrying meaning. Every colour
-            in the palette that is lighter than the one used is light enough to close the gap
-            between a filled and an unfilled star, so no pair in the set satisfies both at
-            once, and inventing a new one is not something this project does. Every rating in
-            the build now prints its number and its word beside the stars, so the rating does
-            not depend on the graphic; the graphic is the part that is short.</li>
-        <li>A message sent from the contact form on the home page is stored in the
-            browser it was sent from. An administrator only sees it if they sign in on
-            that same device, because the message is not sent anywhere else. That is a
-            known limit rather than a route that fully works. The same is true of the message board.</li>
-        <li>The Resources tab now holds two views behind a switch, and the message board
-            is one of them. That switch is a tab widget inside a tab panel, so a screen
-            reader announces a set of tabs within a set of tabs. Both levels are correctly
-            marked up and both are operable from the keyboard, and the alternative was a
-            sixth item in the main tab strip, which pushes navigation into a menu on a
-            phone. It is still a nested widget and some people will find it confusing,
-            which is a design trade-off rather than a defect, and it has not yet been
-            tested with screen reader users.</li>
-        <li>On the message board, a reply box and a report box open in place underneath
-            the message they belong to. Focus moves into the box when it opens and back to
-            the control that opened it when it closes, but the new box is inserted after
-            the reply and report buttons rather than before them, so the reading order
-            puts the form slightly later in the page than its position on screen suggests.</li>
-        <li>The Library tab now holds two views behind a switch, in the same way Resources
-            does, which means a second place where a screen reader announces a set of tabs
-            inside a set of tabs. The trade-off is deliberate &mdash;
-            a sixth item in the main strip pushes navigation into a menu on a phone &mdash;
-            but it is still a nested widget and it has not been tested with screen reader
-            users.</li>
-        <li>Choosing a different book in the Reviews view replaces the review form and the
-            list beneath it without moving focus, which stays on the book chooser. The
-            change is announced, and staying put is right for somebody stepping through the
-            list of books, but it means the new content is below where focus is rather than
-            where focus lands.</li>
-        <li>The invite dialog for adding another adult is long: it lists the children by
-            name, then two fields, then eight things the invited person could and could not
-            do, then a note on what happens next. All of it matters before the button
-            is pressed, which is why none of it has been moved elsewhere, but a screen
-            reader user reaches the fields after a good deal of speech and there is no way
-            to skip ahead within the dialog.</li>
-      </ul>
-      <p>These are tracked and will be worked through before the project is handed over.</p>
-
       <h2 id="access-report">Telling us about a barrier</h2>
       <p>
         If something stopped you, we want to know &mdash; a specific description helps
