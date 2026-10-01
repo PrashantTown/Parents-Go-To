@@ -3703,6 +3703,9 @@ const BookField = (() => {
   })();
   function renderBoard() {
     var row = $("boardRow");
+    if (!row) {
+      return;
+    }
     var items = [];
     if (window.PTGAdmin) {
       window.PTGAdmin.publishedPosts().forEach(function(p) {
@@ -3831,6 +3834,9 @@ const BookField = (() => {
   }
   function renderSuggestions() {
     var row = $("suggestRow");
+    if (!row) {
+      return;
+    }
     var picks = children.length ? suggestions() : [];
     row.hidden = !picks.length;
     if (!picks.length) {

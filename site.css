@@ -344,6 +344,7 @@ h1, h2, h3, h4 {
 /* Home page "What we offer": one slot per service, side by side from tablet up. */
 .offers { display: grid; gap: clamp(1.1rem, 2.6vw, 1.6rem); grid-template-columns: minmax(0,1fr); }
 @media (min-width: 820px) { .offers { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width: 820px) { .offers--one { grid-template-columns: minmax(0,1fr); max-width: 760px; } }
 .offer {
   display: flex; flex-direction: column; align-items: flex-start;
   transition: transform .3s var(--ease-out), box-shadow .3s var(--ease-out);
@@ -588,3 +589,20 @@ details p { margin: .7rem 0 0; color: var(--ink-60); font-size: .96rem; max-widt
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* About: team bios and Four Voices */
+.bio p { font-size: 1rem; line-height: 1.65; }
+.bio__initials {
+  display: grid; place-items: center;
+  width: 52px; height: 52px; margin-bottom: 1.1rem;
+  border-radius: 50%;
+  background: rgba(13,59,50,.09); color: var(--pine);
+  border: 1px solid var(--line-soft);
+  font-family: "Fraunces", serif; font-weight: 600; font-size: 1.1rem;
+  letter-spacing: .02em;
+}
+.voices { display: grid; gap: clamp(1.4rem, 4vw, 2.6rem); grid-template-columns: minmax(0,1fr); align-items: center; padding: clamp(1.5rem, 4vw, 2.4rem); }
+@media (min-width: 760px) { .voices { grid-template-columns: minmax(0, 240px) minmax(0,1fr); } }
+.voices__logo { display: block; width: 100%; max-width: 240px; height: auto; margin-inline: auto; border-radius: var(--r-lg); }
+.voices h2 { font-size: clamp(1.5rem, 3.5vw, 2rem); line-height: 1.1; margin: 0 0 .8rem; }
+.voices p:not(.eyebrow) { margin: 0; font-size: 1.03rem; line-height: 1.65; color: var(--ink-60); max-width: 62ch; }
