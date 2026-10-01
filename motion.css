@@ -9,6 +9,28 @@
 }
 ::view-transition-old(root),
 ::view-transition-new(root) { animation: none; }
+
+/* The tab bars and the header get their own layers in the tab-switch animation.
+   Without them the bars were part of the page snapshot, and the sliding content
+   (a separate layer drawn on top) covered the phone's bottom tab bar, so the bar
+   blinked out and back on every tab tap. Their own layers sit above the content
+   and swap instantly, so the bars stay put. */
+#page-app .app-bar { view-transition-name: app-bar; }
+#page-admin .app-bar { view-transition-name: adm-bar; }
+#appTabs { view-transition-name: app-tabs; }
+#admTabs { view-transition-name: adm-tabs; }
+::view-transition-group(app-bar),
+::view-transition-group(adm-bar),
+::view-transition-group(app-tabs),
+::view-transition-group(adm-tabs) { animation: none; z-index: 10; }
+::view-transition-old(app-bar),
+::view-transition-old(adm-bar),
+::view-transition-old(app-tabs),
+::view-transition-old(adm-tabs) { animation: none; opacity: 0; }
+::view-transition-new(app-bar),
+::view-transition-new(adm-bar),
+::view-transition-new(app-tabs),
+::view-transition-new(adm-tabs) { animation: none; }
 @keyframes vtOut { to { opacity: 0; transform: translateY(-6px); } }
 @keyframes vtIn { from { opacity: 0; transform: translateY(10px); } }
 

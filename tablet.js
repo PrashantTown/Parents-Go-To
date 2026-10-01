@@ -115,6 +115,60 @@
   on(window, "resize", syncSwipe, {
     passive: true
   });
+  // On a phone, hide the bottom tab bar while the on-screen keyboard is up.
+  var TYPING = /^(text|search|email|password|tel|url|number|date|time|datetime-local|month|week)$/;
+  function typingField(el) {
+    if (!el || !el.tagName) return false;
+    if (el.isContentEditable || el.tagName === "TEXTAREA") return true;
+    return el.tagName === "INPUT" && TYPING.test(el.type || "text");
+  }
+  var kbTimer = 0;
+  on(document, "focusin", function(e) {
+    clearTimeout(kbTimer);
+    root.classList.toggle("kb-open", root.dataset.device === "phone" && typingField(e.target));
+  });
+  on(document, "focusout", function() {
+    clearTimeout(kbTimer);
+    // Moving from one field to the next fires focusout then focusin; wait for it.
+    kbTimer = setTimeout(function() {
+      if (!typingField(document.activeElement)) root.classList.remove("kb-open");
+    }, 120);
+  });
+  // Landscape phones: tuck the header away while scrolling down, bring it back on
+  // the way up, so it does not cover a third of a short screen.
+  var shortLand = window.matchMedia ? window.matchMedia("(max-height: 460px) and (orientation: landscape)") : null;
+  var lastY = window.pageYOffset || 0;
+  var tuckQueued = false;
+  function syncTuck() {
+    tuckQueued = false;
+    var y = window.pageYOffset || 0;
+    var b = bar();
+    if (!shortLand || !shortLand.matches || !b || root.classList.contains("dialog-open")) {
+      root.classList.remove("bar-tucked");
+      lastY = y;
+      return;
+    }
+    var h = b.offsetHeight;
+    if (y <= h) root.classList.remove("bar-tucked");
+    else if (y > lastY + 6) root.classList.add("bar-tucked");
+    else if (y < lastY - 6) root.classList.remove("bar-tucked");
+    if (Math.abs(y - lastY) > 6) lastY = y;
+  }
+  on(window, "scroll", function() {
+    if (tuckQueued) return;
+    tuckQueued = true;
+    window.requestAnimationFrame(syncTuck);
+  }, {
+    passive: true
+  });
+  // Keyboard users tabbing into the header always get it back.
+  on(document, "focusin", function(e) {
+    var b = bar();
+    if (b && b.contains(e.target)) root.classList.remove("bar-tucked");
+  });
+  on(window, "hashchange", function() {
+    root.classList.remove("bar-tucked");
+  });
   if (window.visualViewport) {
     var vv = window.visualViewport;
     on(vv, "resize", function() {

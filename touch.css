@@ -1,0 +1,70 @@
+/* Touch screens: phones, tablets and touch laptops.
+   Loaded last so it wins over the layered app styles before it. */
+
+/* A phone treats the last place you tapped as "hovered" until you tap somewhere
+   else, so a tab under your finger (or under where the Sign in button was) kept
+   its hover background and looked selected next to the real selected tab. */
+@media (hover: none) {
+  :is(#page-app, #page-admin) .app-nav button:not([aria-selected="true"]):hover {
+    background: transparent;
+    color: var(--ink-60);
+  }
+  :is(#page-app, #page-admin) .who:not([aria-expanded="true"]):hover {
+    background: none;
+    border-color: transparent;
+  }
+}
+@media (hover: none) and (min-width: 1180px) {
+  #page-admin .app-nav button:not([aria-selected="true"]):hover { color: #BFD4E2; }
+}
+
+/* Small phones (iPhone SE / mini, small Androids): the brand, the chat, bell and
+   account buttons did not fit on one row, so the account controls wrapped onto a
+   second row and the header took a third of the screen. */
+@media (max-width: 400px) {
+  :is(#page-app, #page-admin) .app-bar-inner { gap: .5rem; }
+  :is(#page-app, #page-admin) .bar-actions { gap: .2rem; }
+  :is(#page-app, #page-admin) .who { padding-inline: .2rem; gap: .25rem; }
+  :is(#page-app, #page-admin) .brand { gap: .4rem; }
+  :is(#page-app, #page-admin) .brand-mark { width: 34px; height: 31px; }
+  :is(#page-app, #page-admin) .brand-text .l1 { font-size: .68rem; }
+  :is(#page-app, #page-admin) .brand-text .l2 { font-size: .95rem; }
+}
+@media (max-width: 359.98px) {
+  /* The button keeps its aria-label, so only the logo is shown. */
+  :is(#page-app, #page-admin) .app-bar-inner .brand-text { display: none; }
+  :is(#page-app, #page-admin) .who .chev { display: none; }
+}
+
+/* Admin console on phones: the "Admin console" badge pushed the bell and account
+   buttons onto a second row. Keep just the shield; the text stays for screen readers. */
+@media (max-width: 520px) {
+  #page-admin .admin-badge { font-size: 0; gap: 0; padding: .4rem; }
+  #page-admin .admin-badge svg { width: 16px; height: 16px; }
+}
+
+/* While the on-screen keyboard is up (typing in search, a form or a chat), the
+   bottom tab bar rode up on top of the keyboard and covered what was being typed.
+   tablet.js sets .kb-open while a text field has focus on a phone. */
+@media (max-width: 720px) {
+  html.kb-open :is(#page-app, #page-admin) .app-nav {
+    transform: translateY(100%);
+    visibility: hidden;
+  }
+}
+
+/* Landscape phones: the header and tab strip stayed pinned and covered about a
+   third of the screen. They now slide away while scrolling down and come back
+   as soon as you scroll up (tablet.js sets .bar-tucked). */
+@media (max-height: 460px) and (orientation: landscape) {
+  :is(#page-app, #page-admin) .app-bar {
+    transition: transform .25s var(--ease-out, ease);
+  }
+  html.bar-tucked :is(#page-app, #page-admin) .app-bar {
+    transform: translateY(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(#page-app, #page-admin) .app-bar { transition: none; }
+}
