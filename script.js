@@ -2720,6 +2720,12 @@ const BookField = (() => {
       toggle.focus();
     }
   });
+  // A tap anywhere outside the open menu closes it, as on a phone's own menus.
+  document.addEventListener("click", function(e) {
+    if (header.classList.contains("is-open") && !header.contains(e.target)) {
+      setMenu(false);
+    }
+  });
   window.addEventListener("resize", function() {
     if (window.innerWidth >= 1000) {
       setMenu(false);
@@ -4342,6 +4348,18 @@ const BookField = (() => {
     }
     opts = opts || {};
     state.tab = name;
+    if (window.history && window.history.replaceState) {
+      if (!(name === "settings" && /^#settings(\/|$)/.test(window.location.hash))) {
+        var tabHash = "#" + (name === "dashboard" ? "app" : name);
+        // A tab the person picked gets its own history entry, so the phone's back
+        // button or swipe-back steps through the tabs instead of leaving the app.
+        if (!opts.keepScroll && window.location.hash !== tabHash) {
+          window.history.pushState(null, "", tabHash);
+        } else {
+          window.history.replaceState(null, "", tabHash);
+        }
+      }
+    }
     swapPanels(function() {
     TABS.forEach(function(t) {
       var btn = $("tab-" + t), panel = $("panel-" + t);
@@ -4369,11 +4387,6 @@ const BookField = (() => {
         top: 0,
         behavior: reduced.matches ? "auto" : "smooth"
       });
-    }
-    if (window.history && window.history.replaceState) {
-      if (!(name === "settings" && /^#settings(\/|$)/.test(window.location.hash))) {
-        window.history.replaceState(null, "", "#" + (name === "dashboard" ? "app" : name));
-      }
     }
     });
   }
@@ -7369,6 +7382,18 @@ const BookField = (() => {
     }
     opts = opts || {};
     state.tab = name;
+    if (window.history && window.history.replaceState) {
+      if (!(name === "settings" && /^#settings(\/|$)/.test(window.location.hash))) {
+        var tabHash = "#" + (name === "overview" ? "admin" : name);
+        // A tab the person picked gets its own history entry, so the phone's back
+        // button or swipe-back steps through the tabs instead of leaving the app.
+        if (!opts.keepScroll && window.location.hash !== tabHash) {
+          window.history.pushState(null, "", tabHash);
+        } else {
+          window.history.replaceState(null, "", tabHash);
+        }
+      }
+    }
     swapPanels(function() {
     TABS.forEach(function(t) {
       var btn = $("admtab-" + t), panel = $("admpanel-" + t);
@@ -7396,11 +7421,6 @@ const BookField = (() => {
         top: 0,
         behavior: reduced.matches ? "auto" : "smooth"
       });
-    }
-    if (window.history && window.history.replaceState) {
-      if (!(name === "settings" && /^#settings(\/|$)/.test(window.location.hash))) {
-        window.history.replaceState(null, "", "#" + (name === "overview" ? "admin" : name));
-      }
     }
     });
   }

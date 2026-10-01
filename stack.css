@@ -145,19 +145,20 @@
   }
 }
 
+/* Without stack.js a tall card can't be pinned by its bottom edge, so short
+   screens get the cards laid out flat instead. stack.js handles every size. */
 @media (max-height: 560px) {
-  .stack__slot { position: relative; top: auto; margin-bottom: 1.1rem; }
-  .stack__card { transform: none; min-height: 0; }
-  .stack__card::after { display: none; }
-  .stack::after { display: none; }
+  html:not(.has-js) .stack__slot { position: relative; top: auto; margin-bottom: 1.1rem; }
+  html:not(.has-js) .stack__card { transform: none; min-height: 0; }
+  html:not(.has-js) .stack__card::after { display: none; }
+  html:not(.has-js) .stack::after { display: none; }
 }
 
-/* Set by stack.js when a card is taller than the space it would be pinned in. */
-.stack--flat .stack__slot { position: relative; top: auto; margin-bottom: 1.1rem; }
-.stack--flat .stack__slot:last-child { margin-bottom: 0; }
-.stack--flat .stack__card { transform: none; min-height: 0; will-change: auto; }
-.stack--flat .stack__card::after { display: none; }
-.stack--flat::after { display: none; }
+/* Phones (portrait and landscape): keep the stack, but tighten the spacing between cards. */
+@media (max-height: 560px), (max-width: 520px) {
+  .stack { --stack-gap: clamp(2rem, 10vh, 4rem); --stack-peek: 8px; }
+  .stack__card { min-height: 0; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .stack__card { transform: none; will-change: auto; }

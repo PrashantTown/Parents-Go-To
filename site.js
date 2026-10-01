@@ -9,12 +9,26 @@
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
     toggle.textContent = open ? "Close" : "Menu";
   });
-  nav.addEventListener("click", function(event) {
-    if (!event.target.closest("a")) return;
+  function closeMenu() {
     if (!nav.classList.contains("open")) return;
     nav.classList.remove("open");
     toggle.setAttribute("aria-expanded", "false");
     toggle.textContent = "Menu";
+  }
+  nav.addEventListener("click", function(event) {
+    if (event.target.closest("a")) closeMenu();
+  });
+  document.addEventListener("keydown", function(event) {
+    if (event.key !== "Escape" || !nav.classList.contains("open")) return;
+    closeMenu();
+    toggle.focus();
+  });
+  // A tap outside the open menu closes it, and so does widening past the menu breakpoint.
+  document.addEventListener("click", function(event) {
+    if (!nav.contains(event.target) && !toggle.contains(event.target)) closeMenu();
+  });
+  window.addEventListener("resize", function() {
+    if (window.innerWidth > 820) closeMenu();
   });
 })();
 
