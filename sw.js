@@ -47,11 +47,23 @@ self.addEventListener("push", function(event) {
       payload.body = event.data.text();
     }
   }
-  event.waitUntil(self.registration.showNotification(payload.title || "Parents Go To", {
-    body: payload.body || "",
-    tag: payload.tag || "ptg-push",
-    data: {
-      go: payload.go || ""
+  // An open, visible tab already shows the alert itself.
+  event.waitUntil(self.clients.matchAll({
+    type: "window",
+    includeUncontrolled: true
+  }).then(function(list) {
+    var visible = list.some(function(client) {
+      return client.visibilityState === "visible";
+    });
+    if (visible) {
+      return undefined;
     }
+    return self.registration.showNotification(payload.title || "Parents Go To", {
+      body: payload.body || "",
+      tag: payload.tag || "ptg-push",
+      data: {
+        go: payload.go || ""
+      }
+    });
   }));
 });

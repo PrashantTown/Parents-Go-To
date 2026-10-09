@@ -8,10 +8,6 @@
   var message = document.getElementById("cf-message");
   var result = document.getElementById("cf-result");
   if (!send) return;
-  function reference() {
-    var stamp = Date.now().toString(36).toUpperCase();
-    return "PTG-" + stamp.slice(-6);
-  }
   function fail(field, text) {
     result.classList.add("error");
     result.textContent = text;
@@ -32,10 +28,24 @@
     if (message.value.trim() === "") {
       return fail(message, "Tell us what you need — a sentence or two is plenty.");
     }
-    result.textContent = "Thanks. Your reference is " + reference() + ", filed under “" + topic.value + "”. If you need a reply soon, use the email address on this page.";
-    name.value = "";
-    email.value = "";
-    message.value = "";
+    if (!window.PTGBackend || !window.PTGBackend.ready) {
+      result.classList.add("error");
+      result.textContent = "We could not send that just now. Please email us using the address on this page.";
+      return;
+    }
+    send.disabled = true;
+    result.textContent = "Sending…";
+    window.PTGBackend.contact(name.value.trim(), address, topic.value, message.value.trim()).then(function(ref) {
+      result.textContent = "Thanks. Your reference is " + ref + ", filed under “" + topic.value + "”. If you need a reply soon, use the email address on this page.";
+      name.value = "";
+      email.value = "";
+      message.value = "";
+    }, function(err) {
+      result.classList.add("error");
+      result.textContent = err.message + " You can also email us using the address on this page.";
+    }).then(function() {
+      send.disabled = false;
+    });
   });
   [name, email].forEach(function(field) {
     field.addEventListener("keydown", function(event) {

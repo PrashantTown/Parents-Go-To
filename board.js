@@ -28,7 +28,7 @@
   function read() {
     var raw;
     try {
-      raw = JSON.parse(window.localStorage.getItem(KEY));
+      raw = JSON.parse(window.PTGStore.getItem(KEY));
     } catch (e) {
       raw = null;
     }
@@ -39,7 +39,7 @@
   }
   function write(items) {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify({
+      window.PTGStore.setItem(KEY, JSON.stringify({
         items: items.slice(0, MAX)
       }));
       return true;
@@ -156,9 +156,6 @@
       return d.toDateString();
     }
   }
-  function seed() {
-    return;
-  }
   var Board = {
     list: function() {
       return read().sort(function(a, b) {
@@ -202,7 +199,7 @@
     add: function(rec) {
       var all = read();
       var row = {
-        id: "bd-" + token(),
+        id: window.PTGStore.uuid(),
         from: String(rec.from || "A parent"),
         owner: String(rec.owner || "").trim().toLowerCase() || "guest",
         body: String(rec.body || "").trim(),

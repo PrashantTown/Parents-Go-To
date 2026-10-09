@@ -18,7 +18,7 @@
   function read() {
     var raw;
     try {
-      raw = JSON.parse(window.localStorage.getItem(KEY));
+      raw = JSON.parse(window.PTGStore.getItem(KEY));
     } catch (e) {
       raw = null;
     }
@@ -26,7 +26,7 @@
   }
   function write(items) {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify({
+      window.PTGStore.setItem(KEY, JSON.stringify({
         items: items.slice(0, MAX * 4)
       }));
       return true;
@@ -92,7 +92,7 @@
   function prefs(role, email) {
     var s;
     try {
-      s = JSON.parse(window.localStorage.getItem("ptg-settings-v1"));
+      s = JSON.parse(window.PTGStore.getItem("ptg-settings-v1"));
     } catch (e) {
       s = null;
     }
@@ -149,7 +149,7 @@
     },
     push: function(rec) {
       var row = {
-        id: "n-" + token(),
+        id: window.PTGStore.uuid(),
         to: String(rec.to || "parent::*"),
         kind: String(rec.kind || "system"),
         tone: String(rec.tone || "info"),
@@ -424,7 +424,17 @@
     }
     return false;
   }
+  // Once allowed, also register this device for alerts sent while the
+  // site is closed.
   function ask() {
+    return askBrowser().then(function(p) {
+      if (p === "granted" && window.PTGBackend && window.PTGBackend.enablePush) {
+        window.PTGBackend.enablePush();
+      }
+      return p;
+    });
+  }
+  function askBrowser() {
     if (!hasApi()) {
       return Promise.resolve("unsupported");
     }

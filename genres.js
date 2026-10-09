@@ -45,7 +45,7 @@
   }
   function readAll() {
     try {
-      var raw = window.localStorage.getItem(KEY);
+      var raw = window.PTGStore.getItem(KEY);
       var parsed = raw ? JSON.parse(raw) : null;
       return parsed && typeof parsed === "object" ? parsed : {};
     } catch (e) {
@@ -54,7 +54,7 @@
   }
   function writeAll(map) {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(map));
+      window.PTGStore.setItem(KEY, JSON.stringify(map));
       return true;
     } catch (e) {
       return false;

@@ -42,23 +42,39 @@
 
 (function() {
   "use strict";
+  // Who is using this tab. The real sign-in lives in backend.js; this keeps
+  // the small synchronous API the rest of the site already uses.
   var signedIn = false;
   var who = null;
+  function announce() {
+    var ev;
+    try {
+      ev = new window.Event("ptg:session");
+    } catch (e) {
+      ev = document.createEvent("Event");
+      ev.initEvent("ptg:session", false, false);
+    }
+    window.dispatchEvent(ev);
+  }
   window.PTGSession = {
-    start: function(email, role) {
+    start: function(email, role, opts) {
+      opts = opts || {};
       signedIn = true;
       who = {
         email: String(email || ""),
         role: role === "admin" ? "admin" : "parent",
-        name: "",
+        name: String(opts.name || ""),
         at: Date.now()
       };
-      if (window.PTGAccounts) {
-        window.PTGAccounts.touch(email, who.role);
+      if (!who.name && window.PTGAccounts) {
         var acct = window.PTGAccounts.get(email);
         if (acct) {
           who.name = acct.name || "";
         }
+      }
+      announce();
+      if (opts.quiet) {
+        return;
       }
       if (window.PTGAudit) {
         window.PTGAudit.write("auth", who.role === "admin" ? "Administrator signed in" : "Parent signed in", who.email);
@@ -77,12 +93,20 @@
         });
       }
     },
-    end: function() {
-      if (signedIn && who && window.PTGAudit) {
+    end: function(opts) {
+      opts = opts || {};
+      if (signedIn && who && window.PTGAudit && !opts.remote) {
         window.PTGAudit.write("auth", who.role === "admin" ? "Administrator signed out" : "Parent signed out", who.email);
       }
+      var was = signedIn;
       signedIn = false;
       who = null;
+      if (!opts.remote && window.PTGBackend) {
+        window.PTGBackend.signOut();
+      }
+      if (was) {
+        announce();
+      }
     },
     active: function() {
       return signedIn;
@@ -115,188 +139,104 @@
       return signedIn && who.role === "admin";
     }
   };
-  var DEMO_PASSWORD = "demo1234";
-  var accounts = {};
-  var order = [];
   function key(email) {
     return String(email || "").trim().toLowerCase();
   }
-  function ensure(email, role) {
-    var k = key(email);
-    if (!k) {
+  function backend() {
+    return window.PTGBackend || null;
+  }
+  // The signed-in person, shaped like an entry in the admin account list.
+  function self() {
+    var S = window.PTGSession;
+    if (!S.active()) {
       return null;
     }
-    if (!Object.prototype.hasOwnProperty.call(accounts, k)) {
-      accounts[k] = {
-        email: String(email || "").trim(),
-        name: "",
-        password: null,
-        role: role === "admin" ? "admin" : "parent",
-        status: "active",
-        createdAt: Date.now(),
-        lastSeen: null
-      };
-      order.push(k);
-    }
-    return accounts[k];
+    return {
+      email: S.email(),
+      name: S.name(),
+      role: S.role(),
+      status: "active",
+      createdAt: null,
+      lastSeen: Date.now()
+    };
   }
+  // Accounts now live in the database. Admins see every account; everyone
+  // else only sees themselves. Passwords are never held by the website.
   window.PTGAccounts = {
-    demoPassword: DEMO_PASSWORD,
-    exists: function(email) {
-      var a = accounts[key(email)];
-      return !!(a && a.password !== null);
+    exists: function() {
+      return false;
     },
     get: function(email) {
-      return accounts[key(email)] || null;
+      var b = backend();
+      var list = b ? b.accounts() : [];
+      for (var i = 0; i < list.length; i++) {
+        if (key(list[i].email) === key(email)) {
+          return list[i];
+        }
+      }
+      var me = self();
+      return me && key(me.email) === key(email) ? me : null;
     },
     list: function() {
-      return order.map(function(k) {
-        return accounts[k];
-      });
+      var b = backend();
+      var list = b ? b.accounts() : [];
+      if (list.length) {
+        return list;
+      }
+      var me = self();
+      return me ? [ me ] : [];
     },
-    create: function(email, name, password) {
-      var a = ensure(email, "parent");
-      if (!a) {
-        return null;
-      }
-      a.email = String(email || "").trim();
-      a.name = String(name || "").trim();
-      a.password = String(password || "");
-      a.createdAt = Date.now();
-      return a;
+    create: function() {
+      return null;
     },
-    touch: function(email, role) {
-      var a = ensure(email, role);
-      if (!a) {
-        return null;
-      }
-      if (role === "admin") {
-        a.role = "admin";
-      }
-      a.lastSeen = Date.now();
-      if (!a.name) {
-        var local = String(email || "").split("@")[0].replace(/[._-]+/g, " ").trim();
-        if (local) {
-          a.name = local.replace(/\S+/g, function(w) {
-            return w.charAt(0).toUpperCase() + w.slice(1);
-          });
-        }
-      }
-      return a;
+    touch: function(email) {
+      return this.get(email);
     },
     setStatus: function(email, status) {
-      var a = accounts[key(email)];
-      if (a) {
-        a.status = status === "suspended" ? "suspended" : "active";
-        a.lockedOut = false;
+      var b = backend();
+      if (b) {
+        b.setAccountStatus(email, status).then(function() {
+          if (window.PTGAdmin && window.PTGAdmin.refresh) {
+            window.PTGAdmin.refresh();
+          }
+        });
       }
-      return a;
+      return this.get(email);
     },
-    setPassword: function(email, password) {
-      var a = ensure(email, "parent");
-      if (!a) {
-        return null;
-      }
-      a.password = String(password || "");
-      a.passwordChangedAt = Date.now();
-      return a;
+    setPassword: function() {
+      return null;
     },
-    rename: function(oldEmail, newEmail) {
-      var from = key(oldEmail), to = key(newEmail);
-      if (!from || !to) {
-        return false;
-      }
-      if (from === to) {
-        if (accounts[from]) {
-          accounts[from].email = String(newEmail).trim();
-        }
-        return true;
-      }
-      if (Object.prototype.hasOwnProperty.call(accounts, to)) {
-        return false;
-      }
-      var a = accounts[from] || ensure(oldEmail, "parent");
-      delete accounts[from];
-      a.email = String(newEmail).trim();
-      accounts[to] = a;
-      order[order.indexOf(from)] = to;
+    rename: function() {
       return true;
     },
     setName: function(email, name) {
-      var a = ensure(email, "parent");
-      if (!a) {
-        return null;
+      var b = backend();
+      var me = self();
+      if (b && me && key(me.email) === key(email)) {
+        b.rename(String(name || "").trim());
       }
-      a.name = String(name || "").trim();
-      return a;
+      return this.get(email);
     },
-    noteFail: function(email) {
-      var acct = accounts[key(email)];
-      if (!acct) {
-        return {
-          locked: false
-        };
-      }
-      acct.fails = (acct.fails || 0) + 1;
-      var limit = Number(window.PTGSettings && window.PTGSettings.platform ? window.PTGSettings.platform("lockAttempts") : 5) || 5;
-      if (acct.fails >= limit) {
-        acct.status = "suspended";
-        acct.lockedOut = true;
-        acct.fails = 0;
-        return {
-          locked: true,
-          limit: limit
-        };
-      }
+    noteFail: function() {
       return {
-        locked: false,
-        left: limit - acct.fails
+        locked: false
       };
     },
-    clearFails: function(email) {
-      var acct = accounts[key(email)];
-      if (acct) {
-        acct.fails = 0;
-      }
-    },
-    check: function(email, password) {
-      var acct = accounts[key(email)];
-      if (acct && acct.status === "suspended") {
-        return {
-          ok: false,
-          suspended: true,
-          lockedOut: !!acct.lockedOut
-        };
-      }
-      if (acct && acct.password !== null) {
-        return acct.password === password ? {
-          ok: true,
-          demo: false,
-          name: acct.name
-        } : {
-          ok: false
-        };
-      }
-      return password === DEMO_PASSWORD ? {
-        ok: true,
-        demo: true,
-        name: acct ? acct.name : ""
-      } : {
-        ok: false
-      };
-    }
+    clearFails: function() {}
   };
 })();
 
 (function() {
   "use strict";
+  // Entries made in this tab show straight away; admins also see the
+  // shared log loaded from the database.
   var entries = [];
   var seq = 0;
   window.PTGAudit = {
     write: function(kind, what, who, detail) {
       seq++;
       entries.unshift({
-        id: "log" + seq,
+        id: "local" + seq,
         kind: kind || "account",
         what: String(what || ""),
         who: String(who || "system"),
@@ -306,12 +246,19 @@
       if (entries.length > 400) {
         entries.pop();
       }
+      if (window.PTGBackend) {
+        window.PTGBackend.audit(kind, what, who, detail);
+      }
       if (window.PTGAdmin && window.PTGAdmin.refresh) {
         window.PTGAdmin.refresh();
       }
     },
     list: function() {
-      return entries.slice();
+      var shared = window.PTGBackend ? window.PTGBackend.auditList() : [];
+      var newest = shared.length ? shared[0].at || 0 : 0;
+      return entries.filter(function(e) {
+        return e.at > newest;
+      }).concat(shared);
     }
   };
 })();
@@ -1926,6 +1873,12 @@ const BookField = (() => {
       head: $("h-done"),
       title: "Signed in",
       first: null
+    },
+    newpass: {
+      el: $("view-newpass"),
+      head: $("h-newpass"),
+      title: "Choose a new password",
+      first: $("nPassword")
     }
   };
   var currentView = "signin";
@@ -1982,7 +1935,7 @@ const BookField = (() => {
     if (window.PTGSession) {
       window.PTGSession.end();
     }
-    [ "signinForm", "createForm", "forgotForm", "codeForm", "genresForm" ].forEach(function(id) {
+    [ "signinForm", "createForm", "forgotForm", "codeForm", "genresForm", "newpassForm" ].forEach(function(id) {
       var f = $(id);
       if (f) {
         f.reset();
@@ -2124,6 +2077,31 @@ const BookField = (() => {
       }
     });
   });
+  function busyWhile(button, label, work) {
+    var span = button.querySelector("span");
+    var was = span.textContent;
+    button.classList.add("is-busy");
+    button.disabled = true;
+    span.textContent = label;
+    var done = function() {
+      button.classList.remove("is-busy");
+      button.disabled = false;
+      span.textContent = was;
+    };
+    return Promise.resolve().then(work).then(function(value) {
+      done();
+      return value;
+    }, function(err) {
+      done();
+      throw err;
+    });
+  }
+  function backend() {
+    if (!window.PTGBackend || !window.PTGBackend.ready) {
+      return Promise.reject(new Error("The site cannot reach its database right now. Please try again later."));
+    }
+    return Promise.resolve(window.PTGBackend);
+  }
   signinForm.addEventListener("submit", function(e) {
     e.preventDefault();
     showAlert("signinAlert", "signinAlertText", "");
@@ -2133,76 +2111,71 @@ const BookField = (() => {
     }
     var admin = $("role-admin").checked;
     var who = email.value.trim();
-    busy($("signinSubmit"), "Checking…", 1150, function() {
-      var seen = window.PTGAccounts ? window.PTGAccounts.check(who, password.value) : {
-        ok: password.value === "demo1234",
-        demo: true
-      };
-      if (seen.ok) {
-        if (window.PTGAccounts && window.PTGAccounts.clearFails) {
-          window.PTGAccounts.clearFails(who);
-        }
-        if (admin) {
-          startAdminChallenge(who);
-        } else {
-          if (window.PTGSession) {
-            window.PTGSession.start(who, "parent");
-          }
-          $("doneText").textContent = seen.demo ? "Signed in. Taking you to your shelf…" : "Taking you to your shelf…";
-          $("doneAdmin").hidden = true;
-          $("doneGo").hidden = false;
-          $("doneAdminGo").hidden = true;
-          go("done");
-          if (window.PTGApp) {
-            window.PTGApp.loadShelf(who, {
-              demo: !!seen.demo,
-              name: seen.name
-            });
-          }
-          openShelfShortly();
-        }
-      } else if (seen.suspended) {
-        showAlert("signinAlert", "signinAlertText", seen.lockedOut ? "This account is locked after too many wrong passwords. An administrator can restore it." : "That account has been suspended by an administrator. Contact the site owner to have it restored.");
-        password.value = "";
-        password.focus();
-      } else {
-        var fail = window.PTGAccounts && window.PTGAccounts.noteFail ? window.PTGAccounts.noteFail(who) : {};
-        if (fail.locked) {
-          if (window.PTGAudit) {
-            window.PTGAudit.write("auth", "Account locked after " + fail.limit + " wrong passwords", who);
-          }
-          if (window.PTGNotify && window.PTGNotify.toAdmins) {
-            window.PTGNotify.toAdmins({
-              kind: "account",
-              tone: "alert",
-              title: "Account locked — " + who,
-              body: fail.limit + " wrong passwords in a row. Restore access from Accounts once you have checked with them.",
-              go: "accounts",
-              tag: "locked-" + who.toLowerCase()
-            });
-          }
-          showAlert("signinAlert", "signinAlertText", "Too many wrong passwords, so this account is now locked. An administrator can restore it.");
-        } else {
-          showAlert("signinAlert", "signinAlertText", "That email and password don’t match an account. Check the password, or reset it below." + (fail.left && fail.left <= 2 ? " " + fail.left + (fail.left === 1 ? " try" : " tries") + " left before the account is locked." : ""));
-        }
-        password.value = "";
-        password.focus();
+    var pass = password.value;
+    busyWhile($("signinSubmit"), "Checking…", function() {
+      return backend().then(function(b) {
+        return b.signIn(who, pass, admin ? "admin" : "parent");
+      });
+    }).then(function(result) {
+      password.value = "";
+      if (result && result.needsCode) {
+        startAdminChallenge(who);
+        return;
       }
+      $("doneText").textContent = "Taking you to your shelf…";
+      $("doneAdmin").hidden = true;
+      $("doneGo").hidden = false;
+      $("doneAdminGo").hidden = true;
+      go("done");
+      openShelfShortly();
+    }, function(err) {
+      showAlert("signinAlert", "signinAlertText", err.message);
+      password.value = "";
+      password.focus();
     });
   });
-  var ADMIN_CODE = "246810";
-  var codeFor = "", codeTries = 0;
+  // Administrators confirm with an authenticator app (two-factor). The first
+  // time, the app is linked by scanning a QR code.
+  var factor = null, codeFor = "", codeTries = 0;
+  function svgSrc(qr) {
+    var text = String(qr || "");
+    var at = text.indexOf(",");
+    if (text.indexOf("data:image/svg+xml") === 0 && at !== -1) {
+      var body = text.slice(at + 1);
+      if (/^\s*</.test(body)) {
+        return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(body);
+      }
+    }
+    return text;
+  }
   function startAdminChallenge(whoEmail) {
     codeFor = whoEmail;
     codeTries = 0;
+    factor = null;
     $("otp").value = "";
     $("codeEmail").textContent = whoEmail;
     setHint($("otp"), "otpHint", "");
     showAlert("codeAlert", "codeAlertText", "");
+    var enrol = $("codeEnrol");
+    if (enrol) {
+      enrol.hidden = true;
+    }
     go("code");
     window.setTimeout(function() {
       $("otp").focus();
     }, 60);
+    backend().then(function(b) {
+      return b.adminFactor();
+    }).then(function(f) {
+      factor = f;
+      if (f.enrol && enrol) {
+        $("codeQr").src = svgSrc(f.qr);
+        $("codeSecret").textContent = f.secret;
+        enrol.hidden = false;
+      }
+    }, function(err) {
+      showAlert("codeAlert", "codeAlertText", err.message);
+    });
   }
   $("otp").addEventListener("input", function() {
     var cleaned = $("otp").value.replace(/\D+/g, "").slice(0, 6);
@@ -2222,35 +2195,40 @@ const BookField = (() => {
       $("otp").focus();
       return;
     }
-    busy($("codeSubmit"), "Checking the code…", 900, function() {
-      if (value !== ADMIN_CODE) {
-        codeTries++;
-        if (window.PTGAudit) {
-          window.PTGAudit.write("auth", "Failed administrator one-time code (attempt " + codeTries + " of 3)", codeFor);
-        }
-        if (codeTries >= 3) {
-          if (window.PTGAudit) {
-            window.PTGAudit.write("auth", "Administrator sign-in abandoned after three wrong codes", codeFor);
-          }
-          resetAuthForms();
-          go("signin");
-          window.PTGAuthNotice("Three wrong codes — that sign-in was abandoned and logged. Start again when you have the right code.");
-          return;
-        }
-        showAlert("codeAlert", "codeAlertText", "That code is not right. " + (3 - codeTries) + (3 - codeTries === 1 ? " attempt left." : " attempts left."));
-        $("otp").value = "";
-        $("otp").focus();
-        return;
-      }
-      if (window.PTGSession) {
-        window.PTGSession.start(codeFor, "admin");
-      }
+    if (!factor) {
+      showAlert("codeAlert", "codeAlertText", "Still getting your authenticator ready. Try again in a moment.");
+      return;
+    }
+    busyWhile($("codeSubmit"), "Checking the code…", function() {
+      return window.PTGBackend.verifyAdminCode(factor.factorId, value);
+    }).then(function() {
       $("doneText").textContent = "Signed in as an administrator. Opening the console…";
       $("doneAdmin").hidden = false;
       $("doneGo").hidden = true;
       $("doneAdminGo").hidden = false;
       go("done");
       openConsoleShortly();
+    }, function(err) {
+      if (!err.wrongCode) {
+        showAlert("codeAlert", "codeAlertText", err.message);
+        return;
+      }
+      codeTries++;
+      if (window.PTGAudit) {
+        window.PTGAudit.write("auth", "Failed administrator one-time code (attempt " + codeTries + " of 3)", codeFor);
+      }
+      if (codeTries >= 3) {
+        if (window.PTGAudit) {
+          window.PTGAudit.write("auth", "Administrator sign-in abandoned after three wrong codes", codeFor);
+        }
+        resetAuthForms();
+        go("signin");
+        window.PTGAuthNotice("Three wrong codes — that sign-in was abandoned and logged. Start again when you have the right code.");
+        return;
+      }
+      showAlert("codeAlert", "codeAlertText", "That code is not right. " + (3 - codeTries) + (3 - codeTries === 1 ? " attempt left." : " attempts left."));
+      $("otp").value = "";
+      $("otp").focus();
     });
   });
   function startHash(role) {
@@ -2579,24 +2557,59 @@ const BookField = (() => {
       }
       return;
     }
-    busy($("createSubmit"), "Creating your account…", 1400, function() {
-      var who = cEmail.value.trim();
-      var name = cName.value.trim();
-      if (window.PTGAccounts) {
-        window.PTGAccounts.create(who, name, cPassword.value);
-      }
-      if (window.PTGSession) {
-        window.PTGSession.start(who, "parent");
-      }
-      if (window.PTGApp) {
-        window.PTGApp.loadShelf(who, {
-          demo: false,
-          name: name
-        });
+    var who = cEmail.value.trim();
+    var name = cName.value.trim();
+    var pass = cPassword.value;
+    busyWhile($("createSubmit"), "Creating your account…", function() {
+      return backend().then(function(b) {
+        return b.signUp(name, who, pass);
+      });
+    }).then(function(res) {
+      if (res && res.confirm) {
+        showSent("signup", who);
+        return;
       }
       genresBegin(who);
+    }, function(err) {
+      if (/already an account/i.test(err.message)) {
+        setHint(cEmail, "cEmailHint", err.message);
+        cEmail.focus();
+      }
+      showAlert("createAlert", "createAlertText", err.message);
     });
   });
+  // The "Check your inbox" screen is shared by password resets and new
+  // accounts that need their email confirmed.
+  var sentMode = "reset", sentTo = "";
+  var sentHead = $("h-sent");
+  var sentParas = [].slice.call($("view-sent").querySelectorAll(".done > p"));
+  var sentOriginal = {
+    head: sentHead.textContent,
+    paras: sentParas.map(function(p) {
+      return p.innerHTML;
+    })
+  };
+  function showSent(mode, address) {
+    sentMode = mode;
+    sentTo = address;
+    if (mode === "signup") {
+      sentHead.textContent = "Confirm your email";
+      if (sentParas[0]) {
+        sentParas[0].innerHTML = 'We sent a link to <strong id="sentEmail"></strong>. Open it to finish creating your account.';
+      }
+      if (sentParas[1]) {
+        sentParas[1].textContent = "It can take a minute to arrive. Check your spam folder before asking for another.";
+      }
+    } else {
+      sentHead.textContent = sentOriginal.head;
+      sentParas.forEach(function(p, i) {
+        p.innerHTML = sentOriginal.paras[i];
+      });
+    }
+    $("sentEmail").textContent = address;
+    go("sent");
+    startCooldown(60);
+  }
   var forgotForm = $("forgotForm"), fEmail = $("fEmail");
   function checkForgot() {
     var v = fEmail.value.trim();
@@ -2619,10 +2632,16 @@ const BookField = (() => {
       fEmail.focus();
       return;
     }
-    busy($("forgotSubmit"), "Sending…", 1200, function() {
-      $("sentEmail").textContent = fEmail.value.trim();
-      go("sent");
-      startCooldown(30);
+    var address = fEmail.value.trim();
+    busyWhile($("forgotSubmit"), "Sending…", function() {
+      return backend().then(function(b) {
+        return b.resetPassword(address);
+      });
+    }).then(function() {
+      showSent("reset", address);
+    }, function(err) {
+      setHint(fEmail, "fEmailHint", err.message);
+      fEmail.focus();
     });
   });
   var resend = $("resend"), resendLabel = $("resendLabel"), cooldown = null;
@@ -2637,7 +2656,7 @@ const BookField = (() => {
         window.clearInterval(cooldown);
         resend.disabled = false;
         resendLabel.textContent = "Send it again";
-        route.textContent = "You can request another reset link now.";
+        route.textContent = sentMode === "signup" ? "You can ask for another confirmation email now." : "You can request another reset link now.";
       } else {
         resendLabel.innerHTML = 'Send it again in <span class="countdown">' + left + "</span>s";
       }
@@ -2647,11 +2666,68 @@ const BookField = (() => {
     if (resend.disabled) {
       return;
     }
-    busy(resend, "Sending…", 900, function() {
-      route.textContent = "Another reset link has been sent.";
+    busyWhile(resend, "Sending…", function() {
+      return backend().then(function(b) {
+        return sentMode === "signup" ? b.resendConfirmation(sentTo) : b.resetPassword(sentTo);
+      });
+    }).then(function() {
+      route.textContent = sentMode === "signup" ? "Another confirmation email has been sent." : "Another reset link has been sent.";
+      startCooldown(60);
+    }, function(err) {
+      route.textContent = err.message;
       startCooldown(30);
     });
   });
+  // Arriving from an emailed reset link: choose a new password.
+  var newpassForm = $("newpassForm");
+  if (newpassForm) {
+    bindReveal("nReveal", "nPassword");
+    var nPassword = $("nPassword"), nConfirm = $("nConfirm");
+    window.addEventListener("ptg:recovery", function() {
+      window.location.hash = "#newpass";
+      if (window.PTGApplyView) {
+        window.PTGApplyView();
+      }
+      go("newpass");
+    });
+    newpassForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      showAlert("newpassAlert", "newpassAlertText", "");
+      var pw = nPassword.value;
+      var ok = true;
+      if (pw.length < 10) {
+        ok = setHint(nPassword, "nPwHint", "Use at least ten characters.") && ok;
+      } else {
+        setHint(nPassword, "nPwHint", "");
+      }
+      if (nConfirm.value !== pw) {
+        ok = setHint(nConfirm, "nConfirmHint", "These two don’t match yet.") && ok;
+      } else {
+        setHint(nConfirm, "nConfirmHint", "");
+      }
+      if (!ok) {
+        newpassForm.querySelector('[aria-invalid="true"]').focus();
+        return;
+      }
+      busyWhile($("newpassSubmit"), "Saving…", function() {
+        return backend().then(function(b) {
+          return b.setNewPassword(pw).then(function() {
+            return b.continueAfterRecovery();
+          });
+        });
+      }).then(function() {
+        newpassForm.reset();
+        $("doneText").textContent = "Password changed. Taking you to your shelf…";
+        $("doneAdmin").hidden = true;
+        $("doneGo").hidden = false;
+        $("doneAdminGo").hidden = true;
+        go("done");
+        openShelfShortly();
+      }, function(err) {
+        showAlert("newpassAlert", "newpassAlertText", err.message);
+      });
+    });
+  }
 })();
 
 (function() {
@@ -2659,12 +2735,14 @@ const BookField = (() => {
   var VIEWS = {
     signin: "view-signin",
     create: "view-create",
-    forgot: "view-forgot"
+    forgot: "view-forgot",
+    newpass: "view-newpass"
   };
   var TITLES = {
     signin: "Sign in",
     create: "Create your account",
-    forgot: "Reset your password"
+    forgot: "Reset your password",
+    newpass: "Choose a new password"
   };
   var timers = [];
   function requested() {
@@ -3128,10 +3206,8 @@ const BookField = (() => {
     editingList: null,
     editingChild: null
   };
-  var seq = 100;
-  function uid(p) {
-    seq++;
-    return p + seq;
+  function uid() {
+    return window.PTGStore ? window.PTGStore.uuid() : Date.now().toString(36) + Math.random().toString(36).slice(2);
   }
   function esc(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -4122,7 +4198,7 @@ const BookField = (() => {
   function welcomeMine() {
     var all;
     try {
-      all = JSON.parse(window.localStorage.getItem(WELCOME_KEY)) || {};
+      all = JSON.parse(window.PTGStore.getItem(WELCOME_KEY)) || {};
     } catch (e) {
       all = {};
     }
@@ -4140,7 +4216,7 @@ const BookField = (() => {
     }
     w.all[w.k] = w.me;
     try {
-      window.localStorage.setItem(WELCOME_KEY, JSON.stringify(w.all));
+      window.PTGStore.setItem(WELCOME_KEY, JSON.stringify(w.all));
     } catch (e) {}
   }
   var WELCOME_STEPS = [ {
@@ -4739,6 +4815,7 @@ const BookField = (() => {
   });
   function note(text) {
     activity.unshift({
+      id: uid(),
       text: text,
       at: Date.now()
     });
@@ -6304,9 +6381,11 @@ const BookField = (() => {
     if (current && current !== key) {
       shelves[current] = capture();
     }
-    var fresh = !shelves[key];
-    if (fresh) {
-      shelves[key] = opts.demo ? demoShelf() : emptyShelf(opts.name);
+    var fresh = !shelves[key] || !!opts.shelf;
+    if (opts.shelf) {
+      shelves[key] = opts.shelf;
+    } else if (fresh) {
+      shelves[key] = emptyShelf(opts.name);
     }
     current = key;
     install(shelves[key]);
@@ -6373,7 +6452,7 @@ const BookField = (() => {
   function shareRead() {
     var v;
     try {
-      v = JSON.parse(window.localStorage.getItem(SHARE_KEY));
+      v = JSON.parse(window.PTGStore.getItem(SHARE_KEY));
     } catch (e) {
       v = null;
     }
@@ -6390,7 +6469,7 @@ const BookField = (() => {
   }
   function shareWrite(store) {
     try {
-      window.localStorage.setItem(SHARE_KEY, JSON.stringify(store));
+      window.PTGStore.setItem(SHARE_KEY, JSON.stringify(store));
       return true;
     } catch (e) {
       return false;
@@ -6788,6 +6867,7 @@ const BookField = (() => {
       });
     },
     loadShelf: loadShelf,
+    capture: capture,
     loggedToday: function() {
       var key = dateKey(new Date);
       for (var i = 0; i < sessions.length; i++) {
@@ -6979,95 +7059,38 @@ const BookField = (() => {
   function isHttpUrl(v) {
     return /^https?:\/\/[^\s]+$/i.test(String(v || "").trim());
   }
-  var seq = 0;
-  function uid(p) {
-    seq++;
-    return p + seq;
+  function uid() {
+    return window.PTGStore ? window.PTGStore.uuid() : Date.now().toString(36) + Math.random().toString(36).slice(2);
   }
-  var submissions = [ {
-    id: "sub1",
-    title: "Local library storytime, Saturdays 10am",
-    body: "A half-hour session for under-fives at the branch on the main street. Good for the 3–5 band and no booking needed.",
-    category: "picture",
-    ages: "3–5",
-    link: "",
-    from: "A parent",
-    at: Date.now() - 36e5 * 5,
-    state: "pending",
-    reason: "",
-    decidedBy: "",
-    decidedAt: null
-  }, {
-    id: "sub2",
-    title: "Bilingual picture books we borrowed and loved",
-    body: "A short list of dual-language titles that worked well for a five-year-old reading in two languages at home.",
-    category: "bilingual",
-    ages: "3–5",
-    link: "",
-    from: "A parent",
-    at: Date.now() - 36e5 * 26,
-    state: "pending",
-    reason: "",
-    decidedBy: "",
-    decidedAt: null
-  }, {
-    id: "sub3",
-    title: "Reluctant readers: graphic novels that got us going",
-    body: "Suggested for the 9–12 band after a slow year. Would suit anyone whose child says books are boring.",
-    category: "graphic",
-    ages: "9–12",
-    link: "",
-    from: "A parent",
-    at: Date.now() - 36e5 * 50,
-    state: "pending",
-    reason: "",
-    decidedBy: "",
-    decidedAt: null
-  }, {
-    id: "sub4",
-    title: "Ten-minute bedtime stories collection",
-    body: "A collection that reliably lands inside the ten minutes most families have at bedtime.",
-    category: "bedtime",
-    ages: "0–3",
-    link: "https://www.alia.org.au/region/national",
-    from: "A parent",
-    at: Date.now() - 36e5 * 96,
-    state: "approved",
-    reason: "",
-    decidedBy: "seeded",
-    decidedAt: Date.now() - 36e5 * 90
-  } ];
-  var posts = [ {
-    id: "post1",
-    title: "How to pick books at the right reading level",
-    body: "A short guide to age bands, why they are only a starting point, and what to do when a child is ahead of or behind the band on their card.",
-    category: "early",
-    ages: "5–7",
-    link: "https://raisingchildren.net.au/guides/activity-guides/letters-words-and-stories/reading-activities-children-2-4-years",
-    state: "published",
-    at: Date.now() - 36e5 * 120,
-    by: "seeded"
-  }, {
-    id: "post2",
-    title: "Reading together when you only have ten minutes",
-    body: "Short, honest suggestions for families where bedtime is already tight. Ten minutes counts, and the streak matters more than the length.",
-    category: "bedtime",
-    ages: "3–5",
-    link: "https://raisingchildren.net.au/babies/play-learning/literacy-reading-stories",
-    state: "published",
-    at: Date.now() - 36e5 * 200,
-    by: "seeded"
-  }, {
-    id: "post3",
-    title: "Term two reading challenge (draft)",
-    body: "Outline for a challenge families can opt into next term. Still needs the stakeholder to confirm the prizes and the wording about school involvement.",
-    category: "chapter",
-    ages: "7–9",
-    link: "",
-    state: "draft",
-    at: Date.now() - 36e5 * 8,
-    by: "seeded"
-  } ];
+  var submissions = [];
+  var POSTS_KEY = "ptg-resources-v1";
+  var posts = [];
+  var postsSaved = "[]";
+  function loadPosts() {
+    var v = null;
+    try {
+      v = JSON.parse(window.PTGStore.getItem(POSTS_KEY));
+    } catch (e) {}
+    posts = v && Object.prototype.toString.call(v.items) === "[object Array]" ? v.items : [];
+    postsSaved = JSON.stringify(posts);
+  }
+  function savePosts() {
+    var now = JSON.stringify(posts);
+    if (now === postsSaved) {
+      return;
+    }
+    postsSaved = now;
+    window.PTGStore.setItem(POSTS_KEY, JSON.stringify({
+      items: posts
+    }));
+  }
+  loadPosts();
+  window.addEventListener("ptg:resources", function() {
+    loadPosts();
+    if (window.PTGAdmin && window.PTGAdmin.refresh) {
+      window.PTGAdmin.refresh();
+    }
+  });
   var state = {
     tab: "overview",
     q: "",
@@ -7157,6 +7180,10 @@ const BookField = (() => {
     return window.PTGAccounts ? window.PTGAccounts.list() : [];
   }
   function shelfFor(email) {
+    var acct = window.PTGAccounts ? window.PTGAccounts.get(email) : null;
+    if (acct && acct.shelf) {
+      return acct.shelf;
+    }
     if (!window.PTGApp || !window.PTGApp.shelfSummary) {
       return {
         children: 0,
@@ -7383,11 +7410,9 @@ const BookField = (() => {
       return;
     }
     var incoming = window.PTGSuggest.list();
+    submissions = [];
     for (var i = incoming.length - 1; i >= 0; i--) {
       var r = incoming[i];
-      if (findSub(r.id)) {
-        continue;
-      }
       submissions.unshift({
         id: r.id,
         origin: "parent",
@@ -7437,6 +7462,7 @@ const BookField = (() => {
     }
   }
   function renderAll() {
+    savePosts();
     syncSuggestions();
     closeDormant();
     renderCounts();
@@ -7933,9 +7959,16 @@ const BookField = (() => {
     hit = t.closest("[data-reset]");
     if (hit) {
       var ez = hit.getAttribute("data-reset");
-      log("account", "Sent a password reset link to " + ez);
-      renderAll();
-      say("A reset link would be sent to " + ez + " — email is not connected yet");
+      if (!window.PTGBackend) {
+        return;
+      }
+      window.PTGBackend.sendReset(ez).then(function() {
+        log("account", "Sent a password reset link to " + ez);
+        renderAll();
+        say("A password reset link is on its way to " + ez);
+      }, function(err) {
+        say(err.message);
+      });
       return;
     }
   });
@@ -8183,7 +8216,7 @@ const BookField = (() => {
   function store() {
     var v;
     try {
-      v = JSON.parse(window.localStorage.getItem(SHARE_KEY));
+      v = JSON.parse(window.PTGStore.getItem(SHARE_KEY));
     } catch (e) {
       v = null;
     }
@@ -8218,12 +8251,20 @@ const BookField = (() => {
     });
     return '<li class="sh-book">' + '<span class="sh-spine" style="background:' + esc(b.spine || "#2F6E86") + '"></span>' + '<div class="sh-book-body">' + '<h2 class="sh-title">' + esc(b.title) + "</h2>" + '<p class="sh-author">' + esc(b.author || "Author unknown") + "</p>" + (tags ? '<p class="sh-tags">' + tags + "</p>" : "") + "</div>" + "</li>";
   }
-  function render(token) {
+  function render(token, fetched) {
     var box = $("shareView");
     if (!box) {
       return;
     }
-    var rec = store()[token];
+    var rec = fetched || store()[token];
+    if (!rec && fetched === undefined && window.PTGBackend) {
+      document.title = "Opening a wishlist — Parents Go To";
+      box.innerHTML = state("Opening the wishlist…", "Just a moment.", HEART);
+      window.PTGBackend.sharedWishlist(token).then(function(remote) {
+        render(token, remote || false);
+      });
+      return;
+    }
     if (!rec) {
       document.title = "Link not available — Parents Go To";
       box.innerHTML = state("This link is not available", "The wishlist behind it may have been unshared, or the link may have been " + "copied incorrectly. Ask whoever sent it to share it again.", LOCK);
@@ -8266,7 +8307,8 @@ const BookField = (() => {
     sent: 1,
     code: 1,
     done: 1,
-    card: 1
+    card: 1,
+    newpass: 1
   };
   var APP = {
     app: 1,
@@ -8297,7 +8339,8 @@ const BookField = (() => {
     "view-sent": "Check your inbox",
     "view-code": "Enter your one-time code",
     "view-genres": "What do they like to read?",
-    "view-done": "Signed in"
+    "view-done": "Signed in",
+    "view-newpass": "Choose a new password"
   };
   var SHARE_RE = /^wishlist\/([a-z0-9]{6,40})$/;
   var landing = document.getElementById("page-landing");
@@ -8470,6 +8513,10 @@ const BookField = (() => {
   function route() {
     var h = hashName();
     var role = window.PTGSession ? window.PTGSession.role() : null;
+    // A saved sign-in is still being restored: wait for it ("ptg:auth").
+    if (window.PTGBackend && window.PTGBackend.restoring && (APP[h] || ADMIN[h] || SHARED[h])) {
+      return;
+    }
     if (SHARE_RE.test(h)) {
       show("share");
       return;
@@ -8498,6 +8545,7 @@ const BookField = (() => {
   }
   route();
   window.addEventListener("hashchange", route);
+  window.addEventListener("ptg:auth", route);
   window.addEventListener("pageshow", function(e) {
     if (e.persisted) {
       route();

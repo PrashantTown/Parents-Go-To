@@ -776,12 +776,18 @@
     return name || "Avatar";
   }
   var cache = null;
+  // Forget the cached copy when the signed-in person's looks are loaded.
+  window.addEventListener("ptg:store", function(e) {
+    if (e.detail && e.detail.key === STORE_KEY) {
+      cache = null;
+    }
+  });
   function all() {
     if (cache) {
       return cache;
     }
     try {
-      cache = JSON.parse(window.localStorage.getItem(STORE_KEY)) || {};
+      cache = JSON.parse(window.PTGStore.getItem(STORE_KEY)) || {};
     } catch (e) {
       cache = {};
     }
@@ -792,7 +798,7 @@
   }
   function persist() {
     try {
-      window.localStorage.setItem(STORE_KEY, JSON.stringify(all()));
+      window.PTGStore.setItem(STORE_KEY, JSON.stringify(all()));
     } catch (e) {}
   }
   function slot(childId) {

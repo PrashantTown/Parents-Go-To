@@ -19,8 +19,19 @@
     if (email.indexOf("@") === -1 || email.indexOf(".") === -1) {
       return fail("That address is missing an @ or a full stop.");
     }
-    result.textContent = "Done. We will email " + email + " when a new service opens near you.";
-    field.value = "";
+    if (!window.PTGBackend || !window.PTGBackend.ready) {
+      return fail("We could not save that just now. Please try again later.");
+    }
+    button.disabled = true;
+    result.textContent = "Saving…";
+    window.PTGBackend.subscribe(email).then(function() {
+      result.textContent = "Done. We will email " + email + " when a new service opens near you.";
+      field.value = "";
+    }, function(err) {
+      fail(err.message);
+    }).then(function() {
+      button.disabled = false;
+    });
   }
   button.addEventListener("click", submit);
   field.addEventListener("keydown", function(event) {

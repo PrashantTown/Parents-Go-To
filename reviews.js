@@ -29,7 +29,7 @@
   function read() {
     var raw;
     try {
-      raw = JSON.parse(window.localStorage.getItem(KEY));
+      raw = JSON.parse(window.PTGStore.getItem(KEY));
     } catch (e) {
       raw = null;
     }
@@ -40,7 +40,7 @@
   }
   function write(items) {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify({
+      window.PTGStore.setItem(KEY, JSON.stringify({
         items: items.slice(0, MAX)
       }));
       return true;
@@ -180,53 +180,6 @@
     }
     return null;
   }
-  var SEED = [ {
-    title: "The Magic School Bus: Inside the Human Body",
-    author: "Joanna Cole",
-    from: "Priya",
-    owner: "priya@example.invalid",
-    rating: 5,
-    body: "Read this one twice in a week, which has never happened before. The " + "chapters are short enough to stop at the end of one without an argument.",
-    ago: 1e3 * 60 * 60 * 40
-  }, {
-    title: "Goodnight Moon",
-    author: "Margaret Wise Brown",
-    from: "Marcus",
-    owner: "marcus@example.invalid",
-    rating: 3,
-    body: "Good for a first bedtime book — short, and the pictures carry most of " + "it. We had outgrown it within a couple of months, so borrow it from the library first.",
-    ago: 1e3 * 60 * 60 * 70
-  } ];
-  function seed() {
-    var existing;
-    try {
-      existing = window.localStorage.getItem(KEY);
-    } catch (e) {
-      return;
-    }
-    if (existing !== null) {
-      return;
-    }
-    var rows = SEED.map(function(s) {
-      return {
-        id: "rv-" + token(),
-        book: bookKey(s.title, s.author),
-        bookTitle: s.title,
-        bookAuthor: s.author,
-        from: s.from,
-        owner: s.owner,
-        rating: s.rating,
-        body: s.body,
-        at: Date.now() - s.ago,
-        edited: null,
-        state: "published",
-        reason: "",
-        decidedBy: "moderator@example.invalid",
-        decidedAt: Date.now() - s.ago + 1e3 * 60 * 45
-      };
-    });
-    write(rows);
-  }
   var Reviews = {
     list: function() {
       return read().sort(function(a, b) {
@@ -301,7 +254,7 @@
     add: function(rec) {
       var all = read();
       var row = {
-        id: "rv-" + token(),
+        id: window.PTGStore.uuid(),
         book: bookKey(rec.bookTitle, rec.bookAuthor),
         bookTitle: String(rec.bookTitle || "").trim(),
         bookAuthor: String(rec.bookAuthor || "").trim(),
@@ -1162,7 +1115,6 @@
     });
   }
   function boot() {
-    seed();
     initSwitch($("libViews"), function(tab) {
       if (tab && tab.id === "libv-tab-reviews") {
         renderReviews();

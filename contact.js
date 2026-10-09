@@ -20,7 +20,7 @@
   function read() {
     var raw;
     try {
-      raw = JSON.parse(window.localStorage.getItem(KEY));
+      raw = JSON.parse(window.PTGStore.getItem(KEY));
     } catch (e) {
       raw = null;
     }
@@ -31,7 +31,7 @@
   }
   function write(tickets) {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify({
+      window.PTGStore.setItem(KEY, JSON.stringify({
         tickets: tickets.slice(0, MAX)
       }));
       return true;

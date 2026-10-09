@@ -13,7 +13,7 @@
   }
   function readStore(key, fallback) {
     try {
-      var raw = window.localStorage.getItem(key);
+      var raw = window.PTGStore.getItem(key);
       return raw ? JSON.parse(raw) : fallback;
     } catch (e) {
       return fallback;
@@ -21,7 +21,7 @@
   }
   function writeStore(key, value) {
     try {
-      window.localStorage.setItem(key, JSON.stringify(value));
+      window.PTGStore.setItem(key, JSON.stringify(value));
       return true;
     } catch (e) {
       return false;
@@ -160,6 +160,7 @@
       }
     };
   })();
+  window.PTGShots = Shots;
   var Support = {
     list: function() {
       var s = readStore(SUPPORT_KEY, null);
@@ -188,7 +189,7 @@
       var all = this.list();
       var n = all.length + 1;
       ticket.ref = "PTG-" + String(1e3 + n);
-      ticket.id = "tk" + Date.now() + "-" + n;
+      ticket.id = window.PTGStore.uuid();
       ticket.at = Date.now();
       ticket.state = "open";
       all.unshift(ticket);
@@ -883,6 +884,17 @@
       }
       audit("account", "Sign-in email changed", newMail, "was " + oldMail);
       account = newMail;
+      if (window.PTGBackend) {
+        window.PTGBackend.changeEmail(newMail).then(function() {
+          window.setTimeout(function() {
+            say(scope, "We sent a confirmation link to " + newMail + ". The change finishes once you open it.");
+          }, 1200);
+        }, function(err) {
+          window.setTimeout(function() {
+            say(scope, err.message);
+          }, 1200);
+        });
+      }
       return true;
     }
     if (detailsForm) {
@@ -988,10 +1000,8 @@
         var newVal = String(($(pw.nw) || {}).value || "");
         var copyVal = String(($(pw.copy) || {}).value || "");
         var ok = true;
-        var seen = window.PTGAccounts ? window.PTGAccounts.check(account, oldVal) : {
-          ok: oldVal.length > 0
-        };
-        var oldBad = !seen.ok;
+        var ok = true;
+        var oldBad = !oldVal;
         setErr(pw.old + "Err", oldBad);
         markInvalid(pw.old, oldBad);
         if (oldBad) {
@@ -1021,29 +1031,48 @@
           }
           return;
         }
-        if (window.PTGAccounts && window.PTGAccounts.setPassword && account !== "guest") {
-          window.PTGAccounts.setPassword(account, newVal);
+        if (!window.PTGBackend) {
+          say(scope, "The site cannot reach its database right now.");
+          return;
         }
-        persist({
-          passwordChangedAt: Date.now()
-        });
-        audit("auth", "Password changed", account);
-        pw.form.reset();
-        var meter = $(pw.meter);
-        if (meter) {
-          meter.setAttribute("data-score", "0");
-        }
-        [ pw.old, pw.nw, pw.copy ].forEach(function(id) {
-          var el = $(id);
-          if (el) {
-            el.type = "password";
+        say(scope, "Checking your current password…");
+        window.PTGBackend.verifyPassword(oldVal).then(function(good) {
+          if (!good) {
+            setErr(pw.old + "Err", true);
+            markInvalid(pw.old, true);
+            $(pw.old).focus();
+            say(scope, "That is not your current password.");
+            return;
           }
-          markInvalid(id, false);
-          setErr(id + "Err", false);
+          return window.PTGBackend.changePassword(newVal).then(function() {
+            persist({
+              passwordChangedAt: Date.now()
+            });
+            audit("auth", "Password changed", account);
+            pw.form.reset();
+            var meter = $(pw.meter);
+            if (meter) {
+              meter.setAttribute("data-score", "0");
+            }
+            [ pw.old, pw.nw, pw.copy ].forEach(function(id) {
+              var el = $(id);
+              if (el) {
+                el.type = "password";
+              }
+              markInvalid(id, false);
+              setErr(id + "Err", false);
+            });
+            renderDevices();
+            flashSaved($(pw.saved), "Password updated");
+            say(scope, "Password updated. Use it next time you sign in.");
+          });
+        }).catch(function(err) {
+          if (err.needsCode) {
+            say(scope, "For safety, confirm this change with an emailed code: choose “Forgot your password?” and follow the steps.");
+            return;
+          }
+          say(scope, err.message);
         });
-        renderDevices();
-        flashSaved($(pw.saved), "Password updated");
-        say(scope, "Password updated. Use it next time you sign in.");
       });
     }
     var rp = scope.role === "parent" ? "set" : "admSet";
@@ -1139,29 +1168,20 @@
       }
     }
     function resetSend() {
-      var picked = reset.box.querySelector('input[name="' + rp + 'ResetTo"]:checked');
-      var useBackup = picked && picked.value === "backup" && prefs.backupContact;
-      reset.sentTo = useBackup ? String(prefs.backupContact).trim() : account && account !== "guest" ? account : "your sign-in email";
-      reset.code = String(Math.floor(1e5 + Math.random() * 9e5));
-      reset.expires = Date.now() + RESET_TTL;
+      reset.sentTo = account && account !== "guest" ? account : "your sign-in email";
+      reset.code = "";
+      reset.expires = 0;
       reset.tries = 0;
       $(rp + "ResetSentTo").textContent = reset.sentTo;
       var demo = $(rp + "ResetDemo");
       if (demo) {
-        demo.textContent = "This demo cannot send real email, so the code is also in your notifications: " + reset.code + ".";
-      }
-      if (window.PTGNotify && window.PTGNotify.push) {
-        window.PTGNotify.push({
-          to: scope.role + "::" + String(account || "guest").toLowerCase(),
-          kind: "account",
-          tone: "info",
-          title: "Your password reset code",
-          body: "Your code is " + reset.code + ". It expires in 10 minutes. If you did not ask for this, ignore it.",
-          go: "settings",
-          tag: "reset-" + Date.now()
-        });
+        demo.textContent = "The code goes to your sign-in email address.";
       }
       audit("auth", "Password reset code sent", account, "to " + reset.sentTo);
+      if (!window.PTGBackend) {
+        return Promise.reject(new Error("The site cannot reach its database right now."));
+      }
+      return window.PTGBackend.sendPasswordCode();
     }
     if (reset.box && pw.form) {
       if (reset.open) {
@@ -1177,20 +1197,26 @@
       });
       reset.forms[0].addEventListener("submit", function(e) {
         e.preventDefault();
-        resetSend();
-        resetStep(1);
-        $(rp + "ResetCode").focus();
-        say(scope, "Code sent to " + reset.sentTo + ".");
+        resetSend().then(function() {
+          resetStep(1);
+          $(rp + "ResetCode").focus();
+          say(scope, "Code sent to " + reset.sentTo + ".");
+        }, function(err) {
+          say(scope, err.message);
+        });
       });
       var resend = $(rp + "ResetResend");
       if (resend) {
         resend.addEventListener("click", function() {
-          resetSend();
-          $(rp + "ResetCode").value = "";
-          setErr(rp + "ResetCodeErr", false);
-          markInvalid(rp + "ResetCode", false);
-          $(rp + "ResetCode").focus();
-          say(scope, "A new code is on its way. The old one no longer works.");
+          resetSend().then(function() {
+            $(rp + "ResetCode").value = "";
+            setErr(rp + "ResetCodeErr", false);
+            markInvalid(rp + "ResetCode", false);
+            $(rp + "ResetCode").focus();
+            say(scope, "A new code is on its way. The old one no longer works.");
+          }, function(err) {
+            say(scope, err.message);
+          });
         });
       }
       var codeEl = $(rp + "ResetCode");
@@ -1200,33 +1226,16 @@
       reset.forms[1].addEventListener("submit", function(e) {
         e.preventDefault();
         var value = codeEl.value.trim();
-        var msg = "";
         if (value.length !== 6) {
-          msg = "The code is six digits long.";
-        } else if (!reset.code || Date.now() > reset.expires) {
-          msg = "That code has expired. Send a new one.";
-        } else if (value !== reset.code) {
-          reset.tries++;
-          if (reset.tries >= RESET_TRIES) {
-            audit("auth", "Password reset abandoned after " + RESET_TRIES + " wrong codes", account);
-            resetClear();
-            resetStep(0);
-            reset.forms[0].querySelector('button[type="submit"]').focus();
-            say(scope, "Too many wrong codes. Send a new code to try again.");
-            return;
-          }
-          var left = RESET_TRIES - reset.tries;
-          msg = "That code is not right. " + left + (left === 1 ? " attempt left." : " attempts left.");
-        }
-        if (msg) {
-          setErr(rp + "ResetCodeErr", true, msg);
+          setErr(rp + "ResetCodeErr", true, "The code is six digits long.");
           markInvalid(rp + "ResetCode", true);
           codeEl.focus();
           return;
         }
         setErr(rp + "ResetCodeErr", false);
         markInvalid(rp + "ResetCode", false);
-        reset.code = "";
+        // The code is checked by the server when the new password is saved.
+        reset.code = value;
         resetStep(2);
         $(rp + "ResetPass").focus();
       });
@@ -1248,11 +1257,6 @@
         if (newBad) {
           ok = false;
         }
-        if (!newBad && window.PTGAccounts && account !== "guest" && window.PTGAccounts.check(account, newVal).ok) {
-          setErr(rp + "ResetPassErr", true, "That is the password you already have.");
-          markInvalid(rp + "ResetPass", true);
-          ok = false;
-        }
         var copyBad = newVal !== rCopy.value;
         setErr(rp + "ResetCopyErr", copyBad);
         markInvalid(rp + "ResetCopy", copyBad);
@@ -1263,17 +1267,29 @@
           reset.forms[2].querySelector('[aria-invalid="true"]').focus();
           return;
         }
-        if (window.PTGAccounts && window.PTGAccounts.setPassword && account !== "guest") {
-          window.PTGAccounts.setPassword(account, newVal);
+        if (!window.PTGBackend) {
+          say(scope, "The site cannot reach its database right now.");
+          return;
         }
-        persist({
-          passwordChangedAt: Date.now()
+        window.PTGBackend.changePassword(newVal, reset.code).then(function() {
+          persist({
+            passwordChangedAt: Date.now()
+          });
+          audit("auth", "Password reset with emailed code", account);
+          resetShow(false);
+          renderDevices();
+          flashSaved($(pw.saved), "Password reset");
+          say(scope, "Password reset. Use the new one next time you sign in.");
+        }, function(err) {
+          if (err.wrongCode) {
+            resetStep(1);
+            setErr(rp + "ResetCodeErr", true, "That code is not right or has expired. Send a new one.");
+            markInvalid(rp + "ResetCode", true);
+            $(rp + "ResetCode").focus();
+            return;
+          }
+          say(scope, err.message);
         });
-        audit("auth", "Password reset with emailed code", account);
-        resetShow(false);
-        renderDevices();
-        flashSaved($(pw.saved), "Password reset");
-        say(scope, "Password reset. Use the new one next time you sign in.");
       });
     }
     var DEVICE_ICON = svgIcon('<rect x="2.6" y="3.4" width="14.8" height="10.2" rx="1.6"/><path d="M7 16.6h6"/>', 17);
@@ -1312,6 +1328,9 @@
           yes: "Sign out other devices",
           danger: true
         }, function() {
+          if (window.PTGBackend) {
+            window.PTGBackend.signOutOthers();
+          }
           audit("auth", "Signed out of all other sessions", account);
           renderDevices();
           say(scope, "Every other session has been signed out.");
@@ -1457,7 +1476,12 @@
       });
       shotUrls = [];
       Array.prototype.forEach.call(list.querySelectorAll("[data-shot-id]"), function(a) {
-        Shots.get(a.getAttribute("data-shot-id")).then(function(blob) {
+        var path = a.getAttribute("data-shot-path");
+        Shots.get(a.getAttribute("data-shot-id")).catch(function() {
+          return null;
+        }).then(function(blob) {
+          return blob || (path && window.PTGBackend ? window.PTGBackend.downloadShot(path) : null);
+        }).then(function(blob) {
           if (!blob || !document.contains(a)) {
             a.classList.add("is-missing");
             return;
@@ -1472,7 +1496,7 @@
       });
     }
     function shotLink(t) {
-      return t.shot ? '<a class="tk-shot" data-shot-id="' + esc(t.id) + '" target="_blank" rel="noopener" aria-label="Open the screenshot attached to ' + esc(t.ref) + '"><img alt="" decoding="async"></a>' : "";
+      return t.shot ? '<a class="tk-shot" data-shot-id="' + esc(t.id) + '"' + (typeof t.shot === "string" ? ' data-shot-path="' + esc(t.shot) + '"' : "") + ' target="_blank" rel="noopener" aria-label="Open the screenshot attached to ' + esc(t.ref) + '"><img alt="" decoding="async"></a>' : "";
     }
     if (scope.role === "parent" && $("setContactForm") && rep.form) {
       $("setContactForm").addEventListener("click", function() {
@@ -1763,15 +1787,22 @@
           yes: "Delete my account",
           danger: true
         }, function() {
-          Prefs.clear(scope.role, account);
-          audit("account", "Account deletion requested", account);
-          var out = $("signOutBtn");
-          if (out) {
-            out.click();
+          if (!window.PTGBackend) {
+            say(scope, "The site cannot reach its database right now.");
+            return;
           }
-          if (window.PTGAuthNotice) {
-            window.PTGAuthNotice("Your account is scheduled for deletion and you have been signed out.");
-          }
+          audit("account", "Account deleted", account);
+          window.PTGBackend.deleteAccount().then(function() {
+            var out = $("signOutBtn");
+            if (out) {
+              out.click();
+            }
+            if (window.PTGAuthNotice) {
+              window.PTGAuthNotice("Your account and everything on your shelf have been deleted.");
+            }
+          }, function(err) {
+            say(scope, err.message);
+          });
         });
       });
     }

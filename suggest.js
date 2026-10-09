@@ -18,7 +18,7 @@
   function read() {
     var raw;
     try {
-      raw = JSON.parse(window.localStorage.getItem(KEY));
+      raw = JSON.parse(window.PTGStore.getItem(KEY));
     } catch (e) {
       raw = null;
     }
@@ -29,7 +29,7 @@
   }
   function write(items) {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify({
+      window.PTGStore.setItem(KEY, JSON.stringify({
         items: items.slice(0, MAX)
       }));
       return true;
@@ -76,7 +76,7 @@
     add: function(rec) {
       var all = read();
       var row = {
-        id: "psub-" + token(),
+        id: window.PTGStore.uuid(),
         origin: "parent",
         title: String(rec.title || "").trim(),
         body: String(rec.body || "").trim(),

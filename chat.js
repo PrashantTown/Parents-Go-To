@@ -38,7 +38,7 @@
   function read() {
     var raw;
     try {
-      raw = JSON.parse(window.localStorage.getItem(KEY));
+      raw = JSON.parse(window.PTGStore.getItem(KEY));
     } catch (e) {
       raw = null;
     }
@@ -58,7 +58,7 @@
   }
   function write(store) {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(store));
+      window.PTGStore.setItem(KEY, JSON.stringify(store));
       return true;
     } catch (e) {
       return false;
@@ -230,7 +230,7 @@
         }
       }
       var row = {
-        id: "th-" + token(),
+        id: window.PTGStore.uuid(),
         key: spec.key || "",
         kind: kind,
         title: String(spec.title || "").slice(0, 120),
@@ -275,7 +275,7 @@
       }
       text = text.slice(0, BODY_MAX);
       var msg = {
-        id: "m-" + token(),
+        id: window.PTGStore.uuid(),
         thread: threadId,
         from: id,
         name: t.names[id] || (isChild(id) ? "Them" : meName()),
