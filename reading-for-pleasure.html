@@ -2714,8 +2714,83 @@
                 <div class="set-actions">
                   <button class="btn btn--primary" type="submit">Update password</button>
                   <span class="set-saved" id="setPassSaved" role="status" aria-live="polite"></span>
+                  <button class="btn btn--quiet set-forgot" type="button" id="setForgotOpen" aria-controls="setReset" aria-expanded="false">Forgot your current password?</button>
                 </div>
               </form>
+
+              <div class="set-reset" id="setReset" hidden>
+                <h3 class="set-sub" id="setResetH" tabindex="-1">Reset your password</h3>
+                <ol class="set-steps" id="setResetSteps" aria-label="Reset progress">
+                  <li class="is-here">Send a code</li>
+                  <li>Enter the code</li>
+                  <li>Choose a new password</li>
+                </ol>
+
+                <form id="setResetSend" novalidate>
+                  <p class="set-note">We will send a six-digit code to prove the account is yours. The code
+                     works once and expires after 10 minutes.</p>
+                  <fieldset class="set-reset-to">
+                    <legend>Send the code to</legend>
+                    <label class="set-inline-check">
+                      <input type="radio" name="setResetTo" value="email" checked>
+                      <span>Sign-in email &middot; <b id="setResetEmail">your email</b></span>
+                    </label>
+                    <label class="set-inline-check" id="setResetBackupRow" hidden>
+                      <input type="radio" name="setResetTo" value="backup">
+                      <span>Backup contact &middot; <b id="setResetBackup"></b></span>
+                    </label>
+                  </fieldset>
+                  <div class="set-actions">
+                    <button class="btn btn--primary" type="submit">Send code</button>
+                    <button class="btn btn--quiet" type="button" data-reset-cancel>Cancel</button>
+                  </div>
+                </form>
+
+                <form id="setResetVerify" novalidate hidden>
+                  <p class="set-note">A code is on its way to <b id="setResetSentTo">your email</b>.</p>
+                  <p class="set-note set-reset-demo" id="setResetDemo"></p>
+                  <div class="fields">
+                    <div class="f wide">
+                      <label for="setResetCode">Six-digit code</label>
+                      <input type="text" class="set-reset-code" id="setResetCode" inputmode="numeric" pattern="[0-9]*"
+                             maxlength="6" autocomplete="one-time-code" placeholder="000000" required>
+                      <p class="err" id="setResetCodeErr">That code is not right.</p>
+                    </div>
+                  </div>
+                  <div class="set-actions">
+                    <button class="btn btn--primary" type="submit">Check code</button>
+                    <button class="btn btn--quiet" type="button" id="setResetResend">Send a new code</button>
+                    <button class="btn btn--quiet" type="button" data-reset-cancel>Cancel</button>
+                  </div>
+                </form>
+
+                <form id="setResetNew" novalidate hidden>
+                  <div class="fields">
+                    <div class="f wide">
+                      <label for="setResetPass">New password</label>
+                      <input type="password" id="setResetPass" autocomplete="new-password" required>
+                      <div class="pw-meter" id="setResetMeter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                      <p class="hint" id="setResetHint">At least 8 characters. A short phrase you will remember beats a clever one you will not.</p>
+                      <p class="err" id="setResetPassErr">Use at least 8 characters.</p>
+                    </div>
+                    <div class="f wide">
+                      <label for="setResetCopy">Repeat the new password</label>
+                      <input type="password" id="setResetCopy" autocomplete="new-password" required>
+                      <p class="err" id="setResetCopyErr">The two passwords do not match.</p>
+                    </div>
+                    <div class="f wide">
+                      <label class="set-inline-check">
+                        <input type="checkbox" id="setResetShow">
+                        <span>Show what I am typing</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="set-actions">
+                    <button class="btn btn--primary" type="submit">Save new password</button>
+                    <button class="btn btn--quiet" type="button" data-reset-cancel>Cancel</button>
+                  </div>
+                </form>
+              </div>
 
               <hr class="set-rule">
 
@@ -3114,8 +3189,10 @@
                 </details>
                 <details>
                   <summary>I forgot my password.</summary>
-                  <p>Sign out, then choose Forgot password on the sign-in screen. If you have a
-                     backup contact saved above, that is where the reset goes.</p>
+                  <p>Open Password &amp; security and choose Forgot your current password? We send a
+                     six-digit code to your sign-in email, or to your backup contact if you saved one
+                     above. Enter the code, then choose a new password. Signed out? Use Forgot password
+                     on the sign-in screen instead.</p>
                 </details>
               </div>
 
@@ -4447,8 +4524,79 @@
                 <div class="set-actions">
                   <button class="btn btn--primary" type="submit">Update password</button>
                   <span class="set-saved" id="admSetPassSaved" role="status" aria-live="polite"></span>
+                  <button class="btn btn--quiet set-forgot" type="button" id="admSetForgotOpen" aria-controls="admSetReset" aria-expanded="false">Forgot your current password?</button>
                 </div>
               </form>
+
+              <div class="set-reset" id="admSetReset" hidden>
+                <h3 class="set-sub" id="admSetResetH" tabindex="-1">Reset your password</h3>
+                <ol class="set-steps" id="admSetResetSteps" aria-label="Reset progress">
+                  <li class="is-here">Send a code</li>
+                  <li>Enter the code</li>
+                  <li>Choose a new password</li>
+                </ol>
+
+                <form id="admSetResetSend" novalidate>
+                  <p class="set-note">We will send a six-digit code to prove the account is yours. The code
+                     works once and expires after 10 minutes. Administrator resets are logged.</p>
+                  <fieldset class="set-reset-to">
+                    <legend>Send the code to</legend>
+                    <label class="set-inline-check">
+                      <input type="radio" name="admSetResetTo" value="email" checked>
+                      <span>Sign-in email &middot; <b id="admSetResetEmail">your email</b></span>
+                    </label>
+                  </fieldset>
+                  <div class="set-actions">
+                    <button class="btn btn--primary" type="submit">Send code</button>
+                    <button class="btn btn--quiet" type="button" data-reset-cancel>Cancel</button>
+                  </div>
+                </form>
+
+                <form id="admSetResetVerify" novalidate hidden>
+                  <p class="set-note">A code is on its way to <b id="admSetResetSentTo">your email</b>.</p>
+                  <p class="set-note set-reset-demo" id="admSetResetDemo"></p>
+                  <div class="fields">
+                    <div class="f wide">
+                      <label for="admSetResetCode">Six-digit code</label>
+                      <input type="text" class="set-reset-code" id="admSetResetCode" inputmode="numeric" pattern="[0-9]*"
+                             maxlength="6" autocomplete="one-time-code" placeholder="000000" required>
+                      <p class="err" id="admSetResetCodeErr">That code is not right.</p>
+                    </div>
+                  </div>
+                  <div class="set-actions">
+                    <button class="btn btn--primary" type="submit">Check code</button>
+                    <button class="btn btn--quiet" type="button" id="admSetResetResend">Send a new code</button>
+                    <button class="btn btn--quiet" type="button" data-reset-cancel>Cancel</button>
+                  </div>
+                </form>
+
+                <form id="admSetResetNew" novalidate hidden>
+                  <div class="fields">
+                    <div class="f wide">
+                      <label for="admSetResetPass">New password</label>
+                      <input type="password" id="admSetResetPass" autocomplete="new-password" required>
+                      <div class="pw-meter" id="admSetResetMeter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                      <p class="hint" id="admSetResetHint">At least 12 characters for an administrator. A passphrase of four unrelated words works well.</p>
+                      <p class="err" id="admSetResetPassErr">Use at least 12 characters.</p>
+                    </div>
+                    <div class="f wide">
+                      <label for="admSetResetCopy">Repeat the new password</label>
+                      <input type="password" id="admSetResetCopy" autocomplete="new-password" required>
+                      <p class="err" id="admSetResetCopyErr">The two passwords do not match.</p>
+                    </div>
+                    <div class="f wide">
+                      <label class="set-inline-check">
+                        <input type="checkbox" id="admSetResetShow">
+                        <span>Show what I am typing</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="set-actions">
+                    <button class="btn btn--primary" type="submit">Save new password</button>
+                    <button class="btn btn--quiet" type="button" data-reset-cancel>Cancel</button>
+                  </div>
+                </form>
+              </div>
 
               <hr class="set-rule">
 

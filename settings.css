@@ -443,6 +443,102 @@
   accent-color: var(--pine);
 }
 
+:is(#page-app, #page-admin) .set-forgot {
+  margin-left: auto;
+  color: var(--pine);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:is(#page-app, #page-admin) .set-reset .set-sub:focus {
+  outline: none;
+}
+
+:is(#page-app, #page-admin) .set-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1.2rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: setstep;
+  font-size: .85rem;
+  color: var(--ink-60);
+}
+
+:is(#page-app, #page-admin) .set-steps li {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  counter-increment: setstep;
+}
+
+:is(#page-app, #page-admin) .set-steps li::before {
+  content: counter(setstep);
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--line-soft);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+:is(#page-app, #page-admin) .set-steps li.is-here {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+:is(#page-app, #page-admin) .set-steps li.is-here::before,
+:is(#page-app, #page-admin) .set-steps li.is-done::before {
+  background: var(--pine);
+  box-shadow: none;
+  color: #fff;
+}
+
+:is(#page-app, #page-admin) .set-steps li.is-done::before {
+  content: "\2713";
+}
+
+:is(#page-app, #page-admin) .set-reset-to {
+  display: grid;
+  gap: .55rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+:is(#page-app, #page-admin) .set-reset-to legend {
+  margin-bottom: .55rem;
+  padding: 0;
+  font-size: .89rem;
+  font-weight: 600;
+}
+
+:is(#page-app, #page-admin) .set-reset-to b {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+:is(#page-app, #page-admin) .set-reset-demo {
+  padding: .6rem .8rem;
+  border-radius: 10px;
+  background: var(--hover-bg, rgba(13, 59, 50, .06));
+}
+
+:is(#page-app, #page-admin) .set-reset-code {
+  max-width: 11rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .3em;
+}
+
+@media (max-width: 560px) {
+  :is(#page-app, #page-admin) .set-forgot {
+    margin-left: 0;
+  }
+}
+
 :is(#page-app, #page-admin) .set-photo {
   display: flex;
   align-items: flex-start;

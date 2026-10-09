@@ -1046,6 +1046,236 @@
         say(scope, "Password updated. Use it next time you sign in.");
       });
     }
+    var rp = scope.role === "parent" ? "set" : "admSet";
+    var reset = {
+      box: $(rp + "Reset"),
+      open: $(rp + "ForgotOpen"),
+      head: $(rp + "ResetH"),
+      steps: $(rp + "ResetSteps"),
+      forms: [ $(rp + "ResetSend"), $(rp + "ResetVerify"), $(rp + "ResetNew") ],
+      code: "",
+      expires: 0,
+      tries: 0,
+      sentTo: ""
+    };
+    var RESET_TTL = 10 * 60 * 1e3;
+    var RESET_TRIES = 3;
+    var RESET_HINT = scope.minPassword === 12 ? "At least 12 characters for an administrator. A passphrase of four unrelated words works well." : "At least 8 characters. A short phrase you will remember beats a clever one you will not.";
+    function resetStep(n) {
+      reset.forms.forEach(function(f, i) {
+        if (f) {
+          f.hidden = i !== n;
+        }
+      });
+      if (reset.steps) {
+        [].slice.call(reset.steps.children).forEach(function(li, i) {
+          li.classList.toggle("is-here", i === n);
+          li.classList.toggle("is-done", i < n);
+          if (i === n) {
+            li.setAttribute("aria-current", "step");
+          } else {
+            li.removeAttribute("aria-current");
+          }
+        });
+      }
+    }
+    function resetClear() {
+      reset.code = "";
+      reset.expires = 0;
+      reset.tries = 0;
+      reset.forms.forEach(function(f) {
+        if (f) {
+          f.reset();
+        }
+      });
+      [ "ResetCode", "ResetPass", "ResetCopy" ].forEach(function(k) {
+        markInvalid(rp + k, false);
+        setErr(rp + k + "Err", false);
+      });
+      [ "ResetPass", "ResetCopy" ].forEach(function(k) {
+        var el = $(rp + k);
+        if (el) {
+          el.type = "password";
+        }
+      });
+      var meter = $(rp + "ResetMeter");
+      if (meter) {
+        meter.setAttribute("data-score", "0");
+      }
+      var hint = $(rp + "ResetHint");
+      if (hint) {
+        hint.textContent = RESET_HINT;
+      }
+    }
+    function resetShow(on) {
+      if (!reset.box) {
+        return;
+      }
+      resetClear();
+      resetStep(0);
+      reset.box.hidden = !on;
+      if (pw.form) {
+        pw.form.hidden = on;
+      }
+      if (reset.open) {
+        reset.open.setAttribute("aria-expanded", on ? "true" : "false");
+      }
+      if (on) {
+        var mail = $(rp + "ResetEmail");
+        if (mail) {
+          mail.textContent = account && account !== "guest" ? account : "your sign-in email";
+        }
+        var backupRow = $(rp + "ResetBackupRow");
+        if (backupRow) {
+          var backup = String(prefs.backupContact || "").trim();
+          backupRow.hidden = !backup;
+          $(rp + "ResetBackup").textContent = backup;
+        }
+        if (reset.head) {
+          reset.head.focus();
+        }
+      } else if (reset.open) {
+        reset.open.focus();
+      }
+    }
+    function resetSend() {
+      var picked = reset.box.querySelector('input[name="' + rp + 'ResetTo"]:checked');
+      var useBackup = picked && picked.value === "backup" && prefs.backupContact;
+      reset.sentTo = useBackup ? String(prefs.backupContact).trim() : account && account !== "guest" ? account : "your sign-in email";
+      reset.code = String(Math.floor(1e5 + Math.random() * 9e5));
+      reset.expires = Date.now() + RESET_TTL;
+      reset.tries = 0;
+      $(rp + "ResetSentTo").textContent = reset.sentTo;
+      var demo = $(rp + "ResetDemo");
+      if (demo) {
+        demo.textContent = "This demo cannot send real email, so the code is also in your notifications: " + reset.code + ".";
+      }
+      if (window.PTGNotify && window.PTGNotify.push) {
+        window.PTGNotify.push({
+          to: scope.role + "::" + String(account || "guest").toLowerCase(),
+          kind: "account",
+          tone: "info",
+          title: "Your password reset code",
+          body: "Your code is " + reset.code + ". It expires in 10 minutes. If you did not ask for this, ignore it.",
+          go: "settings",
+          tag: "reset-" + Date.now()
+        });
+      }
+      audit("auth", "Password reset code sent", account, "to " + reset.sentTo);
+    }
+    if (reset.box && pw.form) {
+      if (reset.open) {
+        reset.open.addEventListener("click", function() {
+          resetShow(true);
+        });
+      }
+      [].slice.call(reset.box.querySelectorAll("[data-reset-cancel]")).forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          resetShow(false);
+          say(scope, "Password reset cancelled. Nothing was changed.");
+        });
+      });
+      reset.forms[0].addEventListener("submit", function(e) {
+        e.preventDefault();
+        resetSend();
+        resetStep(1);
+        $(rp + "ResetCode").focus();
+        say(scope, "Code sent to " + reset.sentTo + ".");
+      });
+      var resend = $(rp + "ResetResend");
+      if (resend) {
+        resend.addEventListener("click", function() {
+          resetSend();
+          $(rp + "ResetCode").value = "";
+          setErr(rp + "ResetCodeErr", false);
+          markInvalid(rp + "ResetCode", false);
+          $(rp + "ResetCode").focus();
+          say(scope, "A new code is on its way. The old one no longer works.");
+        });
+      }
+      var codeEl = $(rp + "ResetCode");
+      codeEl.addEventListener("input", function() {
+        codeEl.value = codeEl.value.replace(/\D/g, "").slice(0, 6);
+      });
+      reset.forms[1].addEventListener("submit", function(e) {
+        e.preventDefault();
+        var value = codeEl.value.trim();
+        var msg = "";
+        if (value.length !== 6) {
+          msg = "The code is six digits long.";
+        } else if (!reset.code || Date.now() > reset.expires) {
+          msg = "That code has expired. Send a new one.";
+        } else if (value !== reset.code) {
+          reset.tries++;
+          if (reset.tries >= RESET_TRIES) {
+            audit("auth", "Password reset abandoned after " + RESET_TRIES + " wrong codes", account);
+            resetClear();
+            resetStep(0);
+            reset.forms[0].querySelector('button[type="submit"]').focus();
+            say(scope, "Too many wrong codes. Send a new code to try again.");
+            return;
+          }
+          var left = RESET_TRIES - reset.tries;
+          msg = "That code is not right. " + left + (left === 1 ? " attempt left." : " attempts left.");
+        }
+        if (msg) {
+          setErr(rp + "ResetCodeErr", true, msg);
+          markInvalid(rp + "ResetCode", true);
+          codeEl.focus();
+          return;
+        }
+        setErr(rp + "ResetCodeErr", false);
+        markInvalid(rp + "ResetCode", false);
+        reset.code = "";
+        resetStep(2);
+        $(rp + "ResetPass").focus();
+      });
+      var rPass = $(rp + "ResetPass"), rCopy = $(rp + "ResetCopy"), rShow = $(rp + "ResetShow");
+      rPass.addEventListener("input", function() {
+        var score = strength(rPass.value);
+        $(rp + "ResetMeter").setAttribute("data-score", rPass.value ? String(score) : "0");
+        $(rp + "ResetHint").textContent = rPass.value ? STRENGTH_WORDS[score] : RESET_HINT;
+      });
+      rShow.addEventListener("change", function() {
+        rPass.type = rCopy.type = rShow.checked ? "text" : "password";
+      });
+      reset.forms[2].addEventListener("submit", function(e) {
+        e.preventDefault();
+        var newVal = rPass.value, ok = true;
+        var newBad = newVal.length < scope.minPassword;
+        setErr(rp + "ResetPassErr", newBad, "Use at least " + scope.minPassword + " characters.");
+        markInvalid(rp + "ResetPass", newBad);
+        if (newBad) {
+          ok = false;
+        }
+        if (!newBad && window.PTGAccounts && account !== "guest" && window.PTGAccounts.check(account, newVal).ok) {
+          setErr(rp + "ResetPassErr", true, "That is the password you already have.");
+          markInvalid(rp + "ResetPass", true);
+          ok = false;
+        }
+        var copyBad = newVal !== rCopy.value;
+        setErr(rp + "ResetCopyErr", copyBad);
+        markInvalid(rp + "ResetCopy", copyBad);
+        if (copyBad) {
+          ok = false;
+        }
+        if (!ok) {
+          reset.forms[2].querySelector('[aria-invalid="true"]').focus();
+          return;
+        }
+        if (window.PTGAccounts && window.PTGAccounts.setPassword && account !== "guest") {
+          window.PTGAccounts.setPassword(account, newVal);
+        }
+        persist({
+          passwordChangedAt: Date.now()
+        });
+        audit("auth", "Password reset with emailed code", account);
+        resetShow(false);
+        renderDevices();
+        flashSaved($(pw.saved), "Password reset");
+        say(scope, "Password reset. Use the new one next time you sign in.");
+      });
+    }
     var DEVICE_ICON = svgIcon('<rect x="2.6" y="3.4" width="14.8" height="10.2" rx="1.6"/><path d="M7 16.6h6"/>', 17);
     var PHONE_ICON = svgIcon('<rect x="5.4" y="2.4" width="9.2" height="15.2" rx="2"/><path d="M9 15.2h2"/>', 17);
     function renderDevices() {
