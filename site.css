@@ -341,7 +341,6 @@ h1, h2, h3, h4 {
   padding: .32rem .75rem; border-radius: 999px;
 }
 
-/* Home page "What we offer": one slot per service, side by side from tablet up. */
 .offers { display: grid; gap: clamp(1.1rem, 2.6vw, 1.6rem); grid-template-columns: minmax(0,1fr); }
 @media (min-width: 820px) { .offers { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 @media (min-width: 820px) { .offers--one { grid-template-columns: minmax(0,1fr); max-width: 760px; } }
@@ -381,7 +380,6 @@ h1, h2, h3, h4 {
 }
 @media (hover: none) { .offer:hover { transform: none; } }
 
-/* Four Voices: "Coming soon" page. */
 .soon {
   display: grid; align-items: center; grid-template-columns: minmax(0, 1fr);
   min-height: calc(100vh - 72px);
@@ -590,7 +588,6 @@ details p { margin: .7rem 0 0; color: var(--ink-60); font-size: .96rem; max-widt
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
 
-/* About: team bios and Four Voices */
 .bio p { font-size: 1rem; line-height: 1.65; }
 .bio__initials {
   display: grid; place-items: center;
@@ -607,7 +604,6 @@ details p { margin: .7rem 0 0; color: var(--ink-60); font-size: .96rem; max-widt
 .voices h2 { font-size: clamp(1.5rem, 3.5vw, 2rem); line-height: 1.1; margin: 0 0 .8rem; }
 .voices p:not(.eyebrow) { margin: 0; font-size: 1.03rem; line-height: 1.65; color: var(--ink-60); max-width: 62ch; }
 
-/* ---- Phones and tablets: notches, the home indicator and touch ---- */
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .wrap, .narrow {
   padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
@@ -620,7 +616,6 @@ a, button, summary, [data-href] {
   -webkit-tap-highlight-color: rgba(13,59,50,.12);
 }
 @media (max-width: 820px) {
-  /* A landscape phone is shorter than the open menu, so let the menu scroll. */
   .nav.open {
     max-height: calc(100vh - 72px - env(safe-area-inset-top, 0px));
     max-height: calc(100svh - 72px - env(safe-area-inset-top, 0px));

@@ -115,7 +115,6 @@
   on(window, "resize", syncSwipe, {
     passive: true
   });
-  // On a phone, hide the bottom tab bar while the on-screen keyboard is up.
   var TYPING = /^(text|search|email|password|tel|url|number|date|time|datetime-local|month|week)$/;
   function typingField(el) {
     if (!el || !el.tagName) return false;
@@ -129,13 +128,10 @@
   });
   on(document, "focusout", function() {
     clearTimeout(kbTimer);
-    // Moving from one field to the next fires focusout then focusin; wait for it.
     kbTimer = setTimeout(function() {
       if (!typingField(document.activeElement)) root.classList.remove("kb-open");
     }, 120);
   });
-  // Landscape phones: tuck the header away while scrolling down, bring it back on
-  // the way up, so it does not cover a third of a short screen.
   var shortLand = window.matchMedia ? window.matchMedia("(max-height: 460px) and (orientation: landscape)") : null;
   var lastY = window.pageYOffset || 0;
   var tuckQueued = false;
@@ -161,7 +157,6 @@
   }, {
     passive: true
   });
-  // Keyboard users tabbing into the header always get it back.
   on(document, "focusin", function(e) {
     var b = bar();
     if (b && b.contains(e.target)) root.classList.remove("bar-tucked");

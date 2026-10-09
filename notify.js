@@ -790,6 +790,23 @@
     unread: function(role, email) {
       return Notes.unread(role, email);
     },
+    rename: function(role, oldEmail, newEmail) {
+      var from = addr(role, oldEmail), to = addr(role, newEmail);
+      if (from === to) {
+        return;
+      }
+      var all = read(), hit = false;
+      all.forEach(function(r) {
+        if (r.to === from) {
+          r.to = to;
+          hit = true;
+        }
+      });
+      if (hit) {
+        write(all);
+        fire(null);
+      }
+    },
     markAllRead: function(role, email) {
       Notes.markAllRead(role, email);
     },

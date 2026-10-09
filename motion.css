@@ -10,11 +10,6 @@
 ::view-transition-old(root),
 ::view-transition-new(root) { animation: none; }
 
-/* The tab bars and the header get their own layers in the tab-switch animation.
-   Without them the bars were part of the page snapshot, and the sliding content
-   (a separate layer drawn on top) covered the phone's bottom tab bar, so the bar
-   blinked out and back on every tab tap. Their own layers sit above the content
-   and swap instantly, so the bars stay put. */
 #page-app .app-bar { view-transition-name: app-bar; }
 #page-admin .app-bar { view-transition-name: adm-bar; }
 #appTabs { view-transition-name: app-tabs; }

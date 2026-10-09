@@ -23,7 +23,6 @@
     closeMenu();
     toggle.focus();
   });
-  // A tap outside the open menu closes it, and so does widening past the menu breakpoint.
   document.addEventListener("click", function(event) {
     if (!nav.contains(event.target) && !toggle.contains(event.target)) closeMenu();
   });

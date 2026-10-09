@@ -262,8 +262,6 @@ html[data-theme="dark"] .app-nav-shell.scroll-x::after{
 
   :is(#page-app,#page-admin) dialog{
     margin-bottom:calc(var(--bottom-nav-h) + var(--safe-b));
-    /* Without this a tall dialog keeps the default max-height, the extra bottom margin
-       pushes its top edge (heading and close button) above the screen. */
     max-height:calc(100% - 2rem - var(--bottom-nav-h) - var(--safe-b));
   }
 
@@ -368,7 +366,6 @@ html[data-theme="dark"] .app-nav-shell.scroll-x::after{
   :is(#page-app,#page-admin) .app-nav button:active{ transform:none; }
 }
 
-/* ---- Landing on phones and tablets: notches, the home indicator and touch ---- */
 #page-landing .site-header{ padding-top:var(--safe-t); }
 #page-landing a,
 #page-landing button{
@@ -376,7 +373,6 @@ html[data-theme="dark"] .app-nav-shell.scroll-x::after{
   -webkit-tap-highlight-color:rgba(13,59,50,.12);
 }
 @media (max-width:999.98px){
-  /* A landscape phone is shorter than the open menu, so let the menu scroll. */
   #page-landing .site-header.is-open .nav{
     max-height:calc(100vh - 76px - var(--safe-t));
     max-height:calc(100svh - 76px - var(--safe-t));

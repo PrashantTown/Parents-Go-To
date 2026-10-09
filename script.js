@@ -102,6 +102,12 @@
       }
       return who ? who.name : "";
     },
+    changeEmail: function(email) {
+      if (who) {
+        who.email = String(email || "").trim();
+      }
+      return who ? who.email : "";
+    },
     canOpenShelf: function() {
       return signedIn && who.role === "parent";
     },
@@ -182,6 +188,7 @@
       var a = accounts[key(email)];
       if (a) {
         a.status = status === "suspended" ? "suspended" : "active";
+        a.lockedOut = false;
       }
       return a;
     },
@@ -194,6 +201,27 @@
       a.passwordChangedAt = Date.now();
       return a;
     },
+    rename: function(oldEmail, newEmail) {
+      var from = key(oldEmail), to = key(newEmail);
+      if (!from || !to) {
+        return false;
+      }
+      if (from === to) {
+        if (accounts[from]) {
+          accounts[from].email = String(newEmail).trim();
+        }
+        return true;
+      }
+      if (Object.prototype.hasOwnProperty.call(accounts, to)) {
+        return false;
+      }
+      var a = accounts[from] || ensure(oldEmail, "parent");
+      delete accounts[from];
+      a.email = String(newEmail).trim();
+      accounts[to] = a;
+      order[order.indexOf(from)] = to;
+      return true;
+    },
     setName: function(email, name) {
       var a = ensure(email, "parent");
       if (!a) {
@@ -202,12 +230,42 @@
       a.name = String(name || "").trim();
       return a;
     },
+    noteFail: function(email) {
+      var acct = accounts[key(email)];
+      if (!acct) {
+        return {
+          locked: false
+        };
+      }
+      acct.fails = (acct.fails || 0) + 1;
+      var limit = Number(window.PTGSettings && window.PTGSettings.platform ? window.PTGSettings.platform("lockAttempts") : 5) || 5;
+      if (acct.fails >= limit) {
+        acct.status = "suspended";
+        acct.lockedOut = true;
+        acct.fails = 0;
+        return {
+          locked: true,
+          limit: limit
+        };
+      }
+      return {
+        locked: false,
+        left: limit - acct.fails
+      };
+    },
+    clearFails: function(email) {
+      var acct = accounts[key(email)];
+      if (acct) {
+        acct.fails = 0;
+      }
+    },
     check: function(email, password) {
       var acct = accounts[key(email)];
       if (acct && acct.status === "suspended") {
         return {
           ok: false,
-          suspended: true
+          suspended: true,
+          lockedOut: !!acct.lockedOut
         };
       }
       if (acct && acct.password !== null) {
@@ -2081,6 +2139,9 @@ const BookField = (() => {
         demo: true
       };
       if (seen.ok) {
+        if (window.PTGAccounts && window.PTGAccounts.clearFails) {
+          window.PTGAccounts.clearFails(who);
+        }
         if (admin) {
           startAdminChallenge(who);
         } else {
@@ -2101,11 +2162,29 @@ const BookField = (() => {
           openShelfShortly();
         }
       } else if (seen.suspended) {
-        showAlert("signinAlert", "signinAlertText", "That account has been suspended by an administrator. Contact the site owner to have it restored.");
+        showAlert("signinAlert", "signinAlertText", seen.lockedOut ? "This account is locked after too many wrong passwords. An administrator can restore it." : "That account has been suspended by an administrator. Contact the site owner to have it restored.");
         password.value = "";
         password.focus();
       } else {
-        showAlert("signinAlert", "signinAlertText", "That email and password don’t match an account. Check the password, or reset it below.");
+        var fail = window.PTGAccounts && window.PTGAccounts.noteFail ? window.PTGAccounts.noteFail(who) : {};
+        if (fail.locked) {
+          if (window.PTGAudit) {
+            window.PTGAudit.write("auth", "Account locked after " + fail.limit + " wrong passwords", who);
+          }
+          if (window.PTGNotify && window.PTGNotify.toAdmins) {
+            window.PTGNotify.toAdmins({
+              kind: "account",
+              tone: "alert",
+              title: "Account locked — " + who,
+              body: fail.limit + " wrong passwords in a row. Restore access from Accounts once you have checked with them.",
+              go: "accounts",
+              tag: "locked-" + who.toLowerCase()
+            });
+          }
+          showAlert("signinAlert", "signinAlertText", "Too many wrong passwords, so this account is now locked. An administrator can restore it.");
+        } else {
+          showAlert("signinAlert", "signinAlertText", "That email and password don’t match an account. Check the password, or reset it below." + (fail.left && fail.left <= 2 ? " " + fail.left + (fail.left === 1 ? " try" : " tries") + " left before the account is locked." : ""));
+        }
         password.value = "";
         password.focus();
       }
@@ -2174,25 +2253,33 @@ const BookField = (() => {
       openConsoleShortly();
     });
   });
+  function startHash(role) {
+    var S = window.PTGSettings, who = window.PTGSession ? window.PTGSession.email() : "";
+    var tab = S && S.pref ? String(S.pref("startTab", role, who) || "") : "";
+    if (role === "admin") {
+      return /^(accounts|moderation|resources|log)$/.test(tab) ? "#" + tab : "#admin";
+    }
+    return /^(profiles|library|wishlist)$/.test(tab) ? "#" + tab : "#app";
+  }
   function openConsoleShortly() {
     window.setTimeout(function() {
       if ($("view-done").classList.contains("is-active")) {
-        window.location.hash = "#admin";
+        window.location.hash = startHash("admin");
       }
     }, 1e3);
   }
   $("doneAdminGo").addEventListener("click", function() {
-    window.location.hash = "#admin";
+    window.location.hash = startHash("admin");
   });
   function openShelfShortly() {
     window.setTimeout(function() {
       if ($("view-done").classList.contains("is-active")) {
-        window.location.hash = "#app";
+        window.location.hash = startHash("parent");
       }
     }, 1e3);
   }
   $("doneGo").addEventListener("click", function() {
-    window.location.hash = "#app";
+    window.location.hash = startHash("parent");
   });
   var genresForm = $("genresForm");
   var genresFor = "";
@@ -2720,7 +2807,6 @@ const BookField = (() => {
       toggle.focus();
     }
   });
-  // A tap anywhere outside the open menu closes it, as on a phone's own menus.
   document.addEventListener("click", function(e) {
     if (header.classList.contains("is-open") && !header.contains(e.target)) {
       setMenu(false);
@@ -3069,6 +3155,19 @@ const BookField = (() => {
   function initial(name) {
     return (String(name).trim().charAt(0) || "?").toUpperCase();
   }
+  function setting(name) {
+    var S = window.PTGSettings;
+    return S && S.pref ? S.pref(name, "parent", parent.email) : undefined;
+  }
+  function appLocale() {
+    return setting("language") || undefined;
+  }
+  function kidName(k) {
+    if (!k) {
+      return "";
+    }
+    return setting("hideNames") ? initial(k.name) + "." : k.name;
+  }
   function kidAvatar(k, cls) {
     if (window.PTGAvatar) {
       return window.PTGAvatar.markup(k.id, k.name, k.colour, cls || "avatar");
@@ -3104,7 +3203,7 @@ const BookField = (() => {
   }
   function niceDate(s) {
     var d = day(s);
-    return d ? d.toLocaleDateString(undefined, {
+    return d ? d.toLocaleDateString(appLocale(), {
       day: "numeric",
       month: "short"
     }) : "";
@@ -3409,7 +3508,7 @@ const BookField = (() => {
     var h = (new Date).getHours();
     var part = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
     $("greetLine").textContent = part + ", " + parent.name;
-    $("greetDate").textContent = (new Date).toLocaleDateString(undefined, {
+    $("greetDate").textContent = (new Date).toLocaleDateString(appLocale(), {
       weekday: "long",
       day: "numeric",
       month: "long"
@@ -3471,8 +3570,6 @@ const BookField = (() => {
     shelf.parentNode.hidden = !now.length;
     $("emptyNow").classList.toggle("is-on", !now.length);
     renderReaders();
-    renderSuggestions();
-    renderBoard();
     $("catTiles").innerHTML = CATEGORIES.map(function(c) {
       var n = mine.filter(function(b) {
         return b.category === c.id;
@@ -3484,14 +3581,20 @@ const BookField = (() => {
     sort: "added",
     week: 0
   };
-  var PG_DAYS = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ];
+  var PG_WEEK = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ];
+  function sundayFirst() {
+    return setting("weekStart") === "sun";
+  }
+  function pgDays() {
+    return sundayFirst() ? [ "Sun" ].concat(PG_WEEK.slice(0, 6)) : PG_WEEK;
+  }
   function pgKey(d) {
     return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
   }
   function pgMonday(weeksBack) {
     var d = new Date;
     d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - (d.getDay() + 6) % 7 - 7 * weeksBack);
+    d.setDate(d.getDate() - (sundayFirst() ? d.getDay() : (d.getDay() + 6) % 7) - 7 * weeksBack);
     return d;
   }
   function pgWeekMinutes(weeksBack, childId) {
@@ -3566,13 +3669,13 @@ const BookField = (() => {
     var cols = now.map(function(d, i) {
       var key = pgKey(d.date);
       var future = !pg.week && key > today;
-      var when = d.date.toLocaleDateString(undefined, {
+      var when = d.date.toLocaleDateString(appLocale(), {
         weekday: "long",
         day: "numeric",
         month: "short"
       });
       var label = when + ": " + d.mins + " minutes. " + wasName + ": " + was[i].mins + " minutes.";
-      return '<div class="pg-day' + (future ? " is-future" : "") + (key === today ? " is-today" : "") + '" data-pg-day="' + i + '" tabindex="0" aria-label="' + esc(label) + '">' + '<div class="pg-pair">' + '<span class="pg-b pg-b--was" style="height:' + h(was[i].mins) + '"></span>' + '<span class="pg-b pg-b--now" style="height:' + h(d.mins) + '"></span>' + "</div>" + '<span class="pg-d">' + PG_DAYS[i] + "</span>" + "</div>";
+      return '<div class="pg-day' + (future ? " is-future" : "") + (key === today ? " is-today" : "") + '" data-pg-day="' + i + '" tabindex="0" aria-label="' + esc(label) + '">' + '<div class="pg-pair">' + '<span class="pg-b pg-b--was" style="height:' + h(was[i].mins) + '"></span>' + '<span class="pg-b pg-b--now" style="height:' + h(d.mins) + '"></span>' + "</div>" + '<span class="pg-d">' + pgDays()[i] + "</span>" + "</div>";
     }).join("");
     $("pgPlot").innerHTML = axis + '<div class="pg-cols">' + '<div class="pg-lines" aria-hidden="true"><i style="bottom:100%"></i><i style="bottom:50%"></i><i style="bottom:0"></i></div>' + cols + "</div>";
     $("pgPlot").setAttribute("data-now", JSON.stringify(now.map(function(d) {
@@ -3582,7 +3685,7 @@ const BookField = (() => {
       return d.mins;
     })));
     $("pgTable").innerHTML = "<caption>Minutes read per day</caption><tr><th>Day</th><th>" + esc(nowName) + "</th><th>" + esc(wasName) + "</th></tr>" + now.map(function(d, i) {
-      return "<tr><td>" + PG_DAYS[i] + "</td><td>" + d.mins + "</td><td>" + was[i].mins + "</td></tr>";
+      return "<tr><td>" + pgDays()[i] + "</td><td>" + d.mins + "</td><td>" + was[i].mins + "</td></tr>";
     }).join("");
     $("pgTip").hidden = true;
     var TICKS = 41, lit = avg === null ? -1 : Math.round(avg / 100 * (TICKS - 1)), dial = "";
@@ -3687,7 +3790,7 @@ const BookField = (() => {
       var i = +day.getAttribute("data-pg-day");
       var now = JSON.parse($("pgPlot").getAttribute("data-now") || "[]");
       var was = JSON.parse($("pgPlot").getAttribute("data-was") || "[]");
-      t.innerHTML = "<b>" + PG_DAYS[i] + "</b>" + '<span><i class="pg-key pg-key--now"></i>' + esc($("pgKeyNow").textContent) + "<em>" + (now[i] || 0) + " min</em></span>" + '<span><i class="pg-key pg-key--was"></i>' + esc($("pgKeyWas").textContent) + "<em>" + (was[i] || 0) + " min</em></span>";
+      t.innerHTML = "<b>" + pgDays()[i] + "</b>" + '<span><i class="pg-key pg-key--now"></i>' + esc($("pgKeyNow").textContent) + "<em>" + (now[i] || 0) + " min</em></span>" + '<span><i class="pg-key pg-key--was"></i>' + esc($("pgKeyWas").textContent) + "<em>" + (was[i] || 0) + " min</em></span>";
       t.hidden = false;
       var plot = $("pgPlot"), cell = t.parentNode.getBoundingClientRect(), r = day.getBoundingClientRect();
       var x = r.left - cell.left + r.width / 2;
@@ -3707,52 +3810,6 @@ const BookField = (() => {
       tip(null);
     });
   })();
-  function renderBoard() {
-    var row = $("boardRow");
-    if (!row) {
-      return;
-    }
-    var items = [];
-    if (window.PTGAdmin) {
-      window.PTGAdmin.publishedPosts().forEach(function(p) {
-        items.push({
-          kind: "Post",
-          title: p.title,
-          body: p.body,
-          category: p.category,
-          ages: p.ages,
-          link: p.link,
-          at: p.at
-        });
-      });
-      window.PTGAdmin.submissions().forEach(function(s) {
-        if (s.state === "approved") {
-          items.push({
-            kind: "From a parent",
-            title: s.title,
-            body: s.body,
-            category: s.category,
-            ages: s.ages,
-            link: s.link,
-            at: s.decidedAt || s.at
-          });
-        }
-      });
-    }
-    items.sort(function(a, b) {
-      return (b.at || 0) - (a.at || 0);
-    });
-    items = items.slice(0, 6);
-    row.hidden = !items.length;
-    if (!items.length) {
-      return;
-    }
-    $("boardCards").innerHTML = items.map(function(it) {
-      var c = cat(it.category);
-      var safeLink = /^https?:\/\/[^\s]+$/i.test(String(it.link || "")) ? it.link : "";
-      return '<article class="board-card">' + '<span class="kind">' + esc(it.kind) + "</span>" + "<h3>" + esc(it.title) + "</h3>" + '<p class="body">' + esc(it.body) + "</p>" + '<p class="meta">' + (c ? '<span class="tag tag--cat" style="--tint:' + c.tint + ";--tone:" + c.tone + '">' + esc(c.name) + "</span>" : "") + (it.ages ? '<span class="tag">Ages ' + esc(it.ages) + "</span>" : "") + "</p>" + (safeLink ? '<a class="board-link" href="' + esc(safeLink) + '" rel="noopener nofollow" target="_blank">Open the resource</a>' : "") + "</article>";
-    }).join("");
-  }
   function renderReaders() {
     var row = $("readersRow");
     row.hidden = !children.length;
@@ -3771,95 +3828,6 @@ const BookField = (() => {
       }).length;
       var nowLine = open ? '<span class="now">' + esc(open.title) + "</span>" + progHtml(open, true) : '<span class="now"><em>Nothing open — pick something from the library</em></span>';
       return '<button class="reader" type="button" data-who="' + esc(k.id) + '" aria-pressed="' + (state.who === k.id) + '">' + '<span class="top">' + kidAvatar(k, "avatar avatar--sm") + '<span class="who">' + '<span class="nm">' + esc(k.name) + "</span>" + '<span class="sub">' + done + " finished this month · " + theirs.length + (theirs.length === 1 ? " book" : " books") + "</span>" + "</span>" + "</span>" + nowLine + "</button>";
-    }).join("");
-  }
-  function scoreFor(b, k) {
-    if (b.who && b.who.length && b.who.indexOf(k.id) === -1) {
-      return null;
-    }
-    var s = 0, why = [];
-    if (b.who && b.who.indexOf(k.id) !== -1) {
-      s += 3;
-      why.push("set aside for " + k.name);
-    }
-    if ((k.likes || []).indexOf(b.category) !== -1) {
-      s += 2;
-      var c = cat(b.category);
-      why.push(k.name + " likes " + (c ? c.name.toLowerCase() : "these"));
-    }
-    if (b.ages && b.ages === k.band) {
-      s += 2;
-      why.push("right for ages " + b.ages);
-    }
-    if (!b.who || !b.who.length) {
-      s += 1;
-    }
-    return {
-      score: s,
-      why: why
-    };
-  }
-  function suggestions() {
-    var target = children.filter(function(k) {
-      return k.id === state.who;
-    })[0] || null;
-    var pool = target ? [ target ] : children;
-    var out = [];
-    function consider(b, list) {
-      var best = 0, why = [];
-      pool.forEach(function(k) {
-        var r = scoreFor(b, k);
-        if (r && r.score > best) {
-          best = r.score;
-          why = r.why;
-        }
-      });
-      if (best > 0) {
-        out.push({
-          book: b,
-          list: list,
-          score: best,
-          why: why
-        });
-      }
-    }
-    books.forEach(function(b) {
-      if (b.status === "toread") {
-        consider(b, "books");
-      }
-    });
-    if (out.length < 3) {
-      wishlist.forEach(function(b) {
-        consider(b, "wishlist");
-      });
-    }
-    out.sort(function(a, b) {
-      return b.score - a.score;
-    });
-    return out.slice(0, 4);
-  }
-  function renderSuggestions() {
-    var row = $("suggestRow");
-    if (!row) {
-      return;
-    }
-    var picks = children.length ? suggestions() : [];
-    row.hidden = !picks.length;
-    if (!picks.length) {
-      return;
-    }
-    var target = children.filter(function(k) {
-      return k.id === state.who;
-    })[0];
-    $("suggestTitle").textContent = target ? "Up next for " + target.name : "Up next";
-    $("suggestNote").textContent = target ? "Matched to their favourites and reading level" : "Matched to what each child likes to read";
-    $("suggestCards").innerHTML = picks.map(function(p) {
-      var b = p.book;
-      var wish = p.list === "wishlist";
-      var why = wish ? "On the wishlist" + (p.why.length ? " · " + p.why[0] : "") : p.why[0] || "Not started yet";
-      why = why.charAt(0).toUpperCase() + why.slice(1);
-      var act = wish ? '<button class="btn btn--ghost btn--sm" type="button" data-move="' + esc(b.id) + '">Move to library</button>' : '<button class="btn btn--ghost btn--sm" type="button" data-cycle="' + esc(b.id) + '">Start reading</button>';
-      return '<article class="suggest">' + '<span class="cover cover--mini' + (b.slot ? " cover--slot" : "") + '" style="--spine:' + esc(b.spine || "#0A6280") + '" aria-hidden="true">' + (b.cover ? '<img src="' + esc(b.cover) + '" alt="" loading="lazy" onerror="this.remove()">' : "") + "</span>" + '<div class="grow">' + '<span class="t">' + esc(b.title) + "</span>" + '<span class="a">' + esc(b.author || "Author unknown") + "</span>" + '<span class="why">' + esc(why) + "</span>" + '<div class="acts">' + act + "</div>" + "</div>" + "</article>";
     }).join("");
   }
   function renderProfiles() {
@@ -4096,9 +4064,9 @@ const BookField = (() => {
         return;
       }
       note("Suggested " + title);
-      say("Sent for review. You can follow it in Settings.");
+      say(saved.state === "approved" ? "Published to Resources." : "Sent for review. You can follow it in Settings.");
       renderMySuggestions();
-      if (window.PTGNotify) {
+      if (window.PTGNotify && saved.state !== "approved") {
         window.PTGNotify.toAdmins({
           kind: "moderation",
           tone: "info",
@@ -4147,7 +4115,6 @@ const BookField = (() => {
     if (window.PTGSuggest) {
       window.PTGSuggest.onChange(function() {
         renderMySuggestions();
-        renderBoard();
       });
     }
   }
@@ -4351,8 +4318,6 @@ const BookField = (() => {
     if (window.history && window.history.replaceState) {
       if (!(name === "settings" && /^#settings(\/|$)/.test(window.location.hash))) {
         var tabHash = "#" + (name === "dashboard" ? "app" : name);
-        // A tab the person picked gets its own history entry, so the phone's back
-        // button or swipe-back steps through the tabs instead of leaving the app.
         if (!opts.keepScroll && window.location.hash !== tabHash) {
           window.history.pushState(null, "", tabHash);
         } else {
@@ -4712,7 +4677,6 @@ const BookField = (() => {
       return;
     }
     var age = $("kAge").value === "" ? null : Number($("kAge").value);
-    // The form is novalidate, so the field's min/max are not enforced by the browser.
     if (age !== null && !(age % 1 === 0 && age >= 0 && age <= 18)) {
       e.preventDefault();
       $("kAgeErr").classList.add("is-on");
@@ -4996,7 +4960,7 @@ const BookField = (() => {
     if (!at) {
       return "";
     }
-    return new Date(at).toLocaleDateString(undefined, {
+    return new Date(at).toLocaleDateString(appLocale(), {
       day: "numeric",
       month: "short",
       year: "numeric"
@@ -5244,21 +5208,6 @@ const BookField = (() => {
       return s.date === today && (!childId || s.childId === childId);
     });
   }
-  function sessionsInRange(days) {
-    var out = sessions.slice();
-    if (days > 0) {
-      var cut = new Date;
-      cut.setDate(cut.getDate() - days);
-      var cutKey = dateKey(cut);
-      out = out.filter(function(s) {
-        return s.date >= cutKey;
-      });
-    }
-    out.sort(function(a, b) {
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
-    });
-    return out;
-  }
   function renderTonight() {
     var bar = $("tonightBar");
     var who = state.who === "all" ? null : state.who;
@@ -5293,7 +5242,9 @@ const BookField = (() => {
     open: false,
     mode: "day",
     sheet: null,
-    returnTo: null
+    returnTo: null,
+    hash: "",
+    full: false
   };
   var bedtime = {
     start: "19:30",
@@ -5394,18 +5345,18 @@ const BookField = (() => {
     kidsBackdrop();
     if (show) {
       if (window.PTGAvatar) {
-        $("kidsWhoAv").innerHTML = window.PTGAvatar.svg(window.PTGAvatar.get(k.id).avatar, k.name, 38);
+        $("kidsWhoAv").innerHTML = window.PTGAvatar.svg(window.PTGAvatar.get(k.id).avatar, kidName(k), 38);
         $("kidsWhoAv").style.background = window.PTGAvatar.get(k.id).avatar.bg || k.colour;
       } else {
         $("kidsWhoAv").textContent = initial(k.name);
         $("kidsWhoAv").style.background = k.colour;
       }
-      $("kidsWhoName").textContent = k.name;
+      $("kidsWhoName").textContent = kidName(k);
     }
   }
   function renderKidsWho() {
     $("kidsWhoList").innerHTML = children.map(function(k) {
-      return '<button type="button" data-kid="' + esc(k.id) + '">' + kidAvatar(k, "av") + '<span class="nm">' + esc(k.name) + "</span>" + "</button>";
+      return '<button type="button" data-kid="' + esc(k.id) + '">' + kidAvatar(k, "av") + '<span class="nm">' + esc(kidName(k)) + "</span>" + "</button>";
     }).join("");
   }
   function kidsBooks() {
@@ -5443,7 +5394,7 @@ const BookField = (() => {
       done[s.bookId] = true;
     });
     kidsPaintClear("Book");
-    $("kidsBookHeading").textContent = k ? kids.mode === "night" ? "What did you read, " + k.name + "?" : "What are you reading, " + k.name + "?" : kids.mode === "night" ? "What did you read tonight?" : "What are you reading?";
+    $("kidsBookHeading").textContent = k ? kids.mode === "night" ? "What did you read, " + kidName(k) + "?" : "What are you reading, " + kidName(k) + "?" : kids.mode === "night" ? "What did you read tonight?" : "What are you reading?";
     $("kidsBookLead").textContent = list.length ? "Tap the book." : "";
     $("kidsBookEmptyTxt").textContent = q ? "No books match “" + q + "”. Try a different word." : "There are no books on this shelf yet. Ask a grown-up to add one.";
     $("kidsBookSearchWrap").hidden = all.length === 0 && !q;
@@ -5479,20 +5430,18 @@ const BookField = (() => {
       return w.sourceId === b.id;
     });
   }
-  function demoPartnerNews() {
-    return [];
-  }
   function renderKidsBrowse() {
     var k = child(kids.who);
     var q = kidsQ("Browse");
+    var banded = !!k && !!k.band && !!setting("ageFilter");
     var all = books.filter(function(b) {
-      return kidsMatch(b) && b.status !== "read" && b.status !== "reading";
+      return kidsMatch(b) && b.status !== "read" && b.status !== "reading" && (!banded || !b.ages || b.ages === k.band);
     });
     var list = all.filter(function(b) {
       return kidsHits(b, q);
     });
     kidsPaintClear("Browse");
-    $("kidsBrowseHeading").textContent = k ? "Find something new, " + k.name : "Find something new";
+    $("kidsBrowseHeading").textContent = k ? "Find something new, " + kidName(k) : "Find something new";
     $("kidsBrowseEmptyTxt").textContent = q ? "Nothing matches “" + q + "”. Try a different word." : "Nothing new to find right now — check back soon!";
     $("kidsBrowseEmpty").hidden = list.length > 0;
     $("kidsBrowseList").hidden = list.length === 0;
@@ -5527,7 +5476,19 @@ const BookField = (() => {
     kids.sheet = null;
     $("kidsSheet").hidden = true;
   }
-  function renderKidsMessages() {}
+  function renderKidsMessages() {
+    var others = children.filter(function(k) {
+      return k.id !== kids.who;
+    });
+    $("kidsMsgLead").textContent = others.length ? "Say hello to your grown-up, or to someone else in your family." : "Say hello to your grown-up.";
+    $("kidsMsgKidsWrap").hidden = !kids.who || !others.length;
+    $("kidsMsgKids").innerHTML = others.map(function(k) {
+      return '<button type="button" data-kchat="' + esc(k.id) + '" aria-label="Chat with ' + esc(kidName(k)) + '">' + kidAvatar(k, "av") + '<span class="nm">' + esc(kidName(k)) + "</span>" + "</button>";
+    }).join("");
+    if (window.PTGKidChat) {
+      window.PTGKidChat.refreshBadges();
+    }
+  }
   function kidsToggleWish(b) {
     var k = child(kids.who);
     var existing = wishlist.filter(function(w) {
@@ -5690,7 +5651,7 @@ const BookField = (() => {
     var got = earnedIds(st).length;
     var night = kids.mode === "night";
     var unit = night ? st.now === 1 ? "night" : "nights" : st.now === 1 ? "day" : "days";
-    $("kidsBadgesHeading").textContent = k ? k.name + "’s badges" : "Your badges";
+    $("kidsBadgesHeading").textContent = k ? kidName(k) + "’s badges" : "Your badges";
     $("kidsBadgesLead").textContent = got ? got + " of " + BADGES.length + " badges earned. Tap a badge to flip it." : "Read a little every night to fill your shelf. Tap a badge to see how close you are.";
     $("kidsBadgesHero").innerHTML = '<div class="fl-tile' + (st.now > 0 ? "" : " is-out") + '" aria-hidden="true">' + '<span class="fl-glow"></span>' + '<span class="fl-art">' + flameSvg() + '<i class="fl-spark"></i><i class="fl-spark"></i><i class="fl-spark"></i></span>' + '<span class="fl-count"><b>' + st.now + "</b><small>" + unit + "</small></span></div>" + '<div class="kb-hero-txt"><b>' + (st.now > 1 ? st.now + " " + unit + " in a row!" : st.now === 1 ? "Streak started!" : "Start a streak tonight") + "</b>" + "<span>" + (st.now > 0 ? "Read again " + (night ? "tomorrow night" : "tomorrow") + " to keep your flame going." : "Log a book to light your flame.") + "</span>" + '<span class="kb-hero-best">Best ever: <b>' + st.streak + "</b> in a row</span></div>";
     var seq = 0;
@@ -5788,7 +5749,7 @@ const BookField = (() => {
     $("kidsStreakUnit").textContent = unit;
     $("kidsStepDone").classList.toggle("is-finished", !!finished);
     $("kidsDoneTitle").textContent = finished ? "You finished it!" : run > 1 ? run + " " + unit + " in a row!" : "Well read!";
-    $("kidsDoneSub").textContent = finished ? b.title + " is done. That one goes on the finished shelf." : k ? k.name + ", that is " + kids.mins + " minutes logged." : "That is " + kids.mins + " minutes logged.";
+    $("kidsDoneSub").textContent = finished ? b.title + " is done. That one goes on the finished shelf." : k ? kidName(k) + ", that is " + kids.mins + " minutes logged." : "That is " + kids.mins + " minutes logged.";
     var doneCount = books.filter(function(x) {
       return x.status === "read" && (!kids.who || !x.who || !x.who.length || x.who.indexOf(kids.who) !== -1);
     }).length;
@@ -5864,11 +5825,27 @@ const BookField = (() => {
     kids.open = true;
     kids.mode = mode === "night" ? "night" : "day";
     kids.returnTo = document.activeElement;
+    kids.hash = window.location.hash;
+    closeKidsGate();
+    var root = document.documentElement;
+    kids.full = false;
+    if (setting("kidsFullScreen") && root.requestFullscreen && !document.fullscreenElement) {
+      kids.full = true;
+      try {
+        var asked = root.requestFullscreen();
+        if (asked && asked.catch) {
+          asked.catch(function() {
+            kids.full = false;
+          });
+        }
+      } catch (e) {
+        kids.full = false;
+      }
+    }
     kids.who = null;
     kids.book = null;
     kidsClearSearches();
     closeKidsSheet();
-    closeKidsGate();
     var preset = childId && child(childId) ? childId : state.who !== "all" && child(state.who) ? state.who : null;
     if (preset) {
       kidsSetWho(preset);
@@ -5892,6 +5869,15 @@ const BookField = (() => {
   function closeKids() {
     kids.open = false;
     closeKidsGate();
+    if (kids.full && document.fullscreenElement && document.exitFullscreen) {
+      try {
+        var left = document.exitFullscreen();
+        if (left && left.catch) {
+          left.catch(function() {});
+        }
+      } catch (e) {}
+    }
+    kids.full = false;
     closeKidsSheet();
     kidsClearSearches();
     if (window.PTGKidChat && window.PTGKidChat.close) {
@@ -5912,54 +5898,69 @@ const BookField = (() => {
   $("kidsOpenDash").addEventListener("click", function() {
     openKids(null, "night");
   });
-  var kidsGateAnswer = null;
   var kidsGateThen = null;
-  function openKidsGate(then) {
-    var a = 3 + Math.floor(Math.random() * 6);
-    var b = 2 + Math.floor(Math.random() * 6);
-    kidsGateAnswer = a + b;
-    kidsGateThen = then;
-    $("kidsGateSum").textContent = a + " + " + b + " = ?";
-    $("kidsGateA").value = "";
+  function kidsLocked() {
+    return !!setting("kidsLock") && !!window.PTGSession && window.PTGSession.active();
+  }
+  function leaveKids(then) {
+    if (!kidsLocked()) {
+      closeKids();
+      if (then) {
+        then();
+      }
+      return;
+    }
+    kidsGateThen = then || null;
     $("kidsGateErr").hidden = true;
+    $("kidsGatePw").value = "";
+    $("kidsGatePw").removeAttribute("aria-invalid");
     $("kidsGate").hidden = false;
-    $("kidsGateA").focus();
+    $("kidsGatePw").focus();
   }
   function closeKidsGate() {
     $("kidsGate").hidden = true;
+    $("kidsGatePw").value = "";
     kidsGateThen = null;
-    kidsGateAnswer = null;
   }
-  function tryKidsGate() {
-    var v = Number($("kidsGateA").value);
-    if (v === kidsGateAnswer) {
+  $("kidsGateForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var A = window.PTGAccounts, who = window.PTGSession ? window.PTGSession.email() : parent.email;
+    var pw = $("kidsGatePw").value;
+    if (pw && A && A.check(who, pw).ok) {
       var then = kidsGateThen;
-      closeKidsGate();
+      closeKids();
       if (then) {
         then();
       }
       return;
     }
     $("kidsGateErr").hidden = false;
-    $("kidsGateA").value = "";
-    $("kidsGateA").focus();
-  }
-  $("kidsGateGo").addEventListener("click", tryKidsGate);
-  $("kidsGateCancel").addEventListener("click", closeKidsGate);
-  $("kidsGateA").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      tryKidsGate();
-    }
+    $("kidsGatePw").setAttribute("aria-invalid", "true");
+    $("kidsGatePw").value = "";
+    $("kidsGatePw").focus();
   });
+  function stayInKids() {
+    closeKidsGate();
+    $("kidsExit").focus();
+  }
+  $("kidsGateCancel").addEventListener("click", stayInKids);
   $("kidsGate").addEventListener("click", function(e) {
     if (e.target === $("kidsGate")) {
-      closeKidsGate();
+      stayInKids();
     }
   });
+  document.addEventListener("click", function(e) {
+    if (!kids.open || !setting("blockLinks")) {
+      return;
+    }
+    var a = e.target.closest ? e.target.closest("a[href]") : null;
+    if (a && /^(https?:|mailto:|tel:)/i.test(a.href) && a.origin !== window.location.origin) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
   $("kidsBedSet").addEventListener("click", function() {
-    openKidsGate(function() {
-      closeKids();
+    leaveKids(function() {
       goTab("settings");
       openSetSection("set-bedtime", "parent");
     });
@@ -5975,8 +5976,12 @@ const BookField = (() => {
     kidsSetWho(kids.who);
     renderAll();
   });
-  $("kidsExit").addEventListener("click", closeKids);
-  $("kidsDoneExit").addEventListener("click", closeKids);
+  $("kidsExit").addEventListener("click", function() {
+    leaveKids();
+  });
+  $("kidsDoneExit").addEventListener("click", function() {
+    leaveKids();
+  });
   $("kidsBack").addEventListener("click", function() {
     if (!$("kidsStepLog").hidden || !$("kidsStepBadges").hidden) {
       renderKidsBooks();
@@ -6100,6 +6105,21 @@ const BookField = (() => {
       kidsRemoveWish(w);
     }
   });
+  $("kidsMsgKids").addEventListener("click", function(e) {
+    var hit = e.target.closest("[data-kchat]");
+    var k = child(kids.who);
+    var them = hit && child(hit.getAttribute("data-kchat"));
+    if (k && them && window.PTGKidChat) {
+      window.PTGKidChat.open(k.id, k.name, {
+        asKid: true,
+        withKid: {
+          id: them.id,
+          name: them.name,
+          label: kidName(them)
+        }
+      });
+    }
+  });
   $("kidsMsgAdult").addEventListener("click", function() {
     var k = child(kids.who);
     if (k && window.PTGKidChat) {
@@ -6132,32 +6152,15 @@ const BookField = (() => {
         closeKidsSheet();
         return;
       }
-      closeKids();
+      leaveKids();
       return;
     }
     if (e.key !== "Tab") {
       return;
     }
-    if (!$("kidsGate").hidden) {
-      var gf = [].filter.call($("kidsGate").querySelectorAll("button, input"), function(el) {
-        return el.offsetParent !== null;
-      });
-      if (!gf.length) {
-        return;
-      }
-      var gFirst = gf[0], gLast = gf[gf.length - 1];
-      if (e.shiftKey && document.activeElement === gFirst) {
-        e.preventDefault();
-        gLast.focus();
-      } else if (!e.shiftKey && document.activeElement === gLast) {
-        e.preventDefault();
-        gFirst.focus();
-      }
-      return;
-    }
-    var trapIn = kids.sheet && !$("kidsSheet").hidden ? $("kidsSheet") : $("kids");
+    var trapIn = !$("kidsGate").hidden ? $("kidsGate") : kids.sheet && !$("kidsSheet").hidden ? $("kidsSheet") : $("kids");
     var live = [].filter.call(trapIn.querySelectorAll("button, input"), function(el) {
-      return el.offsetParent !== null;
+      return el.offsetParent !== null && (trapIn !== $("kids") || !$("kidsGate").contains(el));
     });
     if (!live.length) {
       return;
@@ -6172,9 +6175,17 @@ const BookField = (() => {
     }
   });
   window.addEventListener("hashchange", function() {
-    if (kids.open) {
-      closeKids();
+    if (!kids.open) {
+      return;
     }
+    if (kidsLocked()) {
+      if (window.location.hash !== kids.hash) {
+        window.location.replace(window.location.href.split("#")[0] + (kids.hash || "#app"));
+        leaveKids();
+      }
+      return;
+    }
+    closeKids();
   });
   function paintThemeSeg() {
     var now = window.PTGTheme ? window.PTGTheme.get() : "auto";
@@ -6311,8 +6322,6 @@ const BookField = (() => {
           });
         }
       } else if (parent.name) {
-        // The demo shelf keeps its own parent's name; make the account agree so the
-        // avatar letter and the Settings name field match the greeting.
         if (window.PTGAccounts) {
           window.PTGAccounts.setName(email, parent.name);
         }
@@ -6321,11 +6330,43 @@ const BookField = (() => {
         }
       }
     }
+    pruneLog();
+    document.documentElement.lang = appLocale() || "en-AU";
     resetView();
     if (started) {
       renderAll();
     }
   }
+  function pruneLog() {
+    var days = Number(setting("retention")) || 0;
+    if (!days) {
+      return;
+    }
+    var cut = new Date;
+    cut.setDate(cut.getDate() - days);
+    var key = dateKey(cut);
+    for (var i = sessions.length - 1; i >= 0; i--) {
+      if (String(sessions[i].date || "") < key) {
+        sessions.splice(i, 1);
+      }
+    }
+  }
+  window.addEventListener("ptg:prefs", function(e) {
+    var d = e.detail || {};
+    if (d.role !== "parent") {
+      return;
+    }
+    var changed = d.changed || [];
+    if (changed.indexOf("retention") !== -1) {
+      pruneLog();
+    }
+    if (changed.indexOf("language") !== -1) {
+      document.documentElement.lang = appLocale() || "en-AU";
+    }
+    if (started && /retention|weekStart|language|ageFilter|hideNames/.test(changed.join(" "))) {
+      renderAll();
+    }
+  });
   var SHARE_KEY = "ptg-wishlist-share-v1";
   var shareDialog = $("shareDialog");
   var shareTrigger = null;
@@ -6387,7 +6428,7 @@ const BookField = (() => {
     return null;
   }
   function shareLongDate(ms) {
-    return new Date(ms).toLocaleDateString(undefined, {
+    return new Date(ms).toLocaleDateString(appLocale(), {
       day: "numeric",
       month: "long",
       year: "numeric"
@@ -6813,6 +6854,23 @@ const BookField = (() => {
     parentEmail: function() {
       return parent.email || "";
     },
+    changeEmail: function(oldEmail, newEmail) {
+      var from = String(oldEmail || "").trim().toLowerCase(), to = String(newEmail || "").trim().toLowerCase();
+      if (!from || !to) {
+        return;
+      }
+      if (from !== to && shelves[from]) {
+        shelves[to] = shelves[from];
+        delete shelves[from];
+      }
+      if (current === from) {
+        current = to;
+      }
+      parent.email = String(newEmail).trim();
+      if (started) {
+        renderAll();
+      }
+    },
     data: function() {
       return {
         parent: parent,
@@ -7023,7 +7081,8 @@ const BookField = (() => {
     postAge: "",
     logKind: "",
     editingPost: null,
-    reviewing: null
+    reviewing: null,
+    more: {}
   };
   var toast = $("admToast"), toastText = $("admToastText"), toastTimer = null, undoBtn = null;
   function say(message, undo) {
@@ -7053,6 +7112,41 @@ const BookField = (() => {
   }
   function me() {
     return window.PTGSession && window.PTGSession.email() || "administrator";
+  }
+  function adminPref(name) {
+    var S = window.PTGSettings;
+    return S && S.pref ? S.pref(name, "admin", me()) : undefined;
+  }
+  function platformRule(name) {
+    var S = window.PTGSettings;
+    return S && S.platform ? S.platform(name) : undefined;
+  }
+  function rowLimit() {
+    return Number(adminPref("rowsPerTable")) || 25;
+  }
+  function daysAgo(days) {
+    return Date.now() - days * 864e5;
+  }
+  function moreRow(key, shown, total, tag) {
+    if (state.more[key] || total <= shown) {
+      return "";
+    }
+    var btn = '<button class="btn btn--ghost btn--sm adm-more" type="button" data-adm-more="' + key + '">Show all ' + total + "</button>";
+    var line = '<span class="adm-more-note">Showing ' + shown + " of " + total + ".</span> " + btn;
+    return tag === "tr" ? '<tr class="adm-more-row"><td colspan="7">' + line + "</td></tr>" : tag === "li" ? '<li class="adm-more-row">' + line + "</li>" : '<div class="adm-more-row">' + line + "</div>";
+  }
+  function closeDormant() {
+    var days = Number(platformRule("dormantAfter")) || 0;
+    if (!days || !window.PTGAccounts) {
+      return;
+    }
+    var cut = daysAgo(days);
+    accounts().forEach(function(a) {
+      if (a.role === "parent" && a.status !== "suspended" && (a.lastSeen || a.createdAt || Date.now()) < cut) {
+        window.PTGAccounts.setStatus(a.email, "suspended");
+        log("account", "Closed a dormant account " + a.email, "No sign-in for " + days + " days");
+      }
+    });
   }
   function log(kind, what, detail) {
     if (window.PTGAudit) {
@@ -7109,6 +7203,10 @@ const BookField = (() => {
       if (state.modCat && s.category !== state.modCat) {
         return false;
       }
+      var keep = Number(platformRule("subRetention")) || 0;
+      if (keep && s.state !== "pending" && (s.decidedAt || s.at) < daysAgo(keep)) {
+        return false;
+      }
       return matchesQ(s.title + " " + s.body + " " + s.from);
     }).sort(function(a, b) {
       return b.at - a.at;
@@ -7132,7 +7230,11 @@ const BookField = (() => {
   }
   function logList() {
     var all = window.PTGAudit ? window.PTGAudit.list() : [];
+    var keep = Number(platformRule("logRetention")) || 0;
     return all.filter(function(e) {
+      if (keep && e.at && e.at < daysAgo(keep)) {
+        return false;
+      }
       if (state.logKind && e.kind !== state.logKind) {
         return false;
       }
@@ -7225,21 +7327,23 @@ const BookField = (() => {
     return t;
   }
   function renderAccounts() {
-    var list = accountList();
+    var every = accountList();
+    var list = state.more.acc ? every : every.slice(0, rowLimit());
     var filtered = !!(state.accStatus || state.accRole || state.q);
-    $("admAccCount").textContent = list.length + (list.length === 1 ? " account" : " accounts") + (filtered ? " match your filters" : " registered");
+    $("admAccCount").textContent = every.length + (every.length === 1 ? " account" : " accounts") + (filtered ? " match your filters" : " registered");
     $("admAccRows").innerHTML = list.map(function(a) {
       var s = shelfFor(a.email);
       var suspended = a.status === "suspended";
       var isMe = String(a.email).toLowerCase() === String(me()).toLowerCase();
       return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Send reset</button>' + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + "</span>" + "</td>" + "</tr>";
-    }).join("");
-    $("admEmptyAcc").classList.toggle("is-on", !list.length);
+    }).join("") + moreRow("acc", list.length, every.length, "tr");
+    $("admEmptyAcc").classList.toggle("is-on", !every.length);
     $("admAccTable").parentNode.hidden = !list.length;
   }
   function renderModeration() {
-    var list = submissionList();
-    $("admModCount").textContent = list.length + (list.length === 1 ? " submission" : " submissions") + (state.modState === "pending" ? " waiting for review" : "");
+    var every = submissionList();
+    var list = state.more.mod ? every : every.slice(0, rowLimit());
+    $("admModCount").textContent = every.length + (every.length === 1 ? " submission" : " submissions") + (state.modState === "pending" ? " waiting for review" : "");
     $("admModList").innerHTML = list.map(function(s) {
       var pending = s.state === "pending";
       var acts = pending ? '<button class="btn btn--primary btn--sm" type="button" data-approve="' + esc(s.id) + '">Approve</button>' + '<button class="btn btn--danger btn--sm" type="button" data-reject="' + esc(s.id) + '">Reject</button>' : '<button class="btn btn--ghost btn--sm" type="button" data-reopen="' + esc(s.id) + '">Put back in the queue</button>';
@@ -7250,7 +7354,7 @@ const BookField = (() => {
         verdict = '<p class="verdict"><b>Approved</b> by ' + esc(s.decidedBy) + " " + esc(since(s.decidedAt).toLowerCase()) + ". It is live on family dashboards.</p>";
       }
       return '<article class="sub-card" data-state="' + esc(s.state) + '">' + "<div>" + '<div class="head">' + '<span class="pill pill--' + esc(s.state) + '">' + (s.state === "pending" ? "Waiting" : s.state === "approved" ? "Approved" : "Rejected") + "</span>" + "<h3>" + esc(s.title) + "</h3>" + "</div>" + '<p class="body">' + esc(s.body) + "</p>" + '<p class="meta">' + esc(catName(s.category)) + " · Ages " + esc(s.ages) + " · from " + esc(s.from) + " · " + esc(since(s.at)) + (isHttpUrl(s.link) ? ' · <a href="' + esc(s.link) + '" rel="noopener nofollow" target="_blank">' + esc(s.link) + "</a>" : "") + "</p>" + verdict + "</div>" + '<div class="acts">' + acts + "</div>" + "</article>";
-    }).join("");
+    }).join("") + moreRow("mod", list.length, every.length, "div");
     $("admEmptyMod").classList.toggle("is-on", !list.length);
     $("admModList").hidden = !list.length;
   }
@@ -7265,11 +7369,12 @@ const BookField = (() => {
     $("admPostList").hidden = !list.length;
   }
   function renderLog() {
-    var list = logList();
-    $("admLogCount").textContent = list.length + (list.length === 1 ? " entry" : " entries");
-    $("admLogList").innerHTML = list.slice(0, 200).map(function(e) {
+    var every = logList();
+    var list = state.more.log ? every : every.slice(0, rowLimit());
+    $("admLogCount").textContent = every.length + (every.length === 1 ? " entry" : " entries");
+    $("admLogList").innerHTML = list.map(function(e) {
       return "<li>" + '<span class="tag-kind kind--' + esc(e.kind) + '">' + esc(e.kind) + "</span>" + "<span>" + esc(e.what) + (e.detail ? " — " + esc(e.detail) : "") + "</span>" + '<span class="when">' + esc(clockTime(e.at)) + "</span>" + '<span class="who">' + esc(e.who) + "</span>" + "</li>";
-    }).join("");
+    }).join("") + moreRow("log", list.length, every.length, "li");
     $("admEmptyLog").classList.toggle("is-on", !list.length);
     $("admLogList").hidden = !list.length;
   }
@@ -7333,6 +7438,7 @@ const BookField = (() => {
   }
   function renderAll() {
     syncSuggestions();
+    closeDormant();
     renderCounts();
     renderGreeting();
     renderOverview();
@@ -7385,8 +7491,6 @@ const BookField = (() => {
     if (window.history && window.history.replaceState) {
       if (!(name === "settings" && /^#settings(\/|$)/.test(window.location.hash))) {
         var tabHash = "#" + (name === "overview" ? "admin" : name);
-        // A tab the person picked gets its own history entry, so the phone's back
-        // button or swipe-back steps through the tabs instead of leaving the app.
         if (!opts.keepScroll && window.location.hash !== tabHash) {
           window.history.pushState(null, "", tabHash);
         } else {
@@ -7781,7 +7885,24 @@ const BookField = (() => {
       openPost(findPost(hit.getAttribute("data-edit-post")));
       return;
     }
+    hit = t.closest("[data-adm-more]");
+    if (hit) {
+      state.more[hit.getAttribute("data-adm-more")] = true;
+      renderAll();
+      return;
+    }
     hit = t.closest("[data-suspend]");
+    if (hit && adminPref("confirmSuspend") && hit.getAttribute("data-armed") !== "1") {
+      hit.setAttribute("data-armed", "1");
+      hit.textContent = "Tap again to suspend";
+      window.setTimeout(function() {
+        if (document.contains(hit) && hit.getAttribute("data-armed") === "1") {
+          hit.removeAttribute("data-armed");
+          hit.textContent = "Suspend";
+        }
+      }, 4e3);
+      return;
+    }
     if (hit) {
       var em = hit.getAttribute("data-suspend");
       if (window.PTGAccounts) {
@@ -8361,7 +8482,6 @@ const BookField = (() => {
       show(wanted());
       return;
     }
-    // "resources" is both a shelf tab and a console section, so let either side through.
     if (APP[h] && ADMIN[h] && (mayOpenApp() || mayOpenConsole())) {
       show(wanted());
       return;
@@ -8381,6 +8501,51 @@ const BookField = (() => {
   window.addEventListener("pageshow", function(e) {
     if (e.persisted) {
       route();
+    }
+  });
+})();
+
+(function() {
+  "use strict";
+  var last = Date.now();
+  function touch() {
+    last = Date.now();
+  }
+  [ "pointerdown", "keydown", "wheel", "touchstart", "scroll" ].forEach(function(name) {
+    document.addEventListener(name, touch, {
+      passive: true,
+      capture: true
+    });
+  });
+  window.addEventListener("ptg:session", touch);
+  function idleLimit() {
+    var S = window.PTGSession, P = window.PTGSettings;
+    if (!S || !S.active() || !P || !P.pref) {
+      return 0;
+    }
+    return (Number(P.pref("autoLock", S.role(), S.email())) || 0) * 6e4;
+  }
+  function check() {
+    var limit = idleLimit();
+    if (!limit || Date.now() - last < limit) {
+      return;
+    }
+    var S = window.PTGSession;
+    var btn = document.getElementById(S.role() === "admin" ? "admSignOutBtn" : "signOutBtn");
+    if (!btn) {
+      return;
+    }
+    var mins = limit / 6e4;
+    btn.click();
+    if (window.PTGAuthNotice) {
+      window.PTGAuthNotice("You were signed out after " + (mins >= 60 ? mins / 60 + (mins === 60 ? " hour" : " hours") : mins + " minutes") + " without any activity, as set in Settings.");
+    }
+    touch();
+  }
+  window.setInterval(check, 2e4);
+  document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === "visible") {
+      check();
     }
   });
 })();

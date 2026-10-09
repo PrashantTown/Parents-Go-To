@@ -3,6 +3,15 @@
   var KEY = "ptg-suggestions-v1";
   var MAX = 200;
   var EVENT = "ptg:suggestions";
+  function verdict(row, text, link) {
+    var M = window.PTGModeration;
+    if ((M ? M.verdict(text, link) : "pending") === "approved") {
+      row.state = "approved";
+      row.decidedBy = "Automatic";
+      row.decidedAt = Date.now();
+    }
+    return row;
+  }
   function isArray(v) {
     return Object.prototype.toString.call(v) === "[object Array]";
   }
@@ -82,6 +91,7 @@
         decidedBy: "",
         decidedAt: null
       };
+      verdict(row, row.title + " " + row.body, row.link);
       all.unshift(row);
       if (!write(all)) {
         return null;

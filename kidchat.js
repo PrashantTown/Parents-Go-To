@@ -10,9 +10,9 @@
   var lastFocus = null;
   var current = {
     id: null,
-    name: ""
+    name: "",
+    peer: null
   };
-  var sendAs = "adult";
   var kidOnly = false;
   function esc(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -38,12 +38,29 @@
     return {
       account: acct,
       adult: C.ADULT(acct),
-      kid: C.CHILD(acct, current.id)
+      kid: C.CHILD(acct, current.id),
+      peer: current.peer ? C.CHILD(acct, current.peer.id) : null
     };
+  }
+  function pairKey(acct, a, b) {
+    var pair = [ String(a), String(b) ].sort();
+    return "kids:" + acct + ":" + pair[0] + ":" + pair[1];
   }
   function thread() {
     var i = ids();
     var names = {};
+    if (current.peer) {
+      names[i.kid] = current.name;
+      names[i.peer] = current.peer.name;
+      return C.open({
+        kind: "family",
+        key: pairKey(i.account, current.id, current.peer.id),
+        title: current.name + " & " + current.peer.name,
+        account: i.account,
+        members: [ i.kid, i.peer ],
+        names: names
+      });
+    }
     names[i.adult] = grownUpName();
     names[i.kid] = current.name;
     return C.open({
@@ -73,7 +90,7 @@
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
     root.setAttribute("aria-labelledby", "kcTitle");
-    root.innerHTML = '<div class="kc-sheet">' + '<div class="kc-head">' + '<span class="kc-av" id="kcAv" aria-hidden="true"></span>' + '<div class="kc-head-txt">' + '<h2 id="kcTitle" tabindex="-1"></h2>' + '<p id="kcSub"></p>' + "</div>" + '<button class="kc-x" type="button" id="kcClose" aria-label="Close messages">' + icon('<path d="m5 5 10 10M15 5 5 15"/>', 18) + "</button>" + "</div>" + '<div class="kc-as" role="group" aria-label="Sending as">' + '<span class="kc-as-lbl">Sending as</span>' + '<span class="kc-as-seg">' + '<button type="button" class="kc-as-b" data-kc-as="adult" id="kcAsAdult"></button>' + '<button type="button" class="kc-as-b" data-kc-as="kid" id="kcAsKid"></button>' + "</span>" + "</div>" + '<div class="kc-box" id="kcBox"></div>' + "</div>";
+    root.innerHTML = '<div class="kc-sheet">' + '<div class="kc-head">' + '<span class="kc-av" id="kcAv" aria-hidden="true"></span>' + '<div class="kc-head-txt">' + '<h2 id="kcTitle" tabindex="-1"></h2>' + '<p id="kcSub"></p>' + "</div>" + '<button class="kc-x" type="button" id="kcClose" aria-label="Close messages">' + icon('<path d="m5 5 10 10M15 5 5 15"/>', 18) + "</button>" + "</div>" + '<div class="kc-box" id="kcBox"></div>' + "</div>";
     document.body.appendChild(root);
     root.addEventListener("click", function(e) {
       if (e.target === root) {
@@ -87,11 +104,6 @@
       if (t.id === "kcClose") {
         close();
         return;
-      }
-      var as = t.getAttribute("data-kc-as");
-      if (as && !kidOnly && as !== sendAs) {
-        sendAs = as;
-        paint();
       }
     });
     document.addEventListener("keydown", function(e) {
@@ -131,25 +143,17 @@
     var tint = function(id) {
       return UI.colourFor ? UI.colourFor(id) : "#0D3B32";
     };
-    var dot = function(id, name) {
-      return '<span class="kc-dot" style="--av:' + esc(tint(id)) + '">' + esc(String(name).charAt(0).toUpperCase()) + "</span>";
-    };
-    var them = kidOnly ? i.adult : i.kid;
+    var them = current.peer ? i.peer : kidOnly ? i.adult : i.kid;
+    var themName = current.peer ? current.peer.label : kidOnly ? grownUpName() : current.name;
     var av = $("kcAv");
-    av.textContent = String(kidOnly ? grownUpName() : current.name).charAt(0).toUpperCase();
+    av.textContent = String(themName).charAt(0).toUpperCase();
     av.style.setProperty("--av", tint(them));
-    if (!kidOnly) {
-      $("kcAsAdult").innerHTML = dot(i.adult, grownUpName()) + esc(grownUpName());
-      $("kcAsAdult").setAttribute("aria-pressed", sendAs === "adult" ? "true" : "false");
-      $("kcAsKid").innerHTML = dot(i.kid, current.name) + esc(current.name);
-      $("kcAsKid").setAttribute("aria-pressed", sendAs === "kid" ? "true" : "false");
-    }
     if (box) {
       box.destroy();
     }
     box = UI.mount($("kcBox"), {
       threadId: t.id,
-      who: sendAs === "kid" ? i.kid : i.adult,
+      who: kidOnly ? i.kid : i.adult,
       placeholder: "Write a message…",
       empty: kidOnly ? "No messages yet. Say hello." : "No messages yet. Ask what they are reading."
     });
@@ -159,16 +163,16 @@
     current.id = String(childId);
     current.name = String(name || "your child");
     kidOnly = !!(opts && opts.asKid);
-    sendAs = kidOnly ? "kid" : "adult";
+    current.peer = kidOnly && opts.withKid ? {
+      id: String(opts.withKid.id),
+      name: String(opts.withKid.name || "them"),
+      label: String(opts.withKid.label || opts.withKid.name || "them")
+    } : null;
     lastFocus = document.activeElement;
     root.hidden = false;
     root.classList.toggle("kc--overlay", kidOnly);
-    var asRow = root.querySelector(".kc-as");
-    if (asRow) {
-      asRow.hidden = kidOnly;
-    }
     document.documentElement.classList.add("kc-open");
-    $("kcTitle").textContent = "Messages with " + (kidOnly ? grownUpName() : current.name);
+    $("kcTitle").textContent = "Messages with " + (current.peer ? current.peer.label : kidOnly ? grownUpName() : current.name);
     $("kcSub").textContent = "Private · just you two · text only";
     paint();
     $("kcTitle").focus();
@@ -220,6 +224,21 @@
     });
     return rows.length ? C.unread(rows[0].id, me) : 0;
   }
+  function pairUnread(childId, peerId) {
+    var acct = account();
+    var key = pairKey(acct, childId, peerId);
+    var me = C.CHILD(acct, childId);
+    var rows = C.threads("family", me).filter(function(t) {
+      return t.key === key;
+    });
+    return rows.length ? C.unread(rows[0].id, me) : 0;
+  }
+  function kidUnreadAll(childId) {
+    var me = C.CHILD(account(), childId);
+    return C.threads("family", me).reduce(function(n, t) {
+      return n + C.unread(t.id, me);
+    }, 0);
+  }
   function badge(host, n, label) {
     if (!host) {
       return;
@@ -252,13 +271,18 @@
       return;
     }
     var kid = space.getAttribute("data-current-kid") || "";
-    var n = kid ? kidUnread(kid) : 0;
-    badge(space.querySelector('#kidsTabs [data-ktab="messages"]'), n, "from your grown-up");
-    badge($("kidsMsgAdult"), n, "from your grown-up");
+    badge(space.querySelector('#kidsTabs [data-ktab="messages"]'), kid ? kidUnreadAll(kid) : 0, "");
+    badge($("kidsMsgAdult"), kid ? kidUnread(kid) : 0, "from your grown-up");
+    var sibs = $("kidsMsgKids");
+    if (sibs) {
+      Array.prototype.forEach.call(sibs.querySelectorAll("[data-kchat]"), function(b) {
+        badge(b, kid ? pairUnread(kid, b.getAttribute("data-kchat")) : 0, "");
+      });
+    }
     var who = $("kidsWhoList");
     if (who) {
       Array.prototype.forEach.call(who.querySelectorAll("[data-kid]"), function(b) {
-        badge(b, kidUnread(b.getAttribute("data-kid")), "");
+        badge(b, kidUnreadAll(b.getAttribute("data-kid")), "");
       });
     }
   }

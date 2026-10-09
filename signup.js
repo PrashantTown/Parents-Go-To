@@ -23,7 +23,6 @@
     field.value = "";
   }
   button.addEventListener("click", submit);
-  // The field is not inside a form, so Enter (or "Go" on a phone keyboard) needs wiring up.
   field.addEventListener("keydown", function(event) {
     if (event.key === "Enter") { event.preventDefault(); submit(); }
   });

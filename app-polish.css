@@ -56,9 +56,6 @@ html[data-theme="dark"] :is(#page-app, #page-admin, #page-auth){
   color: #fff; background: var(--pine); box-shadow: none;
 }
 #page-admin .app-nav button[aria-selected="true"] .count{ background: #123F5B; }
-/* The rules above are for the top/side tab strip. This file loads after responsive.css,
-   so restore the phone bottom bar's sizing here or the labels get clipped and the bar
-   loses its safe-area padding under the iPhone home indicator. */
 @media (max-width: 720px){
   :is(#page-app, #page-admin) .app-nav{ gap: 0; padding-block: 0 var(--safe-b, 0px); }
   :is(#page-app, #page-admin) .app-nav button{ min-height: 62px; padding: 8px 2px; font-size: .7rem; border-radius: 0; }
@@ -121,7 +118,7 @@ html[data-theme="dark"] :is(#page-app, #page-admin) .bar-search input{ border-co
 :is(#page-app, #page-admin) .btn:focus-visible,
 :is(#page-app, #page-admin) .chip:focus-visible{ outline: 2px solid var(--pine); outline-offset: 2px; }
 
-:is(#page-app, #page-admin) :is(.stat, .toolbar, .whofor, .empty, .profile, .reader, .suggest, .cat, .tonight),
+:is(#page-app, #page-admin) :is(.stat, .toolbar, .whofor, .empty, .profile, .reader, .cat, .tonight),
 #page-admin :is(.triage, .sub-card, .adm-table-wrap),
 :is(#page-app, #page-admin) :is(.set-rail, .set-card){
   border-radius: var(--r-card);
@@ -188,7 +185,6 @@ html[data-theme="dark"] :is(#page-app, #page-admin) .bar-search input{ border-co
   border-color: transparent;
   box-shadow: var(--elev-2);
 }
-/* On narrow phones the two labels do not fit side by side at their natural width. */
 @media (max-width: 479.98px){
   :is(#page-app, #page-admin) .vswitch{ display: flex; width: 100%; }
   :is(#page-app, #page-admin) .vswitch-btn{ flex: 1 1 0; min-width: 0; padding-inline: .6rem; white-space: normal; }
@@ -286,3 +282,7 @@ html[data-theme="dark"] #page-auth .submit--ghost:hover{ background: rgba(121,21
   #page-admin .triage{ transition: none; }
   :is(#page-app, #page-admin) .stat:hover{ transform: none; }
 }
+
+#page-admin .adm-more-row { list-style: none; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; padding: .8rem 0; font-size: .86rem; color: var(--ink-60); }
+#page-admin tr.adm-more-row td { padding: .8rem 1rem; font-size: .86rem; color: var(--ink-60); }
+#page-admin .adm-more-note { margin-right: .3rem; }

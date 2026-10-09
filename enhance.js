@@ -159,15 +159,11 @@
         return;
       }
       var t = e.touches[0];
-      // A swipe from the very edge is the phone's own back / forward gesture
-      // (iOS Safari, Android gesture navigation). Switching tabs as well made one
-      // swipe do two things.
       var edge = Math.max(24, window.innerWidth * .06);
       if (t.clientX < edge || t.clientX > window.innerWidth - edge) {
         live = false;
         return;
       }
-      // Selecting text by dragging is not a swipe either.
       var sel = window.getSelection && window.getSelection();
       if (sel && !sel.isCollapsed) {
         live = false;

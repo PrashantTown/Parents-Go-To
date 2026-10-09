@@ -37,7 +37,6 @@
     email.value = "";
     message.value = "";
   });
-  // Not inside a form, so Enter in a one-line field (or "Go" on a phone keyboard) needs wiring up.
   [name, email].forEach(function(field) {
     field.addEventListener("keydown", function(event) {
       if (event.key === "Enter") { event.preventDefault(); send.click(); }

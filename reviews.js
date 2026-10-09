@@ -8,6 +8,15 @@
   var BODY_MAX = 500;
   var WORDS = [ "", "Not for us", "It was all right", "Good", "Really good", "A favourite" ];
   var STAR = "M10 2.6l2.3 4.7 5.2.8-3.8 3.6.9 5.2-4.6-2.4-4.6 2.4.9-5.2-3.8-3.6 5.2-.8Z";
+  function verdict(row, text, link) {
+    var M = window.PTGModeration;
+    if ((M ? M.verdict(text, link) : "pending") === "approved") {
+      row.state = "approved";
+      row.decidedBy = "Automatic";
+      row.decidedAt = Date.now();
+    }
+    return row;
+  }
   function $(id) {
     return document.getElementById(id);
   }
@@ -307,6 +316,7 @@
         decidedBy: "",
         decidedAt: null
       };
+      verdict(row, row.body, "");
       all.unshift(row);
       if (!write(all)) {
         return null;
@@ -326,6 +336,7 @@
           all[i].reason = "";
           all[i].decidedBy = "";
           all[i].decidedAt = null;
+          verdict(all[i], all[i].body, "");
           hit = all[i];
           break;
         }
@@ -859,10 +870,13 @@
         say("This browser is blocking local storage, so your review was not saved. " + "Nothing has been kept and nobody will see it.");
         return;
       }
-      audit(own ? "Edited a book review" : "Wrote a book review", "“" + row.bookTitle + "” — held for review");
-      notifyAdmins(row, !!own);
+      var live = row.state === "approved";
+      audit(own ? "Edited a book review" : "Wrote a book review", "“" + row.bookTitle + "” — " + (live ? "published straight away" : "held for review"));
+      if (!live) {
+        notifyAdmins(row, !!own);
+      }
       renderReviews();
-      say(own ? "Saved and sent back for review. Your earlier version has come off the book " + "until an administrator looks at the change." : "Sent for review. Nobody else can see it until an administrator publishes it. " + "It is above, marked as awaiting review.");
+      say(live ? own ? "Saved. The new version is live." : "Published. Other parents can see it now." : own ? "Saved and sent back for review. Your earlier version has come off the book " + "until an administrator looks at the change." : "Sent for review. Nobody else can see it until an administrator publishes it. " + "It is above, marked as awaiting review.");
     });
   }
   function admSay(message) {

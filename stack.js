@@ -11,8 +11,6 @@
   var lastWidth = 0;
   var viewH = 0;
 
-  // The smallest viewport height (address bar showing), so a pinned card's
-  // bottom edge is never hidden behind a phone's browser toolbar.
   var probe = document.createElement("div");
   probe.setAttribute("aria-hidden", "true");
   probe.style.cssText = "position:fixed;top:0;left:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none;";
@@ -24,16 +22,12 @@
   }
 
   function measure() {
-    if (!stack.offsetParent && stack.getClientRects().length === 0) return; // landing hidden
+    if (!stack.offsetParent && stack.getClientRects().length === 0) return;
     lastWidth = window.innerWidth;
     viewH = screenHeight();
     slots.forEach(function(slot) { slot.style.top = ""; });
     var base = slots.map(function(slot) { return parseFloat(getComputedStyle(slot).top) || 0; });
     heights = slots.map(function(slot) { return slot.offsetHeight; });
-    // A card taller than the space below its pin would have its end covered by the
-    // next card before anyone could read it (phones, short laptop windows, landscape
-    // tablets). Pin those cards by their bottom edge instead: they scroll up until
-    // the last line is on screen, then hold there while the next card slides over.
     var gap = Math.min(24, viewH * .04);
     pinTops = base.map(function(top, i) {
       var fit = viewH - heights[i] - gap;
@@ -74,9 +68,6 @@
     window.requestAnimationFrame(update);
   }
 
-  // Phone address bars resize the viewport height while scrolling; only a width
-  // change (rotation, window resize) or a real height change (a desktop window
-  // being resized) should re-measure the pins.
   function resized() {
     if (window.innerWidth !== lastWidth || Math.abs(screenHeight() - viewH) > 140) {
       measure();
@@ -90,8 +81,6 @@
   window.addEventListener("orientationchange", function() { setTimeout(measure, 250); });
   window.addEventListener("load", measure);
   window.addEventListener("pageshow", measure);
-  // On the Reading for Pleasure page the landing is hidden while the app is open,
-  // so measure again once it is shown.
   window.addEventListener("hashchange", function() { setTimeout(measure, 60); });
   if (window.ResizeObserver) {
     var ro = new ResizeObserver(function() {

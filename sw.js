@@ -19,7 +19,6 @@ self.addEventListener("notificationclick", function(event) {
     var i, client;
     for (i = 0; i < list.length; i++) {
       client = list[i];
-      // Only the app page listens for "ptg:open"; the marketing pages share this scope.
       if ("focus" in client && /reading-for-pleasure\.html/.test(client.url)) {
         client.postMessage({
           type: "ptg:open",

@@ -7,6 +7,15 @@
   var BODY_MIN = 10;
   var BODY_MAX = 600;
   var AGE_BANDS = [ "0–3", "3–5", "5–7", "7–9", "9–12", "12+" ];
+  function verdict(row, text, link) {
+    var M = window.PTGModeration;
+    if ((M ? M.verdict(text, link) : "pending") === "approved") {
+      row.state = "approved";
+      row.decidedBy = "Automatic";
+      row.decidedAt = Date.now();
+    }
+    return row;
+  }
   function $(id) {
     return document.getElementById(id);
   }
@@ -104,10 +113,6 @@
     var name = s && typeof s.name === "function" ? s.name() : "";
     name = String(name || "").trim();
     return name || "A parent";
-  }
-  function isAdmin() {
-    var s = window.PTGSession;
-    return !!(s && typeof s.role === "function" && s.role() === "admin");
   }
   function me() {
     var s = window.PTGSession;
@@ -209,6 +214,7 @@
         decidedAt: null,
         parentId: String(rec.parentId || "")
       };
+      verdict(row, row.body, "");
       all.unshift(row);
       if (!write(all)) {
         return null;
@@ -488,10 +494,12 @@
         box.value = "";
       }
       countChars();
-      audit("Posted to the message board", "Held for review");
-      notifyAdmins(row, false);
+      audit("Posted to the message board", row.state === "approved" ? "Published straight away" : "Held for review");
+      if (row.state !== "approved") {
+        notifyAdmins(row, false);
+      }
       renderBoard();
-      say("Sent for review. Nobody else can see it until an administrator publishes it. " + "You will find it below, marked as awaiting review.");
+      say(row.state === "approved" ? "Posted. Other parents can see it now." : "Sent for review. Nobody else can see it until an administrator publishes it. " + "You will find it below, marked as awaiting review.");
     });
     var list = $("bdList");
     if (!list) {
@@ -614,11 +622,13 @@
       say("This browser is blocking local storage, so your reply was not saved.");
       return;
     }
-    audit("Replied on the message board", "Held for review");
-    notifyAdmins(row, true);
+    audit("Replied on the message board", row.state === "approved" ? "Published straight away" : "Held for review");
+    if (row.state !== "approved") {
+      notifyAdmins(row, true);
+    }
     closeSlots(null);
     renderBoard();
-    say("Reply sent for review. It appears under the message once an administrator publishes it.");
+    say(row.state === "approved" ? "Reply posted." : "Reply sent for review. It appears under the message once an administrator publishes it.");
     var back = $("bdList");
     if (back) {
       var again = back.querySelector('[data-bd-reply="' + id + '"]');

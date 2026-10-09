@@ -1,13 +1,8 @@
-/* "What is included" and "How it works" on the Reading for Pleasure landing.
-   The card stack itself comes from stack.css; this file fits it to the landing's
-   header, type and theme setting. */
-
 #page-landing .rfp-included,
 #page-landing .rfp-how { scroll-margin-top: 76px; }
 
 #page-landing .rfp-wide-head { max-width: 62ch; margin-bottom: clamp(2rem, 5vw, 3rem); }
 
-/* The landing header is 76px tall, not the 72px stack.css assumes. */
 #page-landing .stack { --stack-top: calc(76px + clamp(.75rem, 2.5vw, 1.5rem)); }
 
 #page-landing .stack__head h3 {
@@ -18,7 +13,6 @@
 #page-landing .stack__item p,
 #page-landing .stack__lede { line-height: 1.55; }
 
-/* ---- How it works ---- */
 #page-landing .rfp-steps {
   list-style: none; margin: 0; padding: 0;
   display: grid; gap: 1.8rem;
@@ -47,7 +41,6 @@
 }
 #page-landing .rfp-steps p { margin: 0; font-size: .95rem; line-height: 1.55; color: var(--ink-60); }
 
-/* ---- Follow the site's own theme setting (light / dark / auto) ---- */
 html[data-theme="dark"] .stack__card { --card-icon-bg: rgba(121,216,184,.12); }
 html[data-theme="dark"] .stack__card::after { background: #000; }
 html[data-theme="dark"] .stack__card--2 { --card-bg: #0F332B; --card-line: rgba(255,255,255,.1); }
@@ -74,5 +67,4 @@ html[data-theme="dark"] .stack__card--4 {
   }
 }
 
-/* Honour the in-app "reduce motion" setting as well as the system one. */
 html.ptg-reduce .stack__card { transform: none; will-change: auto; }

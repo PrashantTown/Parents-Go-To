@@ -154,6 +154,23 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || "").trim());
   }
   var Family = {
+    renameOwner: function(oldEmail, newEmail) {
+      var from = String(oldEmail || "").trim().toLowerCase(), to = String(newEmail || "").trim().toLowerCase();
+      if (!from || !to || from === to) {
+        return;
+      }
+      var items = read(), hit = false;
+      items.forEach(function(r) {
+        if (String(r.owner || "") === from) {
+          r.owner = to;
+          hit = true;
+        }
+      });
+      if (hit && write(items)) {
+        fire();
+        post();
+      }
+    },
     list: function(owner) {
       var who = String(owner || "").trim().toLowerCase() || "guest";
       return read().filter(function(r) {

@@ -145,8 +145,6 @@
   }
 }
 
-/* Without stack.js a tall card can't be pinned by its bottom edge, so short
-   screens get the cards laid out flat instead. stack.js handles every size. */
 @media (max-height: 560px) {
   html:not(.has-js) .stack__slot { position: relative; top: auto; margin-bottom: 1.1rem; }
   html:not(.has-js) .stack__card { transform: none; min-height: 0; }
@@ -154,7 +152,6 @@
   html:not(.has-js) .stack::after { display: none; }
 }
 
-/* Phones (portrait and landscape): keep the stack, but tighten the spacing between cards. */
 @media (max-height: 560px), (max-width: 520px) {
   .stack { --stack-gap: clamp(2rem, 10vh, 4rem); --stack-peek: 8px; }
   .stack__card { min-height: 0; }

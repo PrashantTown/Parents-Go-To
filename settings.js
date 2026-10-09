@@ -101,15 +101,88 @@
       writeStore(PREF_KEY, s);
     }
   };
+  var Shots = (function() {
+    var DB = "ptg-attachments", STORE = "shots", ready = null;
+    function open() {
+      if (ready) {
+        return ready;
+      }
+      ready = new Promise(function(resolve, reject) {
+        if (!window.indexedDB) {
+          reject(new Error("IndexedDB is not available"));
+          return;
+        }
+        var req = window.indexedDB.open(DB, 1);
+        req.onupgradeneeded = function() {
+          req.result.createObjectStore(STORE);
+        };
+        req.onsuccess = function() {
+          resolve(req.result);
+        };
+        req.onerror = function() {
+          reject(req.error);
+        };
+      });
+      ready.catch(function() {
+        ready = null;
+      });
+      return ready;
+    }
+    function run(mode, work) {
+      return open().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          var tx = db.transaction(STORE, mode);
+          var req = work(tx.objectStore(STORE));
+          tx.oncomplete = function() {
+            resolve(req ? req.result : undefined);
+          };
+          tx.onerror = tx.onabort = function() {
+            reject(tx.error);
+          };
+        });
+      });
+    }
+    return {
+      put: function(id, blob) {
+        return run("readwrite", function(st) {
+          return st.put(blob, id);
+        });
+      },
+      get: function(id) {
+        return run("readonly", function(st) {
+          return st.get(id);
+        });
+      },
+      remove: function(id) {
+        return run("readwrite", function(st) {
+          return st.delete(id);
+        }).catch(function() {});
+      }
+    };
+  })();
   var Support = {
     list: function() {
       var s = readStore(SUPPORT_KEY, null);
       return s && Object.prototype.toString.call(s.tickets) === "[object Array]" ? s.tickets : [];
     },
     save: function(tickets) {
+      tickets.slice(200).forEach(function(t) {
+        if (t.shot) {
+          Shots.remove(t.id);
+        }
+      });
       return writeStore(SUPPORT_KEY, {
         tickets: tickets.slice(0, 200)
       });
+    },
+    dropShot: function(id) {
+      var all = this.list();
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].id === id) {
+          all[i].shot = null;
+        }
+      }
+      this.save(all);
     },
     add: function(ticket) {
       var all = this.list();
@@ -140,6 +213,42 @@
     }
   };
   window.PTGSupport = Support;
+  var ALLOWED_HOSTS = /(^|\.)(edu|gov|edu\.au|gov\.au|ac\.uk|gov\.uk|sch\.uk|org\.au)$|librar(y|ies)|penguin|harpercollins|scholastic|bloomsbury|walker|allenandunwin|hachette|macmillan|simonandschuster|randomhouse|usborne|oup\.com|abc\.net\.au|readingrockets\.org|booktrust\.org\.uk/i;
+  window.PTGModeration = {
+    linkAllowed: function(link) {
+      var host;
+      try {
+        host = new URL(String(link)).hostname;
+      } catch (e) {
+        return false;
+      }
+      return ALLOWED_HOSTS.test(host);
+    },
+    namesSomeone: function(text) {
+      return /\b[A-Z][a-z]{1,}\s+[A-Z][a-z]{2,}\b/.test(String(text || "").replace(/(^|[.!?]\s+)[A-Z]/g, "$1x"));
+    },
+    verdict: function(text, link) {
+      var P = window.PTGSettings;
+      var rule = function(name) {
+        var v = P && P.platform ? P.platform(name) : undefined;
+        return v === undefined ? true : !!v;
+      };
+      if (rule("holdAll")) {
+        return "pending";
+      }
+      if (rule("flagNames") && this.namesSomeone(text)) {
+        return "pending";
+      }
+      var self = this;
+      var links = (String(text || "").match(/https?:\/\/[^\s<>"']+/gi) || []).concat(link ? [ link ] : []);
+      if (links.length && rule("linkAllow") && !links.every(function(l) {
+        return self.linkAllowed(l);
+      })) {
+        return "pending";
+      }
+      return "approved";
+    }
+  };
   function browserName() {
     var ua = navigator.userAgent;
     if (/Edg\//.test(ua)) {
@@ -470,8 +579,25 @@
       return "guest";
     }
     function persist(patch) {
+      patch.savedAt = Date.now();
       prefs = Prefs.put(scope.role, account, patch);
       applyGlobal(prefs);
+      var ev;
+      try {
+        ev = new CustomEvent("ptg:prefs", {
+          detail: {
+            role: scope.role,
+            changed: Object.keys(patch)
+          }
+        });
+      } catch (err) {
+        ev = document.createEvent("CustomEvent");
+        ev.initCustomEvent("ptg:prefs", false, false, {
+          role: scope.role,
+          changed: Object.keys(patch)
+        });
+      }
+      window.dispatchEvent(ev);
     }
     function paintAll() {
       var letter = initial(prefs.name || window.PTGSession && window.PTGSession.name() || account);
@@ -712,9 +838,59 @@
       }
       return ok;
     }
+    var emailField = Object.keys(scope.details).filter(function(id) {
+      return scope.details[id] === "email";
+    })[0];
+    var EMAIL_ERR = "That does not look like an email address.";
+    function moveAccount(oldMail, newMail) {
+      if (window.PTGAccounts && window.PTGAccounts.rename && !window.PTGAccounts.rename(oldMail, newMail)) {
+        return false;
+      }
+      if (window.PTGSession && window.PTGSession.changeEmail) {
+        window.PTGSession.changeEmail(newMail);
+      }
+      var store = Prefs.all();
+      var was = Prefs.key(scope.role, oldMail), now = Prefs.key(scope.role, newMail);
+      if (store.profiles[was] && was !== now) {
+        store.profiles[now] = store.profiles[was];
+        delete store.profiles[was];
+        writeStore(PREF_KEY, store);
+      }
+      var low = String(oldMail).toLowerCase();
+      var tickets = Support.list();
+      tickets.forEach(function(t) {
+        if (t.source === scope.role && String(t.from).toLowerCase() === low) {
+          t.from = newMail;
+        }
+        if (String(t.replyTo).toLowerCase() === low) {
+          t.replyTo = newMail;
+        }
+      });
+      Support.save(tickets);
+      if (window.PTGNotify && window.PTGNotify.rename) {
+        window.PTGNotify.rename(scope.role, oldMail, newMail);
+      }
+      if (scope.role === "parent") {
+        if (window.PTGChat && window.PTGChat.renameAccount) {
+          window.PTGChat.renameAccount(oldMail, newMail);
+        }
+        if (window.PTGFamily && window.PTGFamily.renameOwner) {
+          window.PTGFamily.renameOwner(oldMail, newMail);
+        }
+        if (window.PTGApp && window.PTGApp.changeEmail) {
+          window.PTGApp.changeEmail(oldMail, newMail);
+        }
+      }
+      audit("account", "Sign-in email changed", newMail, "was " + oldMail);
+      account = newMail;
+      return true;
+    }
     if (detailsForm) {
       detailsForm.addEventListener("submit", function(e) {
         e.preventDefault();
+        if (emailField) {
+          setErr(emailField + "Err", false, EMAIL_ERR);
+        }
         if (!validateDetails()) {
           var bad = detailsForm.querySelector('[aria-invalid="true"]');
           if (bad) {
@@ -730,6 +906,16 @@
             patch[scope.details[id]] = String(el.value || "").trim();
           }
         });
+        var newMail = String(patch.email || "");
+        if (newMail && account !== "guest" && newMail.toLowerCase() !== String(account).toLowerCase()) {
+          if (!moveAccount(account, newMail)) {
+            setErr(emailField + "Err", true, "That email already belongs to another account.");
+            markInvalid(emailField, true);
+            $(emailField).focus();
+            say(scope, "That email is already in use.");
+            return;
+          }
+        }
         persist(patch);
         var newName = patch.name;
         if (window.PTGSession && window.PTGSession.rename) {
@@ -924,8 +1110,163 @@
       what: scope.reportPrefix + "What",
       email: scope.reportPrefix + "Email",
       diag: scope.reportPrefix + "Diag",
-      saved: scope.reportPrefix + "Saved"
+      saved: scope.reportPrefix + "Saved",
+      shot: scope.reportPrefix + "Shot"
     };
+    var shot = {
+      file: null,
+      name: "",
+      url: ""
+    };
+    function sizeText(bytes) {
+      return bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(bytes / 1024)) + " KB";
+    }
+    function paintShot() {
+      var box = $(rep.shot + "Preview");
+      if (!box) {
+        return;
+      }
+      box.hidden = !shot.file;
+      $(rep.shot + "BtnTxt").textContent = shot.file ? "Choose a different one" : "Add a screenshot";
+      if (shot.file) {
+        $(rep.shot + "Img").src = shot.url;
+        $(rep.shot + "Name").textContent = shot.name + " · " + sizeText(shot.file.size);
+      } else {
+        $(rep.shot + "Img").removeAttribute("src");
+      }
+    }
+    function clearShot() {
+      if (shot.url) {
+        URL.revokeObjectURL(shot.url);
+      }
+      shot.file = null;
+      shot.name = "";
+      shot.url = "";
+      var input = $(rep.shot);
+      if (input) {
+        input.value = "";
+      }
+      setErr(rep.shot + "Err", false);
+      paintShot();
+    }
+    function takeShot(file, name) {
+      setErr(rep.shot + "Err", false);
+      if (!file) {
+        return;
+      }
+      if (!/^image\/(png|jpe?g|webp|gif)$/.test(file.type)) {
+        setErr(rep.shot + "Err", true, "That is not a picture we can attach. Use a PNG, JPG, WebP or GIF.");
+        return;
+      }
+      if (file.size > MAX_UPLOAD) {
+        setErr(rep.shot + "Err", true, "That screenshot is " + sizeText(file.size) + ". The limit is 2 MB — crop it, or save it as a JPG, and try again.");
+        return;
+      }
+      var url = URL.createObjectURL(file);
+      var probe = new Image();
+      probe.onload = function() {
+        if (shot.url) {
+          URL.revokeObjectURL(shot.url);
+        }
+        shot.file = file;
+        shot.name = name || file.name || "Screenshot";
+        shot.url = url;
+        paintShot();
+      };
+      probe.onerror = function() {
+        URL.revokeObjectURL(url);
+        setErr(rep.shot + "Err", true, "That file could not be opened as a picture. Try taking the screenshot again.");
+      };
+      probe.src = url;
+    }
+    var shotInput = $(rep.shot), shotBox = $(rep.shot + "Box");
+    if (shotInput && shotBox && rep.form) {
+      shotInput.addEventListener("change", function() {
+        takeShot(shotInput.files && shotInput.files[0]);
+        shotInput.value = "";
+      });
+      $(rep.shot + "Clear").addEventListener("click", function() {
+        clearShot();
+        shotInput.focus();
+      });
+      [ "dragenter", "dragover" ].forEach(function(name) {
+        shotBox.addEventListener(name, function(e) {
+          if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], "Files") !== -1) {
+            e.preventDefault();
+            shotBox.classList.add("is-over");
+          }
+        });
+      });
+      [ "dragleave", "drop" ].forEach(function(name) {
+        shotBox.addEventListener(name, function() {
+          shotBox.classList.remove("is-over");
+        });
+      });
+      shotBox.addEventListener("drop", function(e) {
+        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) {
+          e.preventDefault();
+          takeShot(f);
+        }
+      });
+      rep.form.addEventListener("paste", function(e) {
+        var items = e.clipboardData && e.clipboardData.items || [];
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].kind === "file" && /^image\//.test(items[i].type)) {
+            e.preventDefault();
+            takeShot(items[i].getAsFile(), "Pasted screenshot");
+            return;
+          }
+        }
+      });
+    }
+    var shotUrls = [];
+    function paintTicketShots(list) {
+      shotUrls.forEach(function(u) {
+        URL.revokeObjectURL(u);
+      });
+      shotUrls = [];
+      Array.prototype.forEach.call(list.querySelectorAll("[data-shot-id]"), function(a) {
+        Shots.get(a.getAttribute("data-shot-id")).then(function(blob) {
+          if (!blob || !document.contains(a)) {
+            a.classList.add("is-missing");
+            return;
+          }
+          var u = URL.createObjectURL(blob);
+          shotUrls.push(u);
+          a.href = u;
+          a.querySelector("img").src = u;
+        }, function() {
+          a.classList.add("is-missing");
+        });
+      });
+    }
+    function shotLink(t) {
+      return t.shot ? '<a class="tk-shot" data-shot-id="' + esc(t.id) + '" target="_blank" rel="noopener" aria-label="Open the screenshot attached to ' + esc(t.ref) + '"><img alt="" decoding="async"></a>' : "";
+    }
+    if (scope.role === "parent" && $("setContactForm") && rep.form) {
+      $("setContactForm").addEventListener("click", function() {
+        var area = $(rep.area);
+        if (area) {
+          area.value = "other";
+        }
+        var reduce = root.classList.contains("ptg-reduce") || window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        rep.form.scrollIntoView({
+          behavior: reduce ? "auto" : "smooth",
+          block: "start"
+        });
+        var what = $(rep.what);
+        if (what) {
+          try {
+            what.focus({
+              preventScroll: true
+            });
+          } catch (err) {
+            what.focus();
+          }
+        }
+      });
+    }
     if (rep.form) {
       rep.form.addEventListener("submit", function(e) {
         e.preventDefault();
@@ -962,20 +1303,36 @@
           severity: sevEl ? sevEl.value : "med",
           severityText: sevEl ? sevEl.options[sevEl.selectedIndex].text : "",
           body: whatVal,
-          diag: attach ? diagLine() : ""
+          diag: attach ? diagLine() : "",
+          shot: shot.file ? {
+            name: shot.name,
+            type: shot.file.type,
+            size: shot.file.size
+          } : null
         });
+        if (shot.file) {
+          Shots.put(ticket.id, shot.file).then(function() {
+            renderTickets();
+            renderAdminReports();
+          }, function() {
+            Support.dropShot(ticket.id);
+            renderTickets();
+            say(scope, "The report was sent, but this browser would not store the screenshot.");
+          });
+        }
         audit("account", "Technical problem reported (" + ticket.ref + ") — " + ticket.area, ticket.from, ticket.severityText);
         if (window.PTGNotify) {
           window.PTGNotify.toAdmins({
             kind: "support",
             tone: ticket.severity === "high" ? "alert" : "info",
             title: "New problem report — " + ticket.ref,
-            body: ticket.area + ". Reported by " + ticket.from + ".",
+            body: ticket.area + ". Reported by " + ticket.from + "." + (ticket.shot ? " Screenshot attached." : ""),
             go: "settings",
             tag: "report-" + ticket.id
           });
         }
         rep.form.reset();
+        clearShot();
         var diagEl = $(rep.diag);
         if (diagEl) {
           diagEl.checked = true;
@@ -1006,8 +1363,9 @@
       });
       wrap.hidden = !mine.length;
       list.innerHTML = mine.map(function(t) {
-        return "<li>" + '<div class="tk-head">' + '<span class="tk-pill tk-pill--' + esc(t.state === "closed" ? "closed" : t.state === "progress" ? "progress" : "open") + '">' + (t.state === "closed" ? "Closed" : t.state === "progress" ? "Being looked at" : "Open") + "</span>" + "<b>" + esc(t.area) + "</b>" + '<span class="tk-ref">' + esc(t.ref) + "</span>" + "</div>" + '<p class="tk-body">' + esc(t.body) + "</p>" + '<p class="tk-meta">Sent ' + esc(since(t.at)) + " · replies go to " + esc(t.replyTo) + "</p>" + "</li>";
+        return "<li>" + '<div class="tk-head">' + '<span class="tk-pill tk-pill--' + esc(t.state === "closed" ? "closed" : t.state === "progress" ? "progress" : "open") + '">' + (t.state === "closed" ? "Closed" : t.state === "progress" ? "Being looked at" : "Open") + "</span>" + "<b>" + esc(t.area) + "</b>" + '<span class="tk-ref">' + esc(t.ref) + "</span>" + "</div>" + '<p class="tk-body">' + esc(t.body) + "</p>" + shotLink(t) + '<p class="tk-meta">Sent ' + esc(since(t.at)) + " · replies go to " + esc(t.replyTo) + "</p>" + "</li>";
       }).join("");
+      paintTicketShots(list);
     }
     var reportFilter = "open";
     function tellReporter(id, state) {
@@ -1067,8 +1425,9 @@
         var pub = t.source === "public";
         var srcPill = pub ? '<span class="tk-pill tk-pill--public">From the home page</span>' : '<span class="tk-pill tk-pill--signedin">Signed in</span>';
         var acts = t.state === "closed" ? '<button class="btn btn--ghost btn--sm" type="button" data-rep-open="' + esc(t.id) + '">Reopen</button>' : '<button class="btn btn--primary btn--sm" type="button" data-rep-progress="' + esc(t.id) + '">Being looked at</button>' + '<button class="btn btn--ghost btn--sm" type="button" data-rep-close="' + esc(t.id) + '">Close</button>';
-        return "<li>" + '<div class="tk-head">' + '<span class="tk-pill tk-pill--' + pill + '">' + pillText + "</span>" + (t.severity === "high" ? '<span class="tk-pill tk-pill--high">Urgent</span>' : "") + srcPill + "<b>" + esc(t.area) + "</b>" + '<span class="tk-ref">' + esc(t.ref) + "</span>" + "</div>" + '<p class="tk-body">' + esc(t.body) + "</p>" + '<p class="tk-meta">' + esc(t.severityText) + " · from " + esc(pub && t.name ? t.name + " <" + t.from + ">" : t.from) + " · " + esc(since(t.at)) + " · reply to " + esc(t.replyTo) + (pub ? " · no account — reply by email" : "") + (t.diag ? "<br>" + esc(t.diag) : "") + "</p>" + '<div class="tk-acts">' + acts + "</div>" + "</li>";
+        return "<li>" + '<div class="tk-head">' + '<span class="tk-pill tk-pill--' + pill + '">' + pillText + "</span>" + (t.severity === "high" ? '<span class="tk-pill tk-pill--high">Urgent</span>' : "") + srcPill + "<b>" + esc(t.area) + "</b>" + '<span class="tk-ref">' + esc(t.ref) + "</span>" + "</div>" + '<p class="tk-body">' + esc(t.body) + "</p>" + shotLink(t) + '<p class="tk-meta">' + esc(t.severityText) + " · from " + esc(pub && t.name ? t.name + " <" + t.from + ">" : t.from) + " · " + esc(since(t.at)) + " · reply to " + esc(t.replyTo) + (pub ? " · no account — reply by email" : "") + (t.diag ? "<br>" + esc(t.diag) : "") + "</p>" + '<div class="tk-acts">' + acts + "</div>" + "</li>";
       }).join("");
+      paintTicketShots(list);
       empty.classList.toggle("is-on", !all.length);
       list.hidden = !all.length;
     }
@@ -1568,11 +1927,6 @@
     }
     function updateReportCounts() {
       var open = Support.openCount();
-      var tab = $("admCountReports");
-      if (tab) {
-        tab.textContent = String(open);
-        tab.hidden = !open;
-      }
       var railBadge = $("admRailReports");
       if (railBadge) {
         railBadge.textContent = String(open);
@@ -1910,9 +2264,54 @@
         }
       }, 0);
     });
+    function controlFor(roleName, name) {
+      var scope = roleName === "admin" ? ADMIN : PARENT;
+      var groups = [ scope.toggles, scope.selects, scope.details ];
+      for (var g = 0; g < groups.length; g++) {
+        for (var id in groups[g]) {
+          if (Object.prototype.hasOwnProperty.call(groups[g], id) && groups[g][id] === name) {
+            return $(id);
+          }
+        }
+      }
+      return null;
+    }
     window.PTGSettings = {
       get: function(roleName, email) {
         return Prefs.get(roleName || "parent", email || "");
+      },
+      pref: function(name, roleName, email) {
+        var role = roleName || (window.PTGSession && window.PTGSession.role()) || "parent";
+        var who = email || window.PTGSession && window.PTGSession.email() || "";
+        var saved = Prefs.get(role, who);
+        if (Object.prototype.hasOwnProperty.call(saved, name)) {
+          return saved[name];
+        }
+        var el = controlFor(role, name);
+        if (!el) {
+          return undefined;
+        }
+        if (el.type === "checkbox") {
+          return el.defaultChecked;
+        }
+        if (el.tagName === "SELECT") {
+          for (var i = 0; i < el.options.length; i++) {
+            if (el.options[i].defaultSelected) {
+              return el.options[i].value;
+            }
+          }
+          return el.options.length ? el.options[0].value : "";
+        }
+        return el.defaultValue;
+      },
+      platform: function(name) {
+        var all = Prefs.all().profiles, best = null;
+        Object.keys(all).forEach(function(k) {
+          if (k.indexOf("admin::") === 0 && Object.prototype.hasOwnProperty.call(all[k], name) && (!best || (all[k].savedAt || 0) >= (best.savedAt || 0))) {
+            best = all[k];
+          }
+        });
+        return best ? best[name] : this.pref(name, "admin", "-");
       },
       support: Support,
       open: function(roleName, sectionId) {

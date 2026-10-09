@@ -813,6 +813,10 @@
 
 :is(#page-app, #page-admin) .set-contact-card {
   display: block;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   padding: 1rem 1.05rem;
   background: var(--paper);
   border: 1px solid var(--line-soft);
@@ -1099,4 +1103,95 @@ html.ptg-reduce *::after {
   :is(#page-app, #page-admin) .set-layout {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+:is(#page-app, #page-admin) .set-shot-lbl {
+  display: block;
+  margin-bottom: .35rem;
+  font-size: .85rem;
+  font-weight: 600;
+}
+:is(#page-app, #page-admin) .set-shot-lbl .opt { font-weight: 400; color: var(--ink-60); }
+:is(#page-app, #page-admin) .set-shot {
+  position: relative;
+  padding: .85rem;
+  border: 1.5px dashed var(--line-soft);
+  border-radius: var(--r-md);
+  transition: border-color .15s var(--ease-out), background-color .15s var(--ease-out);
+}
+:is(#page-app, #page-admin) .set-shot.is-over {
+  border-color: var(--pine);
+  background: color-mix(in srgb, var(--pine) 6%, transparent);
+}
+:is(#page-app, #page-admin) .set-shot-pick {
+  display: flex;
+  align-items: center;
+  gap: .5rem .8rem;
+  flex-wrap: wrap;
+}
+:is(#page-app, #page-admin) .set-shot .f label,
+:is(#page-app, #page-admin) .set-shot-pick label.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin: 0;
+  min-height: 40px;
+  cursor: pointer;
+}
+:is(#page-app, #page-admin) .set-shot-hint {
+  flex: 1 1 14rem;
+  font-size: .8rem;
+  line-height: 1.45;
+  color: var(--ink-60);
+}
+:is(#page-app, #page-admin) .set-shot-preview {
+  margin: .85rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  flex-wrap: wrap;
+}
+:is(#page-app, #page-admin) .set-shot-preview[hidden] { display: none; }
+:is(#page-app, #page-admin) .set-shot-preview img {
+  width: 120px;
+  max-width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft);
+  background: var(--paper);
+}
+:is(#page-app, #page-admin) .set-shot-preview figcaption {
+  display: flex;
+  align-items: center;
+  gap: .4rem .6rem;
+  flex-wrap: wrap;
+  min-width: 0;
+  font-size: .83rem;
+}
+:is(#page-app, #page-admin) .set-shot-name {
+  overflow-wrap: anywhere;
+  color: var(--ink-60);
+}
+
+:is(#page-app, #page-admin) .tk-shot {
+  display: inline-block;
+  margin-top: .55rem;
+  border-radius: var(--r-sm);
+  line-height: 0;
+}
+:is(#page-app, #page-admin) .tk-shot img {
+  width: 160px;
+  max-width: 100%;
+  height: 100px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft);
+  background: var(--paper);
+}
+:is(#page-app, #page-admin) .tk-shot:focus-visible { outline: 2px solid var(--pine); outline-offset: 3px; }
+:is(#page-app, #page-admin) .tk-shot.is-missing { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  :is(#page-app, #page-admin) .set-shot { transition: none; }
 }

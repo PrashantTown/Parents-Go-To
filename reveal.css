@@ -7,7 +7,6 @@ html.rv-on .rv {
   transition-delay: calc(var(--rv-i, 0) * 70ms);
 }
 html.rv-on .rv.is-in { opacity: 1; transform: none; }
-/* reveal.js adds .rv-done once the entrance has played, so hover is not delayed by the stagger. */
 html.rv-on .rv.rv-done {
   transition: opacity var(--dur-base) var(--ease-standard),
               transform var(--dur-base) var(--ease-standard),

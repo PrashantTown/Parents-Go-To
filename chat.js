@@ -366,6 +366,63 @@
         return m.from !== id && (m.at || 0) > seenAt;
       }).length;
     },
+    renameAccount: function(oldEmail, newEmail) {
+      var from = mail(oldEmail), to = mail(newEmail);
+      if (!from || !to || from === to) {
+        return false;
+      }
+      var swap = function(id) {
+        id = String(id || "");
+        if (id === "mail:" + from) {
+          return "mail:" + to;
+        }
+        if (id.indexOf("kid:" + from + ":") === 0) {
+          return "kid:" + to + id.slice(("kid:" + from).length);
+        }
+        return id;
+      };
+      var swapKey = function(k) {
+        var bits = String(k || "").split(":");
+        if (bits.length >= 3 && bits[1] === from) {
+          bits[1] = to;
+        }
+        return bits.join(":");
+      };
+      var store = read();
+      store.threads.forEach(function(t) {
+        if (t.account === from) {
+          t.account = to;
+          t.key = swapKey(t.key);
+        }
+        t.members = t.members.map(swap);
+        var names = {};
+        Object.keys(t.names || {}).forEach(function(k) {
+          names[swap(k)] = t.names[k];
+        });
+        t.names = names;
+      });
+      Object.keys(store.msgs).forEach(function(tid) {
+        (store.msgs[tid] || []).forEach(function(m) {
+          m.from = swap(m.from);
+        });
+      });
+      var reads = {};
+      Object.keys(store.reads).forEach(function(k) {
+        var cut = k.indexOf("|");
+        reads[cut === -1 ? k : k.slice(0, cut + 1) + swap(k.slice(cut + 1))] = store.reads[k];
+      });
+      store.reads = reads;
+      if (!write(store)) {
+        return false;
+      }
+      fire({
+        t: "rename"
+      });
+      post({
+        t: "rename"
+      });
+      return true;
+    },
     unreadTotal: function(kind, who) {
       var id = who || this.me();
       var self = this;

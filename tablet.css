@@ -85,9 +85,6 @@
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
 
-  :is(#page-app,#page-admin) .suggests{
-    grid-template-columns:repeat(auto-fill,minmax(min(215px, 100%), 1fr));
-  }
   :is(#page-app,#page-admin) .readers{
     grid-template-columns:repeat(auto-fill,minmax(min(215px, 100%), 1fr));
   }

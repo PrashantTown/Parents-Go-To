@@ -375,7 +375,6 @@
   </div>
 </section>
 
-
 <section class="section rfp-how" id="how" aria-labelledby="how-title">
   <div class="wrap">
 
@@ -403,7 +402,6 @@
       </ol>
   </div>
 </section>
-
 
 <section class="section" id="contact" aria-labelledby="contact-title">
   <div class="wrap">
@@ -1517,7 +1515,6 @@
             <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg>
           </button>
 
-          
         </form>
       </section>
 
@@ -2479,8 +2476,7 @@
           <section class="set-card" id="set-appearance" tabindex="-1" aria-labelledby="setAppearanceH" hidden>
             <div class="set-card-head">
               <h2 id="setAppearanceH">Appearance</h2>
-              <p>Pick a look. It saves on this device, so a bedtime tablet can sit in dark
-                 while the kitchen laptop stays light.</p>
+              <p></p>
             </div>
 
             <div class="set-card-body">
@@ -3044,6 +3040,27 @@
                     <p class="err" id="setRepWhatErr">Tell us what went wrong — a sentence is plenty.</p>
                   </div>
                   <div class="f wide">
+                    <span class="set-shot-lbl" id="setRepShotLbl">Screenshot <span class="opt">(optional)</span></span>
+                    <div class="set-shot" id="setRepShotBox">
+                      <div class="set-shot-pick">
+                        <input class="set-file" type="file" id="setRepShot" accept="image/png,image/jpeg,image/webp,image/gif" aria-describedby="setRepShotHint setRepShotErr">
+                        <label class="btn btn--ghost btn--sm" for="setRepShot">
+                          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="4" width="14.8" height="12" rx="2"/><circle cx="7.2" cy="8.4" r="1.4"/><path d="m3 14 4.2-3.6 3.2 2.6 2.6-2.2L17 14"/></svg>
+                          <span id="setRepShotBtnTxt">Add a screenshot</span>
+                        </label>
+                        <span class="set-shot-hint" id="setRepShotHint">PNG, JPG, WebP or GIF up to 2&nbsp;MB. You can also drop or paste one here.</span>
+                      </div>
+                      <figure class="set-shot-preview" id="setRepShotPreview" hidden>
+                        <img id="setRepShotImg" alt="Preview of the screenshot you attached">
+                        <figcaption>
+                          <span class="set-shot-name" id="setRepShotName"></span>
+                          <button class="btn btn--quiet btn--sm" type="button" id="setRepShotClear">Remove</button>
+                        </figcaption>
+                      </figure>
+                    </div>
+                    <p class="err" id="setRepShotErr" role="alert"></p>
+                  </div>
+                  <div class="f wide">
                     <label for="setRepEmail">Where should we reply?</label>
                     <input type="email" id="setRepEmail" autocomplete="email" required>
                     <p class="err" id="setRepEmailErr">We need an email address to reply to.</p>
@@ -3080,8 +3097,9 @@
                 </details>
                 <details>
                   <summary>Can I move the shelf to a new phone or laptop?</summary>
-                  <p>Yes. Download a backup on the old device, then open the app on the new one
-                     and choose Restore from a backup. Everything comes back exactly as it was.</p>
+                  <p>Not yet. The shelf lives in this browser on this device. You can save a copy
+                     with Download my data under Privacy &amp; safety, but there is no way to load
+                     it back in on another device yet.</p>
                 </details>
                 <details>
                   <summary>My child logged a book on the wrong name. Can I fix it?</summary>
@@ -3090,7 +3108,9 @@
                 </details>
                 <details>
                   <summary>How do I print a reading log for school?</summary>
-                  <p>Your shelf lives in this browser. Keep using the same browser on the same device and everything stays where you left it.</p>
+                  <p>There is no print button yet. For now, Download my data under Privacy &amp;
+                     safety saves a copy of the reading log you can send to school, or open the
+                     Dashboard and use your browser&rsquo;s Print option to print the reading chart.</p>
                 </details>
                 <details>
                   <summary>I forgot my password.</summary>
@@ -3112,15 +3132,15 @@
                   <b>Email support</b>
                   <span>tsander2@usc.edu.au — we answer within two working days.</span>
                 </a>
-                <a class="set-contact-card" href="#contact">
+                <button class="set-contact-card" type="button" id="setContactForm">
                   <span class="ico">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M17 11.4a2.5 2.5 0 0 1-2.5 2.5H8l-4 2.9v-2.9A2.5 2.5 0 0 1 3 11.4v-6A2.5 2.5 0 0 1 5.5 3h9A2.5 2.5 0 0 1 17 5.4Z"/>
                     </svg>
                   </span>
-                  <b>Contact form</b>
-                  <span>The form on the public site, if you would rather not use email.</span>
-                </a>
+                  <b>Send us a message</b>
+                  <span>Use the form at the top of this page for anything, not just problems. It reaches the same team.</span>
+                </button>
                 <a class="set-contact-card set-contact-card--urgent" href="tel:000">
                   <span class="ico">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3821,8 +3841,6 @@
           <p class="date" id="admGreetDate">Today</p>
         </div>
       </div>
-
-      
 
       <h2 class="vh">Where things stand</h2>
       <div class="stats">
@@ -4676,6 +4694,27 @@
                     <p class="err" id="admSetRepWhatErr">Describe what went wrong — a sentence is plenty.</p>
                   </div>
                   <div class="f wide">
+                    <span class="set-shot-lbl" id="admSetRepShotLbl">Screenshot <span class="opt">(optional)</span></span>
+                    <div class="set-shot" id="admSetRepShotBox">
+                      <div class="set-shot-pick">
+                        <input class="set-file" type="file" id="admSetRepShot" accept="image/png,image/jpeg,image/webp,image/gif" aria-describedby="admSetRepShotHint admSetRepShotErr">
+                        <label class="btn btn--ghost btn--sm" for="admSetRepShot">
+                          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="4" width="14.8" height="12" rx="2"/><circle cx="7.2" cy="8.4" r="1.4"/><path d="m3 14 4.2-3.6 3.2 2.6 2.6-2.2L17 14"/></svg>
+                          <span id="admSetRepShotBtnTxt">Add a screenshot</span>
+                        </label>
+                        <span class="set-shot-hint" id="admSetRepShotHint">PNG, JPG, WebP or GIF up to 2&nbsp;MB. You can also drop or paste one here.</span>
+                      </div>
+                      <figure class="set-shot-preview" id="admSetRepShotPreview" hidden>
+                        <img id="admSetRepShotImg" alt="Preview of the screenshot you attached">
+                        <figcaption>
+                          <span class="set-shot-name" id="admSetRepShotName"></span>
+                          <button class="btn btn--quiet btn--sm" type="button" id="admSetRepShotClear">Remove</button>
+                        </figcaption>
+                      </figure>
+                    </div>
+                    <p class="err" id="admSetRepShotErr" role="alert"></p>
+                  </div>
+                  <div class="f wide">
                     <label for="admSetRepEmail">Where should we reply?</label>
                     <input type="email" id="admSetRepEmail" autocomplete="email" required>
                     <p class="err" id="admSetRepEmailErr">We need an email address to reply to.</p>
@@ -4718,8 +4757,8 @@
                 <details>
                   <summary>A parent says their shelf has vanished.</summary>
                   <p>The shelf lives in their browser, so clearing site data or switching device
-                     empties it. Ask whether they have a backup file; if so, Restore from a backup
-                     in their account menu brings the shelf back.</p>
+                     empties it. There is no restore yet, so it cannot be brought back from the
+                     console. Download my data only saves a copy for their own records.</p>
                 </details>
               </div>
 
@@ -5121,13 +5160,17 @@
 
   <section class="kids-step" id="kidsStepMessages" hidden>
     <h1>Messages</h1>
-    <p class="lead">Say hello to your grown-up.</p>
+    <p class="lead" id="kidsMsgLead">Say hello to your grown-up.</p>
     <div class="kids-msg-card">
       <span class="kids-msg-ic" aria-hidden="true">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.4A1.4 1.4 0 0 1 4.4 4h11.2A1.4 1.4 0 0 1 17 5.4v7.2a1.4 1.4 0 0 1-1.4 1.4H8.6L5 17v-3H4.4A1.4 1.4 0 0 1 3 12.6Z"/><path d="M7 8.2h6M7 10.8h3.6"/></svg>
       </span>
       <p>Tell them what you are reading, or ask for a new book. Only your grown-up can see these messages.</p>
       <button class="kids-go kids-msg-cta" type="button" id="kidsMsgAdult">Message your grown-up</button>
+    </div>
+    <div class="kids-msg-kids" id="kidsMsgKidsWrap" hidden>
+      <h2>Chat with your family</h2>
+      <div class="kids-who" id="kidsMsgKids"></div>
     </div>
   </section>
 
@@ -5167,24 +5210,18 @@
     </div>
   </section>
 
-  <div class="kids-sheet" id="kidsGate" hidden role="dialog" aria-modal="true" aria-labelledby="kidsGateTitle">
-    <div class="kids-sheet-card kids-gate-card">
-      <h2 id="kidsGateTitle">Just checking&hellip;</h2>
-      <p>A quick sum, so this stays a grown-up screen.</p>
-      <p class="kids-gate-sum" id="kidsGateSum"></p>
-      <label class="vh" for="kidsGateA">Type the answer to the sum</label>
-      <input class="kids-gate-input" type="number" inputmode="numeric" id="kidsGateA" autocomplete="off">
-      <p class="kids-gate-err" id="kidsGateErr" hidden>That&rsquo;s not it &mdash; try once more.</p>
+  <div class="kids-sheet" id="kidsGate" hidden role="dialog" aria-modal="true" aria-labelledby="kidsGateTitle" aria-describedby="kidsGateSub">
+    <form class="kids-sheet-card kids-gate-card" id="kidsGateForm" novalidate>
+      <h2 id="kidsGateTitle">Grown-ups only</h2>
+      <p id="kidsGateSub">Type the account password to leave.</p>
+      <label class="vh" for="kidsGatePw">Account password</label>
+      <input class="kids-gate-input" type="password" id="kidsGatePw" autocomplete="current-password" enterkeyhint="done">
+      <p class="kids-gate-err" id="kidsGateErr" role="alert" hidden>That password is not right.</p>
       <div class="kids-sheet-acts">
-        <button class="kids-sheet-b" type="button" id="kidsGateGo">Continue</button>
-        <button class="kids-sheet-b" type="button" id="kidsGateCancel">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M5 5 15 15M15 5 5 15"/>
-          </svg>
-          Never mind
-        </button>
+        <button class="kids-sheet-b kids-gate-go" type="submit">Unlock</button>
+        <button class="kids-sheet-b" type="button" id="kidsGateCancel">Stay here</button>
       </div>
-    </div>
+    </form>
   </div>
 
   <div class="kids-sheet" id="kidsSheet" hidden role="dialog" aria-modal="true" aria-labelledby="kidsSheetTitle">
@@ -5229,7 +5266,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 <script>
 (function() {
-  // One-time move of saved data from the old "pgt" key names to "ptg", so returning families keep their shelves.
   [ "localStorage", "sessionStorage" ].forEach(function(name) {
     try {
       var s = window[name], old = [], i, k;

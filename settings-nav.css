@@ -202,3 +202,5 @@ html.ptg-reduce :is(#page-app, #page-admin) .set-savebar { animation: none; }
 }
 :is(#page-app, #page-admin) .set-ask-type input:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
 :is(#page-app, #page-admin) .set-ask .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+#page-app, #page-admin { overflow-x: clip; }
