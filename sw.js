@@ -33,25 +33,3 @@ self.addEventListener("notificationclick", function(event) {
     return undefined;
   }));
 });
-
-self.addEventListener("push", function(event) {
-  var payload = {
-    title: "Parents Go To",
-    body: "",
-    go: ""
-  };
-  if (event.data) {
-    try {
-      payload = event.data.json();
-    } catch (e) {
-      payload.body = event.data.text();
-    }
-  }
-  event.waitUntil(self.registration.showNotification(payload.title || "Parents Go To", {
-    body: payload.body || "",
-    tag: payload.tag || "ptg-push",
-    data: {
-      go: payload.go || ""
-    }
-  }));
-});

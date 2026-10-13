@@ -8,10 +8,7 @@
   var message = document.getElementById("cf-message");
   var result = document.getElementById("cf-result");
   if (!send) return;
-  function reference() {
-    var stamp = Date.now().toString(36).toUpperCase();
-    return "PTG-" + stamp.slice(-6);
-  }
+  var TO = "tsander2@usc.edu.au";
   function fail(field, text) {
     result.classList.add("error");
     result.textContent = text;
@@ -32,7 +29,9 @@
     if (message.value.trim() === "") {
       return fail(message, "Tell us what you need — a sentence or two is plenty.");
     }
-    result.textContent = "Thanks. Your reference is " + reference() + ", filed under “" + topic.value + "”. If you need a reply soon, use the email address on this page.";
+    var body = message.value.trim() + "\n\n— " + name.value.trim() + " (" + address + ")";
+    window.location.href = "mailto:" + TO + "?subject=" + encodeURIComponent("Parents Go To: " + topic.value) + "&body=" + encodeURIComponent(body);
+    result.textContent = "Your email app should open with the message ready to send. If it does not, email " + TO + " directly.";
     name.value = "";
     email.value = "";
     message.value = "";

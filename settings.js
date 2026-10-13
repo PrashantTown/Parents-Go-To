@@ -471,7 +471,6 @@
       setBigText: "bigText",
       setReduceMotion: "reduceMotion",
       setKidsFull: "kidsFullScreen",
-      setTwoStep: "twoStep",
       setSigninAlerts: "signinAlerts",
       setKidsLock: "kidsLock",
       setAgeFilter: "ageFilter",
@@ -527,7 +526,6 @@
     toggles: {
       admSetBigText: "bigText",
       admSetReduceMotion: "reduceMotion",
-      admSetTwoStep: "twoStep",
       admSetConfirmSuspend: "confirmSuspend",
       admSetSigninAlerts: "signinAlerts",
       admSetHoldAll: "holdAll",
@@ -1073,21 +1071,6 @@
         return "<li>" + '<span class="dev-ico">' + r.icon + "</span>" + '<span class="dev-what"><b>' + esc(r.name) + "</b><span>" + esc(r.note) + "</span></span>" + (r.now ? '<span class="dev-now">Now</span>' : "") + "</li>";
       }).join("");
     }
-    var signOutAll = $(scope.role === "parent" ? "setSignOutAll" : "admSetSignOutAll");
-    if (signOutAll) {
-      signOutAll.addEventListener("click", function() {
-        ask({
-          title: "Sign out everywhere else?",
-          body: scope.role === "admin" ? "Every other console session ends. You stay signed in here." : "Every other device is signed out. You stay signed in on this one.",
-          yes: "Sign out other devices",
-          danger: true
-        }, function() {
-          audit("auth", "Signed out of all other sessions", account);
-          renderDevices();
-          say(scope, "Every other session has been signed out.");
-        });
-      });
-    }
     function renderAbout() {
       var box = $(scope.aboutId);
       if (!box) {
@@ -1533,14 +1516,21 @@
           yes: "Delete my account",
           danger: true
         }, function() {
-          Prefs.clear(scope.role, account);
-          audit("account", "Account deletion requested", account);
+          var gone = account;
+          Prefs.clear(scope.role, gone);
+          audit("account", "Account deleted", gone);
           var out = $("signOutBtn");
           if (out) {
             out.click();
           }
+          if (window.PTGApp && window.PTGApp.forget) {
+            window.PTGApp.forget(gone);
+          }
+          if (window.PTGAccounts && window.PTGAccounts.remove) {
+            window.PTGAccounts.remove(gone);
+          }
           if (window.PTGAuthNotice) {
-            window.PTGAuthNotice("Your account is scheduled for deletion and you have been signed out.");
+            window.PTGAuthNotice("Your account and everything on your shelf have been deleted from this device.");
           }
         });
       });

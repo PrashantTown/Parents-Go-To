@@ -11,9 +11,6 @@
 <meta name="theme-color" content="#EDF1EC" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#101B18" media="(prefers-color-scheme: dark)" />
 <meta name="color-scheme" content="light dark" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-title" content="Parents Go To" />
-<link rel="manifest" href="manifest.webmanifest" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1246,25 +1243,7 @@
             <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg>
           </button>
 
-          <p class="divider" aria-hidden="true">or continue with</p>
-          <div class="oauth">
-            <button type="button" class="oauth-btn" data-oauth="Google">
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.71a5.4 5.4 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l3.01-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.17 6.66 3.58 9 3.58Z"/></svg>
-              Google
-            </button>
-            <button type="button" class="oauth-btn" data-oauth="Facebook">
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#1877F2" d="M18 9a9 9 0 1 0-10.41 8.89v-6.29H5.31V9h2.28V7.02c0-2.25 1.34-3.5 3.4-3.5.98 0 2.01.18 2.01.18v2.21h-1.13c-1.11 0-1.46.69-1.46 1.4V9h2.48l-.4 2.6h-2.08v6.29A9 9 0 0 0 18 9Z"/><path fill="#FFFFFF" d="m12.49 11.6.4-2.6h-2.48V7.31c0-.71.35-1.4 1.46-1.4H13V3.7s-1.03-.18-2.01-.18c-2.06 0-3.4 1.25-3.4 3.5V9H5.31v2.6h2.28v6.29a9.09 9.09 0 0 0 2.82 0V11.6h2.08Z"/></svg>
-              Facebook
-            </button>
-          </div>
-          <p class="oauth-note" id="signinOauthNote" role="status"></p>
-
           <p class="foot">New here? <button type="button" class="link" data-go="create">Create a family account</button></p>
-
-          <p class="foot" style="padding-top:.7rem;border-top:0;margin-top:.2rem">
-
-            <b style="color:var(--ink)"></b>
-          </p>
         </form>
       </section>
 
@@ -1413,19 +1392,6 @@
             <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg>
           </button>
 
-          <p class="divider" aria-hidden="true">or sign up with</p>
-          <div class="oauth">
-            <button type="button" class="oauth-btn" data-oauth="Google">
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.71a5.4 5.4 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l3.01-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.17 6.66 3.58 9 3.58Z"/></svg>
-              Google
-            </button>
-            <button type="button" class="oauth-btn" data-oauth="Facebook">
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#1877F2" d="M18 9a9 9 0 1 0-10.41 8.89v-6.29H5.31V9h2.28V7.02c0-2.25 1.34-3.5 3.4-3.5.98 0 2.01.18 2.01.18v2.21h-1.13c-1.11 0-1.46.69-1.46 1.4V9h2.48l-.4 2.6h-2.08v6.29A9 9 0 0 0 18 9Z"/><path fill="#FFFFFF" d="m12.49 11.6.4-2.6h-2.48V7.31c0-.71.35-1.4 1.46-1.4H13V3.7s-1.03-.18-2.01-.18c-2.06 0-3.4 1.25-3.4 3.5V9H5.31v2.6h2.28v6.29a9.09 9.09 0 0 0 2.82 0V11.6h2.08Z"/></svg>
-              Facebook
-            </button>
-          </div>
-          <p class="oauth-note" id="createOauthNote" role="status"></p>
-
           <p class="foot">Already have an account? <button type="button" class="link" data-go="signin">Sign in</button></p>
         </form>
       </section>
@@ -1467,13 +1433,10 @@
             <rect x="7" y="15" width="46" height="32" rx="4"/>
             <path class="flap" d="M7.8 18 30 34 52.2 18"/>
           </svg>
-          <h1 id="h-sent" tabindex="-1">Check your inbox</h1>
-          <p>If an account exists for <strong id="sentEmail">that address</strong>, a reset link is on its way.</p>
-          <p>It can take a minute to arrive. Check your spam folder before requesting another.</p>
+          <h1 id="h-sent" tabindex="-1">Request sent</h1>
+          <p>We have asked an administrator to reset the password for <strong id="sentEmail">that address</strong>.</p>
+          <p>They will give you a temporary password. Sign in with it, then choose a new one in Settings.</p>
           <div class="actions">
-            <button type="button" class="submit submit--ghost" id="resend">
-              <span id="resendLabel">Send it again</span>
-            </button>
             <button type="button" class="submit" data-go="signin">
               <span>Back to sign in</span>
             </button>
@@ -2723,17 +2686,8 @@
 
               <div class="set-switch">
                 <div class="grow">
-                  <b>Two-step verification</b>
-                  <span>Ask for a one-time code by email whenever this account signs in on a
-                        device it has not seen before.</span>
-                </div>
-                <label class="sw"><input type="checkbox" id="setTwoStep"><span class="sw-track" aria-hidden="true"></span><span class="vh">Two-step verification</span></label>
-              </div>
-
-              <div class="set-switch">
-                <div class="grow">
                   <b>Tell me about new sign-ins</b>
-                  <span>An email whenever the account is opened somewhere new.</span>
+                  <span>A notification whenever the account is opened on a new device.</span>
                 </div>
                 <label class="sw"><input type="checkbox" id="setSigninAlerts" checked><span class="sw-track" aria-hidden="true"></span><span class="vh">Tell me about new sign-ins</span></label>
               </div>
@@ -2762,9 +2716,6 @@
 
               <h3 class="set-sub">Where you are signed in</h3>
               <ul class="set-devices" id="setDevices"></ul>
-              <div class="set-actions">
-                <button class="btn btn--danger" type="button" id="setSignOutAll">Sign out everywhere else</button>
-              </div>
             </div>
           </section>
 
@@ -4456,15 +4407,6 @@
 
               <div class="set-switch">
                 <div class="grow">
-                  <b>Require a one-time code every sign-in</b>
-                  <span>Administrators already receive a code. Turning this off is not
-                        recommended and is written to the audit log.</span>
-                </div>
-                <label class="sw"><input type="checkbox" id="admSetTwoStep" checked><span class="sw-track" aria-hidden="true"></span><span class="vh">Require a one-time code every sign-in</span></label>
-              </div>
-
-              <div class="set-switch">
-                <div class="grow">
                   <b>Ask again before I suspend an account</b>
                   <span>A confirmation step before sign-in is blocked for a parent.</span>
                 </div>
@@ -4474,7 +4416,7 @@
               <div class="set-switch">
                 <div class="grow">
                   <b>Tell me about new sign-ins</b>
-                  <span>An email whenever this console is opened somewhere new.</span>
+                  <span>A notification whenever this console is opened on a new device.</span>
                 </div>
                 <label class="sw"><input type="checkbox" id="admSetSigninAlerts" checked><span class="sw-track" aria-hidden="true"></span><span class="vh">Tell me about new sign-ins</span></label>
               </div>
@@ -4503,9 +4445,6 @@
 
               <h3 class="set-sub">Where you are signed in</h3>
               <ul class="set-devices" id="admSetDevices"></ul>
-              <div class="set-actions">
-                <button class="btn btn--danger" type="button" id="admSetSignOutAll">Sign out everywhere else</button>
-              </div>
             </div>
           </section>
 

@@ -42,10 +42,59 @@
 
 (function() {
   "use strict";
+  var SESSION_KEY = "ptg-session-v1";
   var signedIn = false;
   var who = null;
+  var remembered = false;
+  function storage(kind) {
+    try {
+      return window[kind];
+    } catch (e) {
+      return null;
+    }
+  }
+  function saveWho() {
+    [ "localStorage", "sessionStorage" ].forEach(function(kind) {
+      var s = storage(kind);
+      try {
+        if (s) {
+          s.removeItem(SESSION_KEY);
+        }
+      } catch (e) {}
+    });
+    if (!signedIn || !who) {
+      return;
+    }
+    var keep = storage(remembered ? "localStorage" : "sessionStorage");
+    try {
+      if (keep) {
+        keep.setItem(SESSION_KEY, JSON.stringify({
+          email: who.email,
+          role: who.role,
+          name: who.name,
+          at: who.at,
+          remember: remembered
+        }));
+      }
+    } catch (e) {}
+  }
+  function readWho() {
+    var kinds = [ "sessionStorage", "localStorage" ];
+    for (var i = 0; i < kinds.length; i++) {
+      var s = storage(kinds[i]);
+      try {
+        var v = s ? JSON.parse(s.getItem(SESSION_KEY)) : null;
+        if (v && v.email) {
+          return v;
+        }
+      } catch (e) {}
+    }
+    return null;
+  }
   window.PTGSession = {
     start: function(email, role) {
+      var box = document.getElementById("remember");
+      remembered = !!(box && box.checked);
       signedIn = true;
       who = {
         email: String(email || ""),
@@ -76,13 +125,40 @@
           tag: "signin"
         });
       }
+      saveWho();
+      window.dispatchEvent(new Event("ptg:session"));
+    },
+    restore: function() {
+      var v = readWho();
+      if (!v) {
+        return null;
+      }
+      var acct = window.PTGAccounts ? window.PTGAccounts.get(v.email) : null;
+      if (!acct || acct.status === "suspended") {
+        saveWho();
+        return null;
+      }
+      signedIn = true;
+      remembered = !!v.remember;
+      who = {
+        email: String(v.email),
+        role: v.role === "admin" ? "admin" : "parent",
+        name: String(v.name || acct.name || ""),
+        at: Number(v.at) || Date.now()
+      };
+      return who;
     },
     end: function() {
       if (signedIn && who && window.PTGAudit) {
         window.PTGAudit.write("auth", who.role === "admin" ? "Administrator signed out" : "Parent signed out", who.email);
       }
+      var was = signedIn;
       signedIn = false;
       who = null;
+      saveWho();
+      if (was) {
+        window.dispatchEvent(new Event("ptg:session"));
+      }
     },
     active: function() {
       return signedIn;
@@ -99,12 +175,14 @@
     rename: function(name) {
       if (who) {
         who.name = String(name || "").trim();
+        saveWho();
       }
       return who ? who.name : "";
     },
     changeEmail: function(email) {
       if (who) {
         who.email = String(email || "").trim();
+        saveWho();
       }
       return who ? who.email : "";
     },
@@ -116,8 +194,26 @@
     }
   };
   var DEMO_PASSWORD = "demo1234";
+  var ACCOUNTS_KEY = "ptg-accounts-v1";
   var accounts = {};
   var order = [];
+  try {
+    var kept = JSON.parse(window.localStorage.getItem(ACCOUNTS_KEY));
+    if (kept && kept.accounts && Array.isArray(kept.order)) {
+      accounts = kept.accounts;
+      order = kept.order.filter(function(k) {
+        return Object.prototype.hasOwnProperty.call(accounts, k);
+      });
+    }
+  } catch (e) {}
+  function saveAccounts() {
+    try {
+      window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify({
+        accounts: accounts,
+        order: order
+      }));
+    } catch (e) {}
+  }
   function key(email) {
     return String(email || "").trim().toLowerCase();
   }
@@ -284,19 +380,43 @@
       } : {
         ok: false
       };
+    },
+    remove: function(email) {
+      var k = key(email);
+      if (!Object.prototype.hasOwnProperty.call(accounts, k)) {
+        return false;
+      }
+      delete accounts[k];
+      order = order.filter(function(o) {
+        return o !== k;
+      });
+      return true;
     }
   };
+  [ "create", "touch", "setStatus", "setPassword", "rename", "setName", "noteFail", "clearFails", "remove" ].forEach(function(name) {
+    var fn = window.PTGAccounts[name];
+    window.PTGAccounts[name] = function() {
+      var out = fn.apply(this, arguments);
+      saveAccounts();
+      return out;
+    };
+  });
 })();
 
 (function() {
   "use strict";
+  var AUDIT_KEY = "ptg-audit-v1";
   var entries = [];
-  var seq = 0;
+  try {
+    var kept = JSON.parse(window.localStorage.getItem(AUDIT_KEY));
+    if (Array.isArray(kept)) {
+      entries = kept;
+    }
+  } catch (e) {}
   window.PTGAudit = {
     write: function(kind, what, who, detail) {
-      seq++;
       entries.unshift({
-        id: "log" + seq,
+        id: "log" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         kind: kind || "account",
         what: String(what || ""),
         who: String(who || "system"),
@@ -306,6 +426,9 @@
       if (entries.length > 400) {
         entries.pop();
       }
+      try {
+        window.localStorage.setItem(AUDIT_KEY, JSON.stringify(entries));
+      } catch (e) {}
       if (window.PTGAdmin && window.PTGAdmin.refresh) {
         window.PTGAdmin.refresh();
       }
@@ -2619,37 +2742,25 @@ const BookField = (() => {
       fEmail.focus();
       return;
     }
-    busy($("forgotSubmit"), "Sending…", 1200, function() {
-      $("sentEmail").textContent = fEmail.value.trim();
-      go("sent");
-      startCooldown(30);
-    });
-  });
-  var resend = $("resend"), resendLabel = $("resendLabel"), cooldown = null;
-  function startCooldown(seconds) {
-    var left = seconds;
-    resend.disabled = true;
-    resendLabel.innerHTML = 'Send it again in <span class="countdown">' + left + "</span>s";
-    window.clearInterval(cooldown);
-    cooldown = window.setInterval(function() {
-      left--;
-      if (left <= 0) {
-        window.clearInterval(cooldown);
-        resend.disabled = false;
-        resendLabel.textContent = "Send it again";
-        route.textContent = "You can request another reset link now.";
-      } else {
-        resendLabel.innerHTML = 'Send it again in <span class="countdown">' + left + "</span>s";
+    busy($("forgotSubmit"), "Sending…", 600, function() {
+      var who = fEmail.value.trim();
+      $("sentEmail").textContent = who;
+      if (window.PTGAccounts && window.PTGAccounts.exists(who)) {
+        if (window.PTGAudit) {
+          window.PTGAudit.write("auth", "Password reset requested", who);
+        }
+        if (window.PTGNotify && window.PTGNotify.toAdmins) {
+          window.PTGNotify.toAdmins({
+            kind: "account",
+            tone: "info",
+            title: "Password reset requested — " + who,
+            body: "Give them a temporary password from Accounts.",
+            go: "accounts",
+            tag: "reset-" + who.toLowerCase()
+          });
+        }
       }
-    }, 1e3);
-  }
-  resend.addEventListener("click", function() {
-    if (resend.disabled) {
-      return;
-    }
-    busy(resend, "Sending…", 900, function() {
-      route.textContent = "Another reset link has been sent.";
-      startCooldown(30);
+      go("sent");
     });
   });
 })();
@@ -2765,19 +2876,6 @@ const BookField = (() => {
   });
   window.addEventListener("pageshow", function(e) {
     apply(!!e.persisted);
-  });
-  document.addEventListener("click", function(e) {
-    var btn = e.target.closest ? e.target.closest("[data-oauth]") : null;
-    if (!btn) {
-      return;
-    }
-    var provider = btn.getAttribute("data-oauth");
-    var form = btn.closest("form");
-    var note = form ? form.querySelector(".oauth-note") : null;
-    if (note) {
-      note.textContent = provider + " sign-in is not connected yet.";
-      note.classList.add("is-on");
-    }
   });
 })();
 
@@ -3131,7 +3229,7 @@ const BookField = (() => {
   var seq = 100;
   function uid(p) {
     seq++;
-    return p + seq;
+    return p + Date.now().toString(36) + seq.toString(36) + Math.random().toString(36).slice(2, 6);
   }
   function esc(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -3366,7 +3464,7 @@ const BookField = (() => {
     return '<span class="stars" role="img" aria-label="Rated ' + r + ' out of 5">' + out + "</span>";
   }
   var toast = $("toast"), toastText = $("toastText"), toastTimer = null, undoBtn = null;
-  function say(message, undo) {
+  function say(message, undo, hold) {
     toastText.textContent = message;
     if (undoBtn) {
       undoBtn.remove();
@@ -3385,7 +3483,7 @@ const BookField = (() => {
     }
     toast.classList.add("is-on");
     window.clearTimeout(toastTimer);
-    toastTimer = window.setTimeout(hideToast, undo ? 7e3 : 3600);
+    toastTimer = window.setTimeout(hideToast, hold || (undo ? 7e3 : 3600));
   }
   function hideToast() {
     window.clearTimeout(toastTimer);
@@ -6203,8 +6301,51 @@ const BookField = (() => {
     say(v === "auto" ? "Appearance follows your device" : "Appearance set to " + v);
   });
   paintThemeSeg();
+  var SHELVES_KEY = "ptg-shelves-v1";
   var shelves = {};
   var current = null;
+  try {
+    var keptShelves = JSON.parse(window.localStorage.getItem(SHELVES_KEY));
+    if (keptShelves && typeof keptShelves === "object") {
+      shelves = keptShelves;
+    }
+  } catch (e) {}
+  var shelfSaveTimer = null;
+  function saveShelves() {
+    window.clearTimeout(shelfSaveTimer);
+    shelfSaveTimer = null;
+    if (current) {
+      shelves[current] = capture();
+    }
+    try {
+      window.localStorage.setItem(SHELVES_KEY, JSON.stringify(shelves));
+    } catch (e) {}
+  }
+  function saveShelvesSoon() {
+    window.clearTimeout(shelfSaveTimer);
+    shelfSaveTimer = window.setTimeout(saveShelves, 300);
+  }
+  [ "click", "change", "submit", "keyup", "pointerup" ].forEach(function(name) {
+    document.addEventListener(name, function() {
+      if (current && !$("page-app").hidden) {
+        saveShelvesSoon();
+      }
+    }, true);
+  });
+  window.addEventListener("pagehide", function() {
+    if (current) {
+      saveShelves();
+    }
+  });
+  function forgetShelf(email) {
+    var key = String(email || "").trim().toLowerCase();
+    delete shelves[key];
+    if (current === key) {
+      current = null;
+      install(emptyShelf());
+    }
+    saveShelves();
+  }
   function emptyShelf(name) {
     return {
       parent: {
@@ -6333,6 +6474,7 @@ const BookField = (() => {
     pruneLog();
     document.documentElement.lang = appLocale() || "en-AU";
     resetView();
+    saveShelves();
     if (started) {
       renderAll();
     }
@@ -6867,10 +7009,12 @@ const BookField = (() => {
         current = to;
       }
       parent.email = String(newEmail).trim();
+      saveShelves();
       if (started) {
         renderAll();
       }
     },
+    forget: forgetShelf,
     data: function() {
       return {
         parent: parent,
@@ -6982,7 +7126,7 @@ const BookField = (() => {
   var seq = 0;
   function uid(p) {
     seq++;
-    return p + seq;
+    return p + Date.now().toString(36) + seq.toString(36) + Math.random().toString(36).slice(2, 6);
   }
   var submissions = [ {
     id: "sub1",
@@ -7068,6 +7212,37 @@ const BookField = (() => {
     at: Date.now() - 36e5 * 8,
     by: "seeded"
   } ];
+  var CONSOLE_KEY = "ptg-console-v1";
+  try {
+    var keptConsole = JSON.parse(window.localStorage.getItem(CONSOLE_KEY));
+    if (keptConsole && Array.isArray(keptConsole.posts) && Array.isArray(keptConsole.submissions)) {
+      posts = keptConsole.posts;
+      submissions = keptConsole.submissions;
+    }
+  } catch (e) {}
+  var consoleSaveTimer = null;
+  function saveConsole() {
+    window.clearTimeout(consoleSaveTimer);
+    consoleSaveTimer = null;
+    try {
+      window.localStorage.setItem(CONSOLE_KEY, JSON.stringify({
+        posts: posts,
+        submissions: submissions
+      }));
+    } catch (e) {}
+  }
+  function saveConsoleSoon() {
+    window.clearTimeout(consoleSaveTimer);
+    consoleSaveTimer = window.setTimeout(saveConsole, 300);
+  }
+  [ "click", "change", "submit", "keyup" ].forEach(function(name) {
+    document.addEventListener(name, function() {
+      if (!$("page-admin").hidden) {
+        saveConsoleSoon();
+      }
+    }, true);
+  });
+  window.addEventListener("pagehide", saveConsole);
   var state = {
     tab: "overview",
     q: "",
@@ -7085,7 +7260,7 @@ const BookField = (() => {
     more: {}
   };
   var toast = $("admToast"), toastText = $("admToastText"), toastTimer = null, undoBtn = null;
-  function say(message, undo) {
+  function say(message, undo, hold) {
     toastText.textContent = message;
     if (undoBtn) {
       undoBtn.remove();
@@ -7104,7 +7279,7 @@ const BookField = (() => {
     }
     toast.classList.add("is-on");
     window.clearTimeout(toastTimer);
-    toastTimer = window.setTimeout(hideToast, undo ? 7e3 : 3600);
+    toastTimer = window.setTimeout(hideToast, hold || (undo ? 7e3 : 3600));
   }
   function hideToast() {
     window.clearTimeout(toastTimer);
@@ -7335,7 +7510,7 @@ const BookField = (() => {
       var s = shelfFor(a.email);
       var suspended = a.status === "suspended";
       var isMe = String(a.email).toLowerCase() === String(me()).toLowerCase();
-      return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Send reset</button>' + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + "</span>" + "</td>" + "</tr>";
+      return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Reset password</button>' + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + "</span>" + "</td>" + "</tr>";
     }).join("") + moreRow("acc", list.length, every.length, "tr");
     $("admEmptyAcc").classList.toggle("is-on", !every.length);
     $("admAccTable").parentNode.hidden = !list.length;
@@ -7933,9 +8108,14 @@ const BookField = (() => {
     hit = t.closest("[data-reset]");
     if (hit) {
       var ez = hit.getAttribute("data-reset");
-      log("account", "Sent a password reset link to " + ez);
+      var temp = Math.random().toString(36).slice(2, 6) + "-" + Math.random().toString(36).slice(2, 6);
+      if (window.PTGAccounts) {
+        window.PTGAccounts.setPassword(ez, temp);
+        window.PTGAccounts.setStatus(ez, "active");
+      }
+      log("account", "Set a temporary password for " + ez);
       renderAll();
-      say("A reset link would be sent to " + ez + " — email is not connected yet");
+      say("Temporary password for " + ez + ": " + temp + " — pass it on so they can sign in and change it", null, 2e4);
       return;
     }
   });
@@ -8495,6 +8675,12 @@ const BookField = (() => {
       return;
     }
     show(wanted());
+  }
+  var restored = window.PTGSession && window.PTGSession.restore ? window.PTGSession.restore() : null;
+  if (restored && restored.role === "parent" && window.PTGApp) {
+    window.PTGApp.loadShelf(restored.email, {
+      name: restored.name
+    });
   }
   route();
   window.addEventListener("hashchange", route);
