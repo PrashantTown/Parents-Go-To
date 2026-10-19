@@ -776,6 +776,16 @@
     return name || "Avatar";
   }
   var cache = null;
+  // sync.js refreshes ptg-kid-looks from the server (and clears it on sign
+  // out); drop the cached copy so the next read uses the new data.
+  window.addEventListener("ptg:synced", function(e) {
+    if (e.detail && e.detail.key === STORE_KEY) {
+      cache = null;
+    }
+  });
+  window.addEventListener("ptg:session", function() {
+    cache = null;
+  });
   function all() {
     if (cache) {
       return cache;

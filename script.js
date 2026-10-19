@@ -42,10 +42,15 @@
 
 (function() {
   "use strict";
+  // Signed-in state. The sign-in token itself is kept by PTGApi (api.js);
+  // this keeps who is signed in so the page can show them straight away on
+  // reload, then checks with the server in the background.
   var SESSION_KEY = "ptg-session-v1";
   var signedIn = false;
   var who = null;
   var remembered = false;
+  var Api = window.PTGApi;
+  var Sync = window.PTGSync;
   function storage(kind) {
     try {
       return window[kind];
@@ -91,50 +96,68 @@
     }
     return null;
   }
+  // Forget the session in this page. Returns a promise that settles once the
+  // last changes have been sent and this browser's copy is cleared (or null
+  // when nobody was signed in).
+  function endLocally() {
+    var was = signedIn;
+    signedIn = false;
+    who = null;
+    saveWho();
+    var stopped = Sync ? Sync.stop({
+      clear: true
+    }) : Promise.resolve();
+    if (was) {
+      window.dispatchEvent(new Event("ptg:session"));
+    }
+    return was ? stopped : null;
+  }
   window.PTGSession = {
-    start: function(email, role) {
+    // Call after the server has accepted the sign-in (the token is stored).
+    // Resolves once this person's data has been loaded from the server.
+    start: function(email, role, name) {
       var box = document.getElementById("remember");
       remembered = !!(box && box.checked);
       signedIn = true;
       who = {
-        email: String(email || ""),
+        email: String(email || "").trim(),
         role: role === "admin" ? "admin" : "parent",
-        name: "",
+        name: String(name || ""),
         at: Date.now()
       };
       if (window.PTGAccounts) {
-        window.PTGAccounts.touch(email, who.role);
-        var acct = window.PTGAccounts.get(email);
-        if (acct) {
-          who.name = acct.name || "";
-        }
-      }
-      if (window.PTGAudit) {
-        window.PTGAudit.write("auth", who.role === "admin" ? "Administrator signed in" : "Parent signed in", who.email);
-      }
-      var noteTo = (who.role === "admin" ? "admin::" : "parent::") + who.email.toLowerCase();
-      var kind = window.PTGNotify && window.PTGNotify.deviceLabel ? window.PTGNotify.deviceLabel() : "this device";
-      if (window.PTGNotify && (!window.PTGNotify.newDevice || window.PTGNotify.newDevice(noteTo, kind))) {
-        window.PTGNotify.push({
-          to: noteTo,
-          kind: "account",
-          tone: "info",
-          title: "Signed in on a new device",
-          body: "Signed in on " + kind + ". If that was not you, change your password in Settings.",
-          go: "settings",
-          tag: "signin"
-        });
+        window.PTGAccounts.touch(email, who.role, who.name);
       }
       saveWho();
       window.dispatchEvent(new Event("ptg:session"));
+      var loaded = Sync && Sync.enabled ? Sync.start({
+        email: who.email,
+        role: who.role
+      }) : Promise.resolve();
+      return loaded.then(function() {
+        var noteTo = (who && who.role === "admin" ? "admin::" : "parent::") + String(email || "").toLowerCase();
+        var kind = window.PTGNotify && window.PTGNotify.deviceLabel ? window.PTGNotify.deviceLabel() : "this device";
+        if (window.PTGNotify && (!window.PTGNotify.newDevice || window.PTGNotify.newDevice(noteTo, kind))) {
+          window.PTGNotify.push({
+            to: noteTo,
+            kind: "account",
+            tone: "info",
+            title: "Signed in on a new device",
+            body: "Signed in on " + kind + ". If that was not you, change your password in Settings.",
+            go: "settings",
+            tag: "signin"
+          });
+        }
+      });
     },
+    // Show the last signed-in person straight away after a reload. Only
+    // restores when a sign-in token is still stored; verify() then checks it.
     restore: function() {
       var v = readWho();
       if (!v) {
         return null;
       }
-      var acct = window.PTGAccounts ? window.PTGAccounts.get(v.email) : null;
-      if (!acct || acct.status === "suspended") {
+      if (Api && Api.enabled && !Api.token()) {
         saveWho();
         return null;
       }
@@ -143,22 +166,58 @@
       who = {
         email: String(v.email),
         role: v.role === "admin" ? "admin" : "parent",
-        name: String(v.name || acct.name || ""),
+        name: String(v.name || ""),
         at: Number(v.at) || Date.now()
       };
       return who;
     },
+    // Ask the server who the token belongs to, then load their data.
+    // Resolves with the session, or null if the token is no longer valid.
+    verify: function() {
+      if (!signedIn || !Api || !Api.enabled) {
+        return Promise.resolve(who);
+      }
+      return Api.auth.me().then(function(d) {
+        var u = d.user || {};
+        if (!signedIn) {
+          return null;
+        }
+        who.email = String(u.email || who.email);
+        who.name = String(u.name || who.name || "");
+        who.role = u.role === "admin" ? "admin" : "parent";
+        saveWho();
+        return (Sync && Sync.enabled ? Sync.start({
+          email: who.email,
+          role: who.role
+        }) : Promise.resolve()).then(function() {
+          return who;
+        });
+      }, function(err) {
+        if (err && err.status === 0) {
+          // Offline: keep showing what this browser has.
+          return who;
+        }
+        endLocally();
+        if (Api) {
+          Api.clearToken();
+        }
+        return null;
+      });
+    },
     end: function() {
-      if (signedIn && who && window.PTGAudit) {
-        window.PTGAudit.write("auth", who.role === "admin" ? "Administrator signed out" : "Parent signed out", who.email);
+      var token = Api && Api.enabled ? Api.token() : null;
+      var stopped = endLocally();
+      if (!stopped || !token) {
+        return;
       }
-      var was = signedIn;
-      signedIn = false;
-      who = null;
-      saveWho();
-      if (was) {
-        window.dispatchEvent(new Event("ptg:session"));
-      }
+      // Send the last changes first, then end the session on the server.
+      stopped.then(function() {
+        return Api.auth.logout(token);
+      }).then(null, function() {}).then(function() {
+        if (Api.token() === token) {
+          Api.clearToken();
+        }
+      });
     },
     active: function() {
       return signedIn;
@@ -193,19 +252,48 @@
       return signedIn && who.role === "admin";
     }
   };
-  var DEMO_PASSWORD = "demo1234";
+  // The server says the token no longer works (signed out elsewhere, password
+  // changed, account suspended): sign out here too and explain why.
+  window.addEventListener("ptg:unauthorized", function(e) {
+    if (!signedIn) {
+      return;
+    }
+    endLocally();
+    if (Api) {
+      Api.clearToken();
+    }
+    var msg = e.detail && /suspend/i.test(e.detail.message || "") ? "Your account has been suspended by an administrator. Contact the site owner to have it restored." : "Your session has ended. Please sign in again.";
+    if (window.location.hash !== "#signin") {
+      window.location.hash = "#signin";
+    }
+    window.setTimeout(function() {
+      if (window.PTGAuthNotice) {
+        window.PTGAuthNotice(msg);
+      }
+    }, 60);
+  });
+
+  // Accounts. Administrators see everyone (loaded from the server by
+  // sync.js into ptg-accounts-v1); a parent only sees themselves. Changes an
+  // administrator makes go straight to the server; passwords never live in
+  // the browser.
   var ACCOUNTS_KEY = "ptg-accounts-v1";
   var accounts = {};
   var order = [];
-  try {
-    var kept = JSON.parse(window.localStorage.getItem(ACCOUNTS_KEY));
-    if (kept && kept.accounts && Array.isArray(kept.order)) {
-      accounts = kept.accounts;
-      order = kept.order.filter(function(k) {
-        return Object.prototype.hasOwnProperty.call(accounts, k);
-      });
-    }
-  } catch (e) {}
+  function loadAccounts() {
+    accounts = {};
+    order = [];
+    try {
+      var kept = JSON.parse(window.localStorage.getItem(ACCOUNTS_KEY));
+      if (kept && kept.accounts && Array.isArray(kept.order)) {
+        accounts = kept.accounts;
+        order = kept.order.filter(function(k) {
+          return Object.prototype.hasOwnProperty.call(accounts, k);
+        });
+      }
+    } catch (e) {}
+  }
+  loadAccounts();
   function saveAccounts() {
     try {
       window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify({
@@ -217,30 +305,34 @@
   function key(email) {
     return String(email || "").trim().toLowerCase();
   }
-  function ensure(email, role) {
-    var k = key(email);
-    if (!k) {
-      return null;
+  function refreshConsole() {
+    if (window.PTGAdmin && window.PTGAdmin.rerender) {
+      window.PTGAdmin.rerender();
     }
-    if (!Object.prototype.hasOwnProperty.call(accounts, k)) {
-      accounts[k] = {
-        email: String(email || "").trim(),
-        name: "",
-        password: null,
-        role: role === "admin" ? "admin" : "parent",
-        status: "active",
-        createdAt: Date.now(),
-        lastSeen: null
-      };
-      order.push(k);
-    }
-    return accounts[k];
   }
+  function failed(err, fallback) {
+    var msg = Api ? Api.errorMessage(err, fallback) : fallback;
+    if (Sync && Sync.toast) {
+      Sync.toast(msg, 7e3);
+    }
+    if (Sync && Sync.pull) {
+      Sync.pull(ACCOUNTS_KEY);
+    }
+  }
+  window.addEventListener("ptg:synced", function(e) {
+    if (e.detail && e.detail.key === ACCOUNTS_KEY) {
+      loadAccounts();
+      refreshConsole();
+    }
+  });
+  window.addEventListener("ptg:session", function() {
+    if (!window.PTGSession || !window.PTGSession.active()) {
+      loadAccounts();
+    }
+  });
   window.PTGAccounts = {
-    demoPassword: DEMO_PASSWORD,
     exists: function(email) {
-      var a = accounts[key(email)];
-      return !!(a && a.password !== null);
+      return !!accounts[key(email)];
     },
     get: function(email) {
       return accounts[key(email)] || null;
@@ -250,51 +342,80 @@
         return accounts[k];
       });
     },
-    create: function(email, name, password) {
-      var a = ensure(email, "parent");
-      if (!a) {
+    // Remember the signed-in person locally (the server keeps the real record).
+    touch: function(email, role, name) {
+      var k = key(email);
+      if (!k) {
         return null;
       }
-      a.email = String(email || "").trim();
-      a.name = String(name || "").trim();
-      a.password = String(password || "");
-      a.createdAt = Date.now();
-      return a;
-    },
-    touch: function(email, role) {
-      var a = ensure(email, role);
+      var a = accounts[k];
       if (!a) {
-        return null;
-      }
-      if (role === "admin") {
-        a.role = "admin";
+        a = accounts[k] = {
+          email: String(email || "").trim(),
+          name: "",
+          role: role === "admin" ? "admin" : "parent",
+          status: "active",
+          createdAt: Date.now(),
+          lastSeen: null
+        };
+        order.push(k);
       }
       a.lastSeen = Date.now();
-      if (!a.name) {
-        var local = String(email || "").split("@")[0].replace(/[._-]+/g, " ").trim();
-        if (local) {
-          a.name = local.replace(/\S+/g, function(w) {
-            return w.charAt(0).toUpperCase() + w.slice(1);
-          });
-        }
+      if (name) {
+        a.name = String(name);
       }
       return a;
     },
     setStatus: function(email, status) {
       var a = accounts[key(email)];
-      if (a) {
-        a.status = status === "suspended" ? "suspended" : "active";
-        a.lockedOut = false;
-      }
-      return a;
-    },
-    setPassword: function(email, password) {
-      var a = ensure(email, "parent");
       if (!a) {
         return null;
       }
-      a.password = String(password || "");
+      var want = status === "suspended" ? "suspended" : "active";
+      var was = a.status;
+      a.status = want;
+      a.lockedOut = false;
+      saveAccounts();
+      if (Api && Api.enabled && a.id) {
+        Api.admin.setStatus(a.id, want).then(function() {
+          if (Sync) {
+            Sync.pull(ACCOUNTS_KEY);
+          }
+        }, function(err) {
+          a.status = was;
+          failed(err, "Couldn't change that account's status.");
+        });
+      }
+      return a;
+    },
+    // Used by the console to give someone a temporary password.
+    setPassword: function(email, password) {
+      var a = accounts[key(email)];
+      if (!a) {
+        return null;
+      }
+      a.status = "active";
+      a.lockedOut = false;
+      a.tempPassword = true;
       a.passwordChangedAt = Date.now();
+      saveAccounts();
+      if (Api && Api.enabled && a.id) {
+        Api.admin.tempPassword(a.id, password).then(function() {
+          if (Sync) {
+            Sync.pull(ACCOUNTS_KEY);
+          }
+        }, function(err) {
+          failed(err, "Couldn't set the temporary password. It will not work — try again.");
+        });
+      }
+      return a;
+    },
+    setName: function(email, name) {
+      var a = accounts[key(email)];
+      if (a) {
+        a.name = String(name || "").trim();
+        saveAccounts();
+      }
       return a;
     },
     rename: function(oldEmail, newEmail) {
@@ -303,116 +424,81 @@
         return false;
       }
       if (from === to) {
-        if (accounts[from]) {
-          accounts[from].email = String(newEmail).trim();
-        }
         return true;
       }
-      if (Object.prototype.hasOwnProperty.call(accounts, to)) {
+      if (accounts[to]) {
         return false;
       }
-      var a = accounts[from] || ensure(oldEmail, "parent");
-      delete accounts[from];
-      a.email = String(newEmail).trim();
-      accounts[to] = a;
-      order[order.indexOf(from)] = to;
+      var a = accounts[from];
+      if (a) {
+        delete accounts[from];
+        a.email = String(newEmail).trim();
+        accounts[to] = a;
+        order[order.indexOf(from)] = to;
+        saveAccounts();
+      }
       return true;
     },
-    setName: function(email, name) {
-      var a = ensure(email, "parent");
-      if (!a) {
-        return null;
-      }
-      a.name = String(name || "").trim();
-      return a;
-    },
-    noteFail: function(email) {
-      var acct = accounts[key(email)];
-      if (!acct) {
-        return {
-          locked: false
-        };
-      }
-      acct.fails = (acct.fails || 0) + 1;
-      var limit = Number(window.PTGSettings && window.PTGSettings.platform ? window.PTGSettings.platform("lockAttempts") : 5) || 5;
-      if (acct.fails >= limit) {
-        acct.status = "suspended";
-        acct.lockedOut = true;
-        acct.fails = 0;
-        return {
-          locked: true,
-          limit: limit
-        };
-      }
-      return {
-        locked: false,
-        left: limit - acct.fails
-      };
-    },
-    clearFails: function(email) {
-      var acct = accounts[key(email)];
-      if (acct) {
-        acct.fails = 0;
-      }
-    },
-    check: function(email, password) {
-      var acct = accounts[key(email)];
-      if (acct && acct.status === "suspended") {
-        return {
-          ok: false,
-          suspended: true,
-          lockedOut: !!acct.lockedOut
-        };
-      }
-      if (acct && acct.password !== null) {
-        return acct.password === password ? {
-          ok: true,
-          demo: false,
-          name: acct.name
-        } : {
-          ok: false
-        };
-      }
-      return password === DEMO_PASSWORD ? {
-        ok: true,
-        demo: true,
-        name: acct ? acct.name : ""
-      } : {
-        ok: false
-      };
-    },
+    // Administrators deleting someone else's account.
     remove: function(email) {
       var k = key(email);
-      if (!Object.prototype.hasOwnProperty.call(accounts, k)) {
+      var a = accounts[k];
+      if (!a) {
         return false;
       }
       delete accounts[k];
       order = order.filter(function(o) {
         return o !== k;
       });
-      return true;
-    }
-  };
-  [ "create", "touch", "setStatus", "setPassword", "rename", "setName", "noteFail", "clearFails", "remove" ].forEach(function(name) {
-    var fn = window.PTGAccounts[name];
-    window.PTGAccounts[name] = function() {
-      var out = fn.apply(this, arguments);
       saveAccounts();
-      return out;
-    };
-  });
+      var me = window.PTGSession ? key(window.PTGSession.email()) : "";
+      if (Api && Api.enabled && a.id && k !== me) {
+        Api.admin.remove(a.id).then(null, function(err) {
+          failed(err, "Couldn't delete that account.");
+        });
+      }
+      return true;
+    },
+    // Sign-in, lockouts and password checks now happen on the server.
+    noteFail: function() {
+      return {
+        locked: false
+      };
+    },
+    clearFails: function() {},
+    reload: loadAccounts
+  };
 })();
 
 (function() {
   "use strict";
   var AUDIT_KEY = "ptg-audit-v1";
   var entries = [];
-  try {
-    var kept = JSON.parse(window.localStorage.getItem(AUDIT_KEY));
-    if (Array.isArray(kept)) {
-      entries = kept;
+  // Entries are sent to the server by sync.js; administrators get the full
+  // log back from the server.
+  function load() {
+    entries = [];
+    try {
+      var kept = JSON.parse(window.localStorage.getItem(AUDIT_KEY));
+      if (Array.isArray(kept)) {
+        entries = kept;
+      }
+    } catch (e) {}
+  }
+  load();
+  window.addEventListener("ptg:synced", function(e) {
+    if (e.detail && e.detail.key === AUDIT_KEY) {
+      load();
+      if (window.PTGAdmin && window.PTGAdmin.refresh) {
+        window.PTGAdmin.refresh();
+      }
     }
-  } catch (e) {}
+  });
+  window.addEventListener("ptg:session", function() {
+    if (!window.PTGSession || !window.PTGSession.active()) {
+      load();
+    }
+  });
   window.PTGAudit = {
     write: function(kind, what, who, detail) {
       entries.unshift({
@@ -2178,17 +2264,6 @@ const BookField = (() => {
   window.PTGAuthNotice = function(message) {
     showAlert("signinAlert", "signinAlertText", message);
   };
-  function busy(button, label, ms, then) {
-    var span = button.querySelector("span");
-    var was = span.textContent;
-    button.classList.add("is-busy");
-    span.textContent = label;
-    window.setTimeout(function() {
-      button.classList.remove("is-busy");
-      span.textContent = was;
-      then();
-    }, ms);
-  }
   function bindReveal(buttonId, inputId) {
     var btn = $(buttonId), input = $(inputId);
     btn.addEventListener("click", function() {
@@ -2247,6 +2322,82 @@ const BookField = (() => {
       }
     });
   });
+  // Puts a submit button into its "working" state until the server answers.
+  function working(button, label) {
+    var span = button.querySelector("span");
+    var was = span.textContent;
+    button.classList.add("is-busy");
+    button.disabled = true;
+    span.textContent = label;
+    return function() {
+      button.classList.remove("is-busy");
+      button.disabled = false;
+      span.textContent = was;
+    };
+  }
+  function apiOff() {
+    return !window.PTGApi || !window.PTGApi.enabled;
+  }
+  var OFFLINE_SITE = "This copy of the site isn’t connected to its server yet, so accounts are switched off. (Set the API address in config.js.)";
+  function remembered() {
+    return !!($("remember") && $("remember").checked);
+  }
+  // The server accepted the sign-in: keep the token, load this person's
+  // data, then open their side of the site.
+  function finishSignin(res, wanted) {
+    var user = res.user || {};
+    var mail = user.email || email.value.trim();
+    var name = user.name || "";
+    var role = user.role === "admin" ? "admin" : "parent";
+    window.PTGApi.setToken(res.token, remembered());
+    password.value = "";
+    $("doneText").textContent = role === "admin" ? "Signed in as an administrator. Loading the console…" : "Signed in. Loading your shelf…";
+    $("doneAdmin").hidden = role !== "admin";
+    $("doneGo").hidden = role === "admin";
+    $("doneAdminGo").hidden = role !== "admin";
+    go("done");
+    var started = window.PTGSession ? window.PTGSession.start(mail, role, name) : Promise.resolve();
+    started.then(function() {
+      if (role === "parent" && window.PTGApp) {
+        window.PTGApp.loadShelf(mail, {
+          name: name
+        });
+      }
+      $("doneText").textContent = role === "admin" ? "Signed in as an administrator. Opening the console…" : "Taking you to your shelf…";
+      if (role === "admin") {
+        openConsoleShortly();
+      } else {
+        openShelfShortly();
+      }
+      if (user.tempPassword && window.PTGSync && window.PTGSync.toast) {
+        window.PTGSync.toast("You signed in with a temporary password. Choose a new one in Settings.", 9e3);
+      }
+    });
+  }
+  function signinError(err) {
+    var Api = window.PTGApi;
+    var left = err.data && err.data.attemptsLeft;
+    switch (err.code) {
+     case "ACCOUNT_LOCKED":
+      return "This account is locked after too many wrong passwords. An administrator can restore it.";
+
+     case "ACCOUNT_SUSPENDED":
+      return "That account has been suspended by an administrator. Contact the site owner to have it restored.";
+
+     case "NOT_ADMIN":
+      return "That account isn’t an administrator account. Choose Parent to open your shelf.";
+
+     case "USE_ADMIN":
+      return "That is an administrator account. Choose Administrator to open the console.";
+
+     case "NOT_PARENT":
+      return "That account can’t sign in here.";
+    }
+    if (err.status === 401) {
+      return "That email and password don’t match an account. Check the password, or reset it below." + (left && left <= 2 ? " " + left + (left === 1 ? " try" : " tries") + " left before the account is locked." : "");
+    }
+    return Api.errorMessage(err, "Signing in didn’t work just now. Try again in a moment.");
+  }
   signinForm.addEventListener("submit", function(e) {
     e.preventDefault();
     showAlert("signinAlert", "signinAlertText", "");
@@ -2254,70 +2405,34 @@ const BookField = (() => {
       (card.querySelector('.view.is-active [aria-invalid="true"]') || email).focus();
       return;
     }
+    if (apiOff()) {
+      showAlert("signinAlert", "signinAlertText", OFFLINE_SITE);
+      return;
+    }
     var admin = $("role-admin").checked;
     var who = email.value.trim();
-    busy($("signinSubmit"), "Checking…", 1150, function() {
-      var seen = window.PTGAccounts ? window.PTGAccounts.check(who, password.value) : {
-        ok: password.value === "demo1234",
-        demo: true
-      };
-      if (seen.ok) {
-        if (window.PTGAccounts && window.PTGAccounts.clearFails) {
-          window.PTGAccounts.clearFails(who);
-        }
-        if (admin) {
-          startAdminChallenge(who);
-        } else {
-          if (window.PTGSession) {
-            window.PTGSession.start(who, "parent");
-          }
-          $("doneText").textContent = seen.demo ? "Signed in. Taking you to your shelf…" : "Taking you to your shelf…";
-          $("doneAdmin").hidden = true;
-          $("doneGo").hidden = false;
-          $("doneAdminGo").hidden = true;
-          go("done");
-          if (window.PTGApp) {
-            window.PTGApp.loadShelf(who, {
-              demo: !!seen.demo,
-              name: seen.name
-            });
-          }
-          openShelfShortly();
-        }
-      } else if (seen.suspended) {
-        showAlert("signinAlert", "signinAlertText", seen.lockedOut ? "This account is locked after too many wrong passwords. An administrator can restore it." : "That account has been suspended by an administrator. Contact the site owner to have it restored.");
+    var done = working($("signinSubmit"), "Checking…");
+    window.PTGApi.auth.login(who, password.value, admin ? "admin" : "parent").then(function(res) {
+      done();
+      if (res.codeRequired) {
         password.value = "";
-        password.focus();
-      } else {
-        var fail = window.PTGAccounts && window.PTGAccounts.noteFail ? window.PTGAccounts.noteFail(who) : {};
-        if (fail.locked) {
-          if (window.PTGAudit) {
-            window.PTGAudit.write("auth", "Account locked after " + fail.limit + " wrong passwords", who);
-          }
-          if (window.PTGNotify && window.PTGNotify.toAdmins) {
-            window.PTGNotify.toAdmins({
-              kind: "account",
-              tone: "alert",
-              title: "Account locked — " + who,
-              body: fail.limit + " wrong passwords in a row. Restore access from Accounts once you have checked with them.",
-              go: "accounts",
-              tag: "locked-" + who.toLowerCase()
-            });
-          }
-          showAlert("signinAlert", "signinAlertText", "Too many wrong passwords, so this account is now locked. An administrator can restore it.");
-        } else {
-          showAlert("signinAlert", "signinAlertText", "That email and password don’t match an account. Check the password, or reset it below." + (fail.left && fail.left <= 2 ? " " + fail.left + (fail.left === 1 ? " try" : " tries") + " left before the account is locked." : ""));
-        }
-        password.value = "";
-        password.focus();
+        startAdminChallenge(who, res.challenge);
+        return;
       }
+      finishSignin(res);
+    }, function(err) {
+      done();
+      showAlert("signinAlert", "signinAlertText", signinError(err));
+      password.value = "";
+      password.focus();
     });
   });
-  var ADMIN_CODE = "246810";
-  var codeFor = "", codeTries = 0;
-  function startAdminChallenge(whoEmail) {
+  // Administrators confirm a one-time code after their password. The code
+  // is checked by the server (ADMIN_LOGIN_CODE in the backend's settings).
+  var codeFor = "", codeChallenge = "";
+  function startAdminChallenge(whoEmail, challenge) {
     codeFor = whoEmail;
-    codeTries = 0;
+    codeChallenge = challenge || "";
     $("otp").value = "";
     $("codeEmail").textContent = whoEmail;
     setHint($("otp"), "otpHint", "");
@@ -2345,35 +2460,22 @@ const BookField = (() => {
       $("otp").focus();
       return;
     }
-    busy($("codeSubmit"), "Checking the code…", 900, function() {
-      if (value !== ADMIN_CODE) {
-        codeTries++;
-        if (window.PTGAudit) {
-          window.PTGAudit.write("auth", "Failed administrator one-time code (attempt " + codeTries + " of 3)", codeFor);
-        }
-        if (codeTries >= 3) {
-          if (window.PTGAudit) {
-            window.PTGAudit.write("auth", "Administrator sign-in abandoned after three wrong codes", codeFor);
-          }
-          resetAuthForms();
-          go("signin");
-          window.PTGAuthNotice("Three wrong codes — that sign-in was abandoned and logged. Start again when you have the right code.");
-          return;
-        }
-        showAlert("codeAlert", "codeAlertText", "That code is not right. " + (3 - codeTries) + (3 - codeTries === 1 ? " attempt left." : " attempts left."));
-        $("otp").value = "";
-        $("otp").focus();
+    var done = working($("codeSubmit"), "Checking the code…");
+    window.PTGApi.auth.adminCode(codeChallenge, value).then(function(res) {
+      done();
+      finishSignin(res);
+    }, function(err) {
+      done();
+      if (err.code === "CODE_ABANDONED" || err.code === "CHALLENGE_EXPIRED") {
+        resetAuthForms();
+        go("signin");
+        window.PTGAuthNotice(err.code === "CODE_ABANDONED" ? "Three wrong codes — that sign-in was abandoned and logged. Start again when you have the right code." : "That sign-in took too long. Start again.");
         return;
       }
-      if (window.PTGSession) {
-        window.PTGSession.start(codeFor, "admin");
-      }
-      $("doneText").textContent = "Signed in as an administrator. Opening the console…";
-      $("doneAdmin").hidden = false;
-      $("doneGo").hidden = true;
-      $("doneAdminGo").hidden = false;
-      go("done");
-      openConsoleShortly();
+      var left = err.data && err.data.attemptsLeft;
+      showAlert("codeAlert", "codeAlertText", err.status === 401 ? "That code is not right." + (left ? " " + left + (left === 1 ? " attempt left." : " attempts left.") : "") : window.PTGApi.errorMessage(err));
+      $("otp").value = "";
+      $("otp").focus();
     });
   });
   function startHash(role) {
@@ -2702,22 +2804,38 @@ const BookField = (() => {
       }
       return;
     }
-    busy($("createSubmit"), "Creating your account…", 1400, function() {
-      var who = cEmail.value.trim();
-      var name = cName.value.trim();
-      if (window.PTGAccounts) {
-        window.PTGAccounts.create(who, name, cPassword.value);
+    if (apiOff()) {
+      showAlert("createAlert", "createAlertText", OFFLINE_SITE);
+      return;
+    }
+    var who = cEmail.value.trim();
+    var name = cName.value.trim();
+    var done = working($("createSubmit"), "Creating your account…");
+    window.PTGApi.auth.register(name, who, cPassword.value).then(function(res) {
+      done();
+      var user = res.user || {};
+      var mail = user.email || who;
+      window.PTGApi.setToken(res.token, remembered());
+      cPassword.value = "";
+      cConfirm.value = "";
+      return window.PTGSession.start(mail, "parent", user.name || name).then(function() {
+        if (window.PTGApp) {
+          window.PTGApp.loadShelf(mail, {
+            demo: false,
+            name: user.name || name
+          });
+        }
+        genresBegin(mail);
+      });
+    }, function(err) {
+      done();
+      if (err.status === 409) {
+        setHint(cEmail, "cEmailHint", "There is already an account on that address — sign in instead.");
+        showAlert("createAlert", "createAlertText", "There’s one thing to fix below.");
+        cEmail.focus();
+        return;
       }
-      if (window.PTGSession) {
-        window.PTGSession.start(who, "parent");
-      }
-      if (window.PTGApp) {
-        window.PTGApp.loadShelf(who, {
-          demo: false,
-          name: name
-        });
-      }
-      genresBegin(who);
+      showAlert("createAlert", "createAlertText", window.PTGApi.errorMessage(err, "We couldn’t create the account just now. Try again in a moment."));
     });
   });
   var forgotForm = $("forgotForm"), fEmail = $("fEmail");
@@ -2742,25 +2860,22 @@ const BookField = (() => {
       fEmail.focus();
       return;
     }
-    busy($("forgotSubmit"), "Sending…", 600, function() {
-      var who = fEmail.value.trim();
+    if (apiOff()) {
+      setHint(fEmail, "fEmailHint", OFFLINE_SITE);
+      return;
+    }
+    // The server tells the administrators (and logs it); the answer is the
+    // same whether or not the address has an account.
+    var who = fEmail.value.trim();
+    var done = working($("forgotSubmit"), "Sending…");
+    window.PTGApi.auth.forgot(who).then(function() {
+      done();
       $("sentEmail").textContent = who;
-      if (window.PTGAccounts && window.PTGAccounts.exists(who)) {
-        if (window.PTGAudit) {
-          window.PTGAudit.write("auth", "Password reset requested", who);
-        }
-        if (window.PTGNotify && window.PTGNotify.toAdmins) {
-          window.PTGNotify.toAdmins({
-            kind: "account",
-            tone: "info",
-            title: "Password reset requested — " + who,
-            body: "Give them a temporary password from Accounts.",
-            go: "accounts",
-            tag: "reset-" + who.toLowerCase()
-          });
-        }
-      }
       go("sent");
+    }, function(err) {
+      done();
+      setHint(fEmail, "fEmailHint", window.PTGApi.errorMessage(err));
+      fEmail.focus();
     });
   });
 })();
@@ -2853,6 +2968,10 @@ const BookField = (() => {
       stopCorrecting();
     }
   }, true);
+  // Once someone submits a form (sign in, create account…) the page moves
+  // on by itself; a late correction would pull it back to the form. This
+  // shows up now that the server can answer within the correction window.
+  document.addEventListener("submit", stopCorrecting, true);
   window.PTGOpenSetting = function(sectionId, role) {
     if (!sectionId || !window.PTGSettings || !window.PTGSettings.open) {
       return;
@@ -6337,6 +6456,41 @@ const BookField = (() => {
       saveShelves();
     }
   });
+  // sync.js keeps ptg-shelves-v1 in step with the server. Before it brings in
+  // a refresh, save any edit made in the last moment so it isn't lost...
+  window.addEventListener("ptg:before-sync", function(e) {
+    if (e.detail && e.detail.key === SHELVES_KEY && shelfSaveTimer) {
+      saveShelves();
+    }
+  });
+  // ...and after it, show the refreshed shelf.
+  window.addEventListener("ptg:synced", function(e) {
+    if (!e.detail || e.detail.key !== SHELVES_KEY) {
+      return;
+    }
+    var kept = null;
+    try {
+      kept = JSON.parse(window.localStorage.getItem(SHELVES_KEY));
+    } catch (err) {}
+    shelves = kept && typeof kept === "object" ? kept : {};
+    if (current && shelves[current]) {
+      install(shelves[current]);
+      if (started) {
+        renderAll();
+      }
+    }
+  });
+  // Signing out forgets the shelf in this page.
+  window.addEventListener("ptg:session", function() {
+    if (window.PTGSession && window.PTGSession.active()) {
+      return;
+    }
+    window.clearTimeout(shelfSaveTimer);
+    shelfSaveTimer = null;
+    shelves = {};
+    current = null;
+    install(emptyShelf());
+  });
   function forgetShelf(email) {
     var key = String(email || "").trim().toLowerCase();
     delete shelves[key];
@@ -7213,13 +7367,45 @@ const BookField = (() => {
     by: "seeded"
   } ];
   var CONSOLE_KEY = "ptg-console-v1";
-  try {
-    var keptConsole = JSON.parse(window.localStorage.getItem(CONSOLE_KEY));
-    if (keptConsole && Array.isArray(keptConsole.posts) && Array.isArray(keptConsole.submissions)) {
-      posts = keptConsole.posts;
-      submissions = keptConsole.submissions;
+  // With the server connected, resources and suggestions come from it
+  // (sync.js keeps ptg-console-v1 up to date), so the samples above are only
+  // used when the site runs without a server.
+  if (window.PTGSync && window.PTGSync.enabled) {
+    posts = [];
+    submissions = [];
+  }
+  function loadConsole() {
+    try {
+      var keptConsole = JSON.parse(window.localStorage.getItem(CONSOLE_KEY));
+      if (keptConsole && Array.isArray(keptConsole.posts) && Array.isArray(keptConsole.submissions)) {
+        posts = keptConsole.posts;
+        submissions = keptConsole.submissions;
+      }
+    } catch (e) {}
+  }
+  loadConsole();
+  window.addEventListener("ptg:before-sync", function(e) {
+    if (e.detail && e.detail.key === CONSOLE_KEY && consoleSaveTimer) {
+      saveConsole();
     }
-  } catch (e) {}
+  });
+  window.addEventListener("ptg:synced", function(e) {
+    if (e.detail && e.detail.key === CONSOLE_KEY) {
+      loadConsole();
+      if (started && !document.getElementById("page-admin").hidden) {
+        renderAll();
+      }
+    }
+  });
+  window.addEventListener("ptg:session", function() {
+    if (window.PTGSession && window.PTGSession.active()) {
+      return;
+    }
+    window.clearTimeout(consoleSaveTimer);
+    consoleSaveTimer = null;
+    posts = [];
+    submissions = [];
+  });
   var consoleSaveTimer = null;
   function saveConsole() {
     window.clearTimeout(consoleSaveTimer);
@@ -7242,7 +7428,11 @@ const BookField = (() => {
       }
     }, true);
   });
-  window.addEventListener("pagehide", saveConsole);
+  window.addEventListener("pagehide", function() {
+    if (window.PTGSession && window.PTGSession.canOpenConsole()) {
+      saveConsole();
+    }
+  });
   var state = {
     tab: "overview",
     q: "",
@@ -7332,6 +7522,11 @@ const BookField = (() => {
     return window.PTGAccounts ? window.PTGAccounts.list() : [];
   }
   function shelfFor(email) {
+    // The server sends each account's shelf counts with the accounts list.
+    var acct = window.PTGAccounts ? window.PTGAccounts.get(email) : null;
+    if (acct && acct.shelf) {
+      return acct.shelf;
+    }
     if (!window.PTGApp || !window.PTGApp.shelfSummary) {
       return {
         children: 0,
@@ -8336,6 +8531,12 @@ const BookField = (() => {
         renderLog();
       }
     },
+    // Repaint everything (used after account data arrives from the server).
+    rerender: function() {
+      if (started && !document.getElementById("page-admin").hidden) {
+        renderAll();
+      }
+    },
     submissions: function() {
       syncSuggestions();
       return submissions.slice();
@@ -8404,6 +8605,33 @@ const BookField = (() => {
       return;
     }
     var rec = store()[token];
+    var Api = window.PTGApi;
+    if (rec || !Api || !Api.enabled) {
+      paint(box, rec);
+      return;
+    }
+    // Shared links are opened by people without an account, usually on
+    // another device, so fetch the list from the server.
+    document.title = "Opening a shared wishlist — Parents Go To";
+    box.innerHTML = state("Opening the wishlist…", "One moment while we fetch it.", HEART);
+    Api.get("/api/share/" + encodeURIComponent(token), {
+      auth: false
+    }).then(function(d) {
+      paint(box, d.item || null);
+    }, function(err) {
+      if (err.status === 410) {
+        paint(box, {
+          expires: err.data && err.data.expires || 1
+        });
+      } else if (err.status === 0) {
+        document.title = "Can’t open the link — Parents Go To";
+        box.innerHTML = state("We can’t reach the server", "Check your connection and open the link again.", LOCK);
+      } else {
+        paint(box, null);
+      }
+    });
+  }
+  function paint(box, rec) {
     if (!rec) {
       document.title = "Link not available — Parents Go To";
       box.innerHTML = state("This link is not available", "The wishlist behind it may have been unshared, or the link may have been " + "copied incorrectly. Ask whoever sent it to share it again.", LOCK);
@@ -8683,6 +8911,22 @@ const BookField = (() => {
     });
   }
   route();
+  // Show what this browser had straight away, then check the sign-in with
+  // the server and bring in the latest data.
+  if (restored && window.PTGSession.verify) {
+    window.PTGSession.verify().then(function(who) {
+      if (!who) {
+        bounceToSignin("Your session has ended. Please sign in again.");
+        return;
+      }
+      if (who.role === "parent" && window.PTGApp) {
+        window.PTGApp.loadShelf(who.email, {
+          name: who.name
+        });
+      }
+      route();
+    });
+  }
   window.addEventListener("hashchange", route);
   window.addEventListener("pageshow", function(e) {
     if (e.persisted) {

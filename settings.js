@@ -142,15 +142,72 @@
         });
       });
     }
+    // Screenshots are also sent to the server (once the report itself has
+    // been saved there), so administrators can see them on any device.
+    function upload(id, blob) {
+      var Api = window.PTGApi, Sync = window.PTGSync;
+      if (!Api || !Api.enabled || !Api.token() || !blob) {
+        return Promise.resolve();
+      }
+      var waitForTicket = Sync && Sync.flush ? Sync.flush(SUPPORT_KEY) : Promise.resolve();
+      return waitForTicket.then(function() {
+        return new Promise(function(resolve, reject) {
+          var reader = new window.FileReader();
+          reader.onload = function() {
+            resolve(reader.result);
+          };
+          reader.onerror = function() {
+            reject(reader.error);
+          };
+          reader.readAsDataURL(blob);
+        });
+      }).then(function(dataUrl) {
+        return Api.post("/api/support/" + Api.enc(id) + "/screenshot", {
+          dataUrl: dataUrl,
+          name: blob.name || "screenshot"
+        });
+      });
+    }
+    function download(id) {
+      var Api = window.PTGApi;
+      if (!Api || !Api.enabled || !Api.token()) {
+        return Promise.resolve(undefined);
+      }
+      return Api.get("/api/support/" + Api.enc(id) + "/screenshot", {
+        raw: true
+      }).then(function(res) {
+        return res.blob();
+      }, function() {
+        return undefined;
+      });
+    }
     return {
       put: function(id, blob) {
+        var warn = function(err) {
+          if (window.PTGSync && window.PTGSync.toast) {
+            window.PTGSync.toast("The report was sent, but the screenshot couldn’t be uploaded" + (err && err.message ? ": " + err.message : "."), 7e3);
+          }
+        };
+        var sent = upload(id, blob);
+        // Fine if either this browser or the server keeps the image.
         return run("readwrite", function(st) {
           return st.put(blob, id);
+        }).then(function() {
+          sent.then(null, warn);
+        }, function(localErr) {
+          return sent.then(null, function(err) {
+            warn(err);
+            throw localErr;
+          });
         });
       },
       get: function(id) {
         return run("readonly", function(st) {
           return st.get(id);
+        }).then(function(blob) {
+          return blob || download(id);
+        }, function() {
+          return download(id);
         });
       },
       remove: function(id) {
@@ -187,7 +244,9 @@
     add: function(ticket) {
       var all = this.list();
       var n = all.length + 1;
-      ticket.ref = "PTG-" + String(1e3 + n);
+      // References must be unique across everyone, not just this browser;
+      // the server keeps this one unless it is already taken.
+      ticket.ref = "PTG-" + (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2, 4)).toUpperCase();
       ticket.id = "tk" + Date.now() + "-" + n;
       ticket.at = Date.now();
       ticket.state = "open";
@@ -879,7 +938,6 @@
           window.PTGApp.changeEmail(oldMail, newMail);
         }
       }
-      audit("account", "Sign-in email changed", newMail, "was " + oldMail);
       account = newMail;
       return true;
     }
@@ -905,15 +963,64 @@
           }
         });
         var newMail = String(patch.email || "");
-        if (newMail && account !== "guest" && newMail.toLowerCase() !== String(account).toLowerCase()) {
-          if (!moveAccount(account, newMail)) {
+        var mailChanged = !!newMail && account !== "guest" && newMail.toLowerCase() !== String(account).toLowerCase();
+        // Name and sign-in email live on the account, so the server saves
+        // them first (and checks the email isn't someone else's).
+        var serverPatch = {};
+        if (account !== "guest") {
+          if (mailChanged) {
+            serverPatch.email = newMail;
+          }
+          if (patch.name && patch.name !== (window.PTGSession ? window.PTGSession.name() : "")) {
+            serverPatch.name = patch.name;
+          }
+        }
+        var Api = window.PTGApi;
+        var Sync = window.PTGSync;
+        var call = Api && Api.enabled && Object.keys(serverPatch).length ? Api.auth.updateMe(serverPatch) : Promise.resolve(null);
+        var submitBtn = detailsForm.querySelector('[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+        }
+        call.then(function() {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+          }
+          if (mailChanged) {
+            // The server has already moved everything to the new email; update
+            // this page to match without sending the renames back to it.
+            if (Sync) {
+              Sync.pause();
+            }
+            try {
+              moveAccount(account, newMail);
+            } finally {
+              if (Sync) {
+                Sync.resume();
+              }
+            }
+            if (Sync && Sync.rekey) {
+              Sync.rekey(newMail);
+            }
+          }
+          saveDetails(patch);
+        }, function(err) {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+          }
+          if (err && err.status === 409 && emailField) {
             setErr(emailField + "Err", true, "That email already belongs to another account.");
             markInvalid(emailField, true);
             $(emailField).focus();
             say(scope, "That email is already in use.");
             return;
           }
-        }
+          say(scope, Api ? Api.errorMessage(err, "Your details couldn’t be saved just now.") : "Your details couldn’t be saved just now.");
+        });
+      });
+    }
+    function saveDetails(patch) {
+      {
         persist(patch);
         var newName = patch.name;
         if (window.PTGSession && window.PTGSession.rename) {
@@ -931,7 +1038,7 @@
         audit("account", "Personal details updated", account);
         flashSaved(detailsSaved, "Saved");
         say(scope, "Your details are saved.");
-      });
+      }
     }
     if (detailsUndo) {
       detailsUndo.addEventListener("click", function() {
@@ -986,10 +1093,8 @@
         var newVal = String(($(pw.nw) || {}).value || "");
         var copyVal = String(($(pw.copy) || {}).value || "");
         var ok = true;
-        var seen = window.PTGAccounts ? window.PTGAccounts.check(account, oldVal) : {
-          ok: oldVal.length > 0
-        };
-        var oldBad = !seen.ok;
+        // The server checks the current password; here we only need one.
+        var oldBad = !oldVal;
         setErr(pw.old + "Err", oldBad);
         markInvalid(pw.old, oldBad);
         if (oldBad) {
@@ -1019,13 +1124,43 @@
           }
           return;
         }
-        if (window.PTGAccounts && window.PTGAccounts.setPassword && account !== "guest") {
-          window.PTGAccounts.setPassword(account, newVal);
+        var Api = window.PTGApi;
+        if (!Api || !Api.enabled || account === "guest") {
+          say(scope, "Passwords can only be changed when the site is connected to its server.");
+          return;
         }
+        var pwBtn = pw.form.querySelector('[type="submit"]');
+        if (pwBtn) {
+          pwBtn.disabled = true;
+        }
+        Api.auth.changePassword(oldVal, newVal).then(function(res) {
+          if (pwBtn) {
+            pwBtn.disabled = false;
+          }
+          // Other devices are signed out; this one gets a fresh token.
+          if (res && res.token) {
+            Api.setToken(res.token, Api.remembered());
+          }
+          passwordSaved();
+        }, function(err) {
+          if (pwBtn) {
+            pwBtn.disabled = false;
+          }
+          if (err && err.status === 401) {
+            setErr(pw.old + "Err", true, "That is not your current password.");
+            markInvalid(pw.old, true);
+            $(pw.old).focus();
+            return;
+          }
+          say(scope, Api.errorMessage(err, "Your password couldn’t be changed just now."));
+        });
+      });
+    }
+    function passwordSaved() {
+      {
         persist({
           passwordChangedAt: Date.now()
         });
-        audit("auth", "Password changed", account);
         pw.form.reset();
         var meter = $(pw.meter);
         if (meter) {
@@ -1042,7 +1177,7 @@
         renderDevices();
         flashSaved($(pw.saved), "Password updated");
         say(scope, "Password updated. Use it next time you sign in.");
-      });
+      }
     }
     var DEVICE_ICON = svgIcon('<rect x="2.6" y="3.4" width="14.8" height="10.2" rx="1.6"/><path d="M7 16.6h6"/>', 17);
     var PHONE_ICON = svgIcon('<rect x="5.4" y="2.4" width="9.2" height="15.2" rx="2"/><path d="M9 15.2h2"/>', 17);
@@ -1419,6 +1554,10 @@
         renderAdminReports();
         updateReportCounts();
       });
+    } else {
+      window.addEventListener("ptg:contact", function() {
+        renderTickets();
+      });
     }
     if (scope.role === "admin") {
       panel.addEventListener("click", function(e) {
@@ -1513,25 +1652,33 @@
           title: "Delete your account?",
           body: "This removes the account and everything on the shelf, and it cannot be undone. Download a copy first if you want to keep it.",
           type: "DELETE",
+          password: true,
           yes: "Delete my account",
           danger: true
-        }, function() {
+        }, function(password) {
+          var Api = window.PTGApi;
+          if (!Api || !Api.enabled) {
+            say(scope, "Accounts can only be deleted when the site is connected to its server.");
+            return;
+          }
           var gone = account;
-          Prefs.clear(scope.role, gone);
-          audit("account", "Account deleted", gone);
-          var out = $("signOutBtn");
-          if (out) {
-            out.click();
-          }
-          if (window.PTGApp && window.PTGApp.forget) {
-            window.PTGApp.forget(gone);
-          }
-          if (window.PTGAccounts && window.PTGAccounts.remove) {
-            window.PTGAccounts.remove(gone);
-          }
-          if (window.PTGAuthNotice) {
-            window.PTGAuthNotice("Your account and everything on your shelf have been deleted from this device.");
-          }
+          Api.auth.deleteMe(password).then(function() {
+            Prefs.clear(scope.role, gone);
+            var out = $("signOutBtn");
+            if (out) {
+              out.click();
+            }
+            if (window.PTGApp && window.PTGApp.forget) {
+              window.PTGApp.forget(gone);
+            }
+            if (window.PTGAuthNotice) {
+              window.setTimeout(function() {
+                window.PTGAuthNotice("Your account and everything on your shelf have been deleted.");
+              }, 80);
+            }
+          }, function(err) {
+            say(scope, err && err.status === 401 ? "That password isn’t right, so nothing was deleted." : Api.errorMessage(err, "The account couldn’t be deleted just now."));
+          });
         });
       });
     }
@@ -2116,46 +2263,57 @@
     askDlg.className = "set-leave set-ask";
     askDlg.setAttribute("aria-labelledby", prefix + "ask-title");
     askDlg.setAttribute("aria-describedby", prefix + "ask-msg");
-    askDlg.innerHTML = '<h2 id="' + prefix + 'ask-title"></h2>' + '<p class="set-leave-msg" id="' + prefix + 'ask-msg"></p>' + '<div class="set-ask-type" hidden>' + '<label for="' + prefix + 'ask-input"></label>' + '<input id="' + prefix + 'ask-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">' + "</div>" + '<div class="set-leave-acts">' + '<button type="button" class="btn btn--ghost" data-ask="no">Cancel</button>' + '<button type="button" class="btn" data-ask="yes"></button>' + "</div>";
+    askDlg.innerHTML = '<h2 id="' + prefix + 'ask-title"></h2>' + '<p class="set-leave-msg" id="' + prefix + 'ask-msg"></p>' + '<div class="set-ask-type" hidden>' + '<label for="' + prefix + 'ask-input"></label>' + '<input id="' + prefix + 'ask-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">' + "</div>" + '<div class="set-ask-type set-ask-pw" hidden>' + '<label for="' + prefix + 'ask-pw">Your password</label>' + '<input id="' + prefix + 'ask-pw" type="password" autocomplete="current-password">' + "</div>" + '<div class="set-leave-acts">' + '<button type="button" class="btn btn--ghost" data-ask="no">Cancel</button>' + '<button type="button" class="btn" data-ask="yes"></button>' + "</div>";
     (page || document.body).appendChild(askDlg);
     var askInput = askDlg.querySelector("input");
+    var askPw = askDlg.querySelector(".set-ask-pw input");
     var askYes = askDlg.querySelector('[data-ask="yes"]');
     var askWord = "";
+    var askNeedsPw = false;
     var askThen = null;
     var askFrom = null;
+    function askReady() {
+      askYes.disabled = !!askWord && askInput.value.trim().toUpperCase() !== askWord || askNeedsPw && !askPw.value;
+    }
+    // o.password: also ask for the account password (passed to `then`).
     function ask(o, then) {
       askWord = o.type || "";
+      askNeedsPw = !!o.password;
       askThen = then;
       askFrom = document.activeElement;
       askDlg.querySelector("h2").textContent = o.title;
       askDlg.querySelector(".set-leave-msg").textContent = o.body;
       askDlg.querySelector(".set-ask-type").hidden = !askWord;
+      askDlg.querySelector(".set-ask-pw").hidden = !askNeedsPw;
       askDlg.querySelector("label").textContent = "Type " + askWord + " to confirm";
       askInput.value = "";
+      askPw.value = "";
       askYes.textContent = o.yes;
       askYes.className = "btn " + (o.danger ? "btn--danger" : "btn--primary");
-      askYes.disabled = !!askWord;
+      askReady();
       askDlg.showModal();
       (askWord ? askInput : askDlg.querySelector('[data-ask="no"]')).focus();
     }
     function askClose(ok) {
       var then = askThen;
+      var given = askPw.value;
       askThen = null;
+      askPw.value = "";
       askDlg.close();
       if (ok && then) {
-        then();
+        then(given);
       } else if (askFrom && askFrom.focus && document.contains(askFrom)) {
         askFrom.focus();
       }
     }
-    askInput.addEventListener("input", function() {
-      askYes.disabled = askInput.value.trim().toUpperCase() !== askWord;
-    });
-    askInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter" && !askYes.disabled) {
-        e.preventDefault();
-        askClose(true);
-      }
+    [ askInput, askPw ].forEach(function(input) {
+      input.addEventListener("input", askReady);
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && !askYes.disabled) {
+          e.preventDefault();
+          askClose(true);
+        }
+      });
     });
     askDlg.addEventListener("click", function(e) {
       var b = e.target.closest ? e.target.closest("[data-ask]") : null;
@@ -2212,6 +2370,18 @@
         });
       }
     }
+    // Settings saved on another device arrive through sync.js: show them,
+    // unless this screen has edits that haven't been saved yet.
+    window.addEventListener("ptg:synced", function(e) {
+      if (!e.detail || e.detail.key !== PREF_KEY) {
+        return;
+      }
+      var pageEl = $(scope.pageId);
+      if (!pageEl || pageEl.hidden || !panel.hidden && dirtyCount()) {
+        return;
+      }
+      hydrate();
+    });
     return {
       hydrate: hydrate,
       prefs: function() {

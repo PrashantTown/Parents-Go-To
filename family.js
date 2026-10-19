@@ -316,7 +316,7 @@
     }
   }
   function memberCard(r) {
-    return '<article class="profile profile--carer">' + '<div class="profile-top">' + '<span class="avatar avatar--lg fam-avatar" aria-hidden="true">' + esc(initial(r.name)) + "</span>" + '<div><div class="nm">' + esc(r.name) + "</div>" + '<span class="role">Carer &middot; invited ' + esc(since(r.at)) + "</span></div>" + "</div>" + "<dl>" + "<dt>Invited as</dt><dd>" + esc(r.email) + "</dd>" + "<dt>Invited by</dt><dd>" + esc(r.byName || r.by || "the account holder") + "</dd>" + "<dt>Reference</dt><dd>" + esc(r.ref) + "</dd>" + "</dl>" + '<p class="fam-state"><span class="pill pill--pending">Invited</span>' + "<span>They can see this shelf until you withdraw access.</span></p>" + '<div class="acts">' + '<button class="btn btn--danger btn--sm" type="button" data-fam-wd="' + esc(r.id) + '">' + 'Withdraw access<span class="vh"> for ' + esc(r.name) + "</span></button>" + "</div>" + "</article>";
+    return '<article class="profile profile--carer">' + '<div class="profile-top">' + '<span class="avatar avatar--lg fam-avatar" aria-hidden="true">' + esc(initial(r.name)) + "</span>" + '<div><div class="nm">' + esc(r.name) + "</div>" + '<span class="role">Carer &middot; invited ' + esc(since(r.at)) + "</span></div>" + "</div>" + "<dl>" + "<dt>Invited as</dt><dd>" + esc(r.email) + "</dd>" + "<dt>Invited by</dt><dd>" + esc(r.byName || r.by || "the account holder") + "</dd>" + "<dt>Reference</dt><dd>" + esc(r.ref) + "</dd>" + "</dl>" + (r.state === "accepted" ? '<p class="fam-state"><span class="pill">Accepted</span>' : '<p class="fam-state"><span class="pill pill--pending">Invited</span>') + "<span>They can see this shelf until you withdraw access.</span></p>" + '<div class="acts">' + '<button class="btn btn--danger btn--sm" type="button" data-fam-wd="' + esc(r.id) + '">' + 'Withdraw access<span class="vh"> for ' + esc(r.name) + "</span></button>" + "</div>" + "</article>";
   }
   function pastRow(r) {
     return "<li>" + "<b>" + esc(r.name) + "</b> · " + esc(r.email) + '<span class="fam-past-when">Access withdrawn ' + esc(since(r.withdrawnAt)) + "</span>" + "</li>";
@@ -666,12 +666,62 @@
       attributeFilter: [ "hidden" ]
     });
   }
+  // Invitations someone else sent to the signed-in parent arrive from the
+  // server (see sync.js). Show them at the top of the dashboard so they can
+  // be accepted or declined.
+  function incoming() {
+    var me = whoEmail();
+    return read().filter(function(r) {
+      return r.state === "invited" && String(r.email || "") === me && String(r.owner || "") !== me;
+    });
+  }
+  function renderInvites() {
+    var host = $("panel-dashboard");
+    var bar = $("famInvites");
+    var S = window.PTGSession;
+    var list = S && S.active() && S.role() === "parent" ? incoming() : [];
+    if (!list.length) {
+      if (bar && bar.parentNode) {
+        bar.parentNode.removeChild(bar);
+      }
+      return;
+    }
+    if (!host) {
+      return;
+    }
+    if (!bar) {
+      bar = document.createElement("section");
+      bar.id = "famInvites";
+      bar.setAttribute("aria-label", "Shelf invitations");
+      bar.style.cssText = "margin:0 0 18px;padding:14px 16px;border-radius:14px;border:1px solid rgba(13,59,50,.2);" + "background:rgba(13,59,50,.06);display:grid;gap:10px";
+      host.insertBefore(bar, host.firstChild);
+    }
+    bar.innerHTML = list.map(function(r) {
+      return '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">' + '<p style="margin:0;flex:1 1 260px"><b>' + esc(r.byName || r.owner || "Another parent") + "</b> invited you to share their family shelf. " + "You will be able to message each other about what the children are reading.</p>" + '<span style="display:flex;gap:8px">' + '<button class="btn btn--primary btn--sm" type="button" data-fam-accept="' + esc(r.id) + '">Accept</button>' + '<button class="btn btn--quiet btn--sm" type="button" data-fam-decline="' + esc(r.id) + '">Decline</button>' + "</span></div>";
+    }).join("");
+  }
+  document.addEventListener("click", function(e) {
+    var t = e.target.closest ? e.target.closest("[data-fam-accept],[data-fam-decline]") : null;
+    if (!t) {
+      return;
+    }
+    if (t.hasAttribute("data-fam-accept")) {
+      Family.accept(t.getAttribute("data-fam-accept"));
+    } else {
+      Family.withdraw(t.getAttribute("data-fam-decline"), whoEmail());
+    }
+    renderInvites();
+  });
   function boot() {
     bootInvite();
     bootWithdraw();
     renderFamily();
     Family.onChange(renderFamily);
+    Family.onChange(renderInvites);
+    window.addEventListener("ptg:session", renderInvites);
     watch("panel-profiles", renderFamily);
+    watch("panel-dashboard", renderInvites);
+    renderInvites();
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
