@@ -10,7 +10,7 @@
  */
 (function() {
   "use strict";
-  var DEPLOYED_API = "https://REPLACE-WITH-YOUR-API-HOST";
+  var DEPLOYED_API = "https://parents-go-to-api.onrender.com";
 
   var host = window.location.hostname;
   var local = window.location.protocol === "file:" || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host);
