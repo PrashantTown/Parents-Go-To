@@ -2811,7 +2811,7 @@ const BookField = (() => {
         window.clearInterval(cooldown);
         resend.disabled = false;
         resendLabel.textContent = "Send it again";
-        route.textContent = sentMode === "signup" ? "You can ask for another confirmation email now." : "You can ask again now if you need to.";
+        route.textContent = sentMode === "signup" ? "You can ask for another confirmation email now." : "You can request another reset link now.";
       } else {
         resendLabel.innerHTML = 'Send it again in <span class="countdown">' + left + "</span>s";
       }
@@ -2826,7 +2826,7 @@ const BookField = (() => {
         return sentMode === "signup" ? b.resendConfirmation(sentTo) : b.resetPassword(sentTo);
       });
     }).then(function() {
-      route.textContent = sentMode === "signup" ? "Another confirmation email has been sent." : "We’ve reminded the administrators.";
+      route.textContent = sentMode === "signup" ? "Another confirmation email has been sent." : "Another reset link has been sent.";
       startCooldown(60);
     }, function(err) {
       route.textContent = err.message;
@@ -3031,7 +3031,7 @@ const BookField = (() => {
     }
     var admin = document.getElementById("role-admin");
     if (form && form.contains(admin) && admin.checked) {
-      tell("Administrators sign in with their email address, password and the administrator code.");
+      tell("Administrators sign in with their email address, password and a six-digit code.");
       return;
     }
     var consent = [ "cGuardian", "cTerms" ].every(function(id) {
@@ -3629,7 +3629,21 @@ const BookField = (() => {
         }
       }
     }
-    return '<article class="book' + (b.slot ? " book--slot" : "") + '">' + coverHtml(b) + '<div class="book-body">' + '<h3 class="book-title">' + esc(b.title) + "</h3>" + '<p class="book-author">' + esc(b.author || "Author unknown") + "</p>" + (list === "wishlist" ? "" : bookLinks(b) + (readDaysLine(b) ? '<p class="book-days">' + esc(readDaysLine(b)) + "</p>" : "")) + extra + '<div class="book-meta">' + tagsHtml(b) + "</div>" + '<div class="book-acts">' + acts + '<button class="icon-btn" type="button" data-del="' + esc(b.id) + '" data-list="' + list + '" aria-label="Remove ' + esc(b.title) + '">' + svg('<path d="M4 6h12M8 6V4.4A1.4 1.4 0 0 1 9.4 3h1.2A1.4 1.4 0 0 1 12 4.4V6"/><path d="M5.6 6 6.3 16a1.4 1.4 0 0 0 1.4 1.3h4.6A1.4 1.4 0 0 0 13.7 16L14.4 6"/>', 17) + "</button>" + "</div>" + "</div>" + "</article>";
+    return '<article class="book' + (b.slot ? " book--slot" : "") + '">' + coverHtml(b) + '<div class="book-body">' + '<h3 class="book-title">' + esc(b.title) + "</h3>" + '<p class="book-author">' + esc(b.author || "Author unknown") + "</p>" + (list === "wishlist" ? addedByLine(b) : bookLinks(b) + (readDaysLine(b) ? '<p class="book-days">' + esc(readDaysLine(b)) + "</p>" : "")) + extra + '<div class="book-meta">' + tagsHtml(b) + "</div>" + '<div class="book-acts">' + acts + '<button class="icon-btn" type="button" data-del="' + esc(b.id) + '" data-list="' + list + '" aria-label="Remove ' + esc(b.title) + '">' + svg('<path d="M4 6h12M8 6V4.4A1.4 1.4 0 0 1 9.4 3h1.2A1.4 1.4 0 0 1 12 4.4V6"/><path d="M5.6 6 6.3 16a1.4 1.4 0 0 0 1.4 1.3h4.6A1.4 1.4 0 0 0 13.7 16L14.4 6"/>', 17) + "</button>" + "</div>" + "</div>" + "</article>";
+  }
+  // On the wishlist: who put the book there (a child from their reading
+  // space, or the parent), and when.
+  function addedByLine(b) {
+    var who = String(b.addedBy || "").trim();
+    if (!who && /reading space|bedtime mode/i.test(String(b.notes || "")) && b.who && b.who.length === 1) {
+      var k = child(b.who[0]);
+      who = k ? k.name : "";
+    }
+    if (!who) {
+      who = String(parent.name || "").trim().split(/\s+/)[0];
+    }
+    var when = b.added ? niceDate(b.added) : "";
+    return who ? '<p class="book-days">Added by ' + esc(who) + (when ? " · " + esc(when) : "") + "</p>" : "";
   }
   function addTile(kind) {
     var copy = kind === "wishlist" ? {
@@ -6290,6 +6304,8 @@ const BookField = (() => {
       ages: b.ages,
       status: "toread",
       who: kids.who ? [ kids.who ] : [],
+      addedBy: k ? k.name : "",
+      added: dateKey(new Date),
       spine: b.spine,
       cover: b.cover,
       notes: kids.mode === "night" ? "Added from bedtime mode" : "Added from the reading space",
@@ -6372,6 +6388,8 @@ const BookField = (() => {
     } else {
       var w = catalogueBook(c, true);
       w.who = kids.who ? [ kids.who ] : [];
+      w.addedBy = k ? k.name : "";
+      w.added = w.added || dateKey(new Date);
       w.notes = kids.mode === "night" ? "Added from bedtime mode" : "Added from the reading space";
       wishlist.unshift(w);
       note((k ? k.name + " added " : "Added ") + c.title + " to the wishlist");

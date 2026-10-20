@@ -12,6 +12,9 @@
  * Everything else the pages store (board, reviews, chat, settings and so on)
  * is kept in step by sync.js.
  *
+ * Links in emails open this page with #reset=<token> ("Forgot your
+ * password?") or #confirm=<token> (a new account confirming its email).
+ *
  * Load order: store.js, config.js, api.js, sync.js, this file, then the pages.
  */
 (function() {
@@ -34,6 +37,7 @@
   var me = { id: null, email: "", role: "parent", name: "" };
   var pendingCode = null; // { challenge, remember } between the password and the admin code
   var tempLogin = null; // { user, token, remember, password } after signing in with a temporary password
+  var resetToken = null; // from an emailed "choose a new password" link
   var checkedPassword = ""; // the current password, once Settings has confirmed it
   var accountList = [];
   var auditList = [];
@@ -141,6 +145,9 @@
     if (code === "ACCOUNT_SUSPENDED") {
       return error("That account has been suspended by an administrator. Contact the site owner to have it restored.", { suspended: true });
     }
+    if (code === "EMAIL_NOT_CONFIRMED") {
+      return error("Your email address is not confirmed yet. Open the link we emailed you, or send it again.", { notConfirmed: true });
+    }
     if (code === "NOT_ADMIN") {
       return error("That account is not an administrator. Choose Parent to open your shelf.");
     }
@@ -217,6 +224,7 @@
       tempLogin = { user: d.user, token: d.token, remember: remember, password: password || "" };
       Api.setToken(d.token, remember);
       window.setTimeout(function() {
+        newPassLede("You signed in with a temporary password. Choose a new one for your account.");
         fire("ptg:recovery");
       }, 0);
       return Promise.resolve({ tempPassword: true });
@@ -516,7 +524,7 @@
       setRemember(remember);
       return Api.auth.login(String(email).trim(), password, role === "admin" ? "admin" : "parent").then(function(d) {
         if (d.codeRequired) {
-          pendingCode = { challenge: d.challenge, remember: remember };
+          pendingCode = { challenge: d.challenge, remember: remember, via: d.via || "code", email: String(email).trim() };
           return { needsCode: true };
         }
         return finishLogin(d, remember, password);
@@ -524,9 +532,14 @@
         throw signinError(err);
       });
     },
-    // Administrators enter the six-digit code set on the server.
+    // Administrators enter a six-digit code: emailed to them for this
+    // sign-in, or (without email) the shared code set on the server.
     adminFactor: function() {
-      return pendingCode ? Promise.resolve({ factorId: "admin-code", enrol: false }) : Promise.reject(error("That sign-in has expired. Start again."));
+      if (!pendingCode) {
+        return Promise.reject(error("That sign-in has expired. Start again."));
+      }
+      codeLede(pendingCode.via, pendingCode.email);
+      return Promise.resolve({ factorId: "admin-code", enrol: false });
     },
     verifyAdminCode: function(factorId, code) {
       if (!pendingCode) {
@@ -546,7 +559,7 @@
         }
         if (code2 === "CHALLENGE_EXPIRED") {
           pendingCode = null;
-          throw error("That sign-in has expired. Go back and sign in again.");
+          throw error(err.message && /code has expired/i.test(err.message) ? err.message : "That sign-in has expired. Go back and sign in again.");
         }
         throw error(message(err));
       });
@@ -554,6 +567,10 @@
     signUp: function(name, email, password) {
       setRemember(true);
       return Api.auth.register(String(name || "").trim(), String(email).trim(), password).then(function(d) {
+        if (d.confirm) {
+          // The account opens once they click the link we emailed them.
+          return { confirm: true };
+        }
         return finishLogin(d, true, password).then(function() {
           return { confirm: false };
         });
@@ -561,19 +578,36 @@
         throw signinError(err);
       });
     },
-    // There is no email service: accounts are ready straight away.
-    resendConfirmation: function() {
-      return Promise.resolve();
-    },
-    // "Forgot your password?" tells the administrators, who give the person
-    // a temporary password.
-    resetPassword: function(email) {
-      return Api.auth.forgot(String(email).trim()).then(noop, function(err) {
+    resendConfirmation: function(email) {
+      return Api.post("/api/auth/resend-confirmation", { email: String(email).trim() }, { auth: false }).then(noop, function(err) {
         throw error(message(err));
       });
     },
-    // After signing in with a temporary password.
+    // "Forgot your password?" emails a link to choose a new password. If the
+    // server has no email set up, the administrators are told instead, and
+    // the "check your inbox" screen says so.
+    resetPassword: function(email) {
+      var address = String(email).trim();
+      return Api.auth.forgot(address).then(function(d) {
+        if (d && d.mode === "admin") {
+          window.setTimeout(function() {
+            adminResetText(address);
+          }, 0);
+        }
+      }, function(err) {
+        throw error(message(err));
+      });
+    },
+    // After an emailed reset link, or signing in with a temporary password.
     setNewPassword: function(password) {
+      if (resetToken) {
+        return Api.post("/api/auth/reset-password", { token: resetToken, password: password }, { auth: false }).then(function(d) {
+          resetToken = null;
+          tempLogin = d.token ? { user: d.user, token: d.token, remember: remembering(), password: "" } : { admin: true };
+        }, function(err) {
+          throw error(message(err));
+        });
+      }
       if (!tempLogin) {
         return Promise.reject(error("Sign in again with your temporary password, then choose a new one."));
       }
@@ -592,6 +626,10 @@
       });
     },
     continueAfterRecovery: function() {
+      if (tempLogin && tempLogin.admin) {
+        tempLogin = null;
+        return Promise.reject(error("Your password is changed. Go back to sign in, choose Administrator and use the new password."));
+      }
       if (!tempLogin || tempLogin.user.tempPassword) {
         return Promise.reject(error("Choose a new password first."));
       }
@@ -831,7 +869,98 @@
   };
   window.PTGBackend = Backend;
 
+  function adminResetText(address) {
+    var head = document.getElementById("h-sent");
+    var paras = document.querySelectorAll("#view-sent .done > p");
+    if (head) {
+      head.textContent = "Request sent";
+    }
+    if (paras[0]) {
+      paras[0].innerHTML = 'If an account exists for <strong id="sentEmail"></strong>, an administrator will be in touch with a temporary password.';
+      paras[0].querySelector("strong").textContent = address;
+    }
+    if (paras[1]) {
+      paras[1].textContent = "Sign in with it, and you’ll be asked to choose a new password straight away.";
+    }
+  }
+  function codeLede(via, email) {
+    var lede = document.querySelector("#view-code .lede");
+    if (!lede) {
+      return;
+    }
+    var who = document.createElement("strong");
+    who.id = "codeEmail";
+    who.textContent = email || "your account";
+    lede.textContent = "";
+    if (via === "email") {
+      lede.appendChild(document.createTextNode("We’ve emailed a six-digit code to "));
+      lede.appendChild(who);
+      lede.appendChild(document.createTextNode(". Enter it below. It works once and expires in 10 minutes."));
+    } else {
+      lede.appendChild(document.createTextNode("Administrator sign-in needs a second step. Enter the six-digit administrator code for "));
+      lede.appendChild(who);
+      lede.appendChild(document.createTextNode("."));
+    }
+  }
+  function newPassLede(text) {
+    var lede = document.getElementById("newpassLede");
+    if (lede) {
+      lede.textContent = text;
+    }
+  }
+
   /* ------------------------------------------------- opening the page */
+
+  // A link from an email: take the token out of the address bar (and the
+  // browser history) straight away, before the page's router sees it.
+  var linkToken = null;
+  function takeLinkToken() {
+    var m = /^#(reset|confirm)=([0-9a-f]{64})$/.exec(window.location.hash || "");
+    if (!m) {
+      return false;
+    }
+    linkToken = { kind: m[1], token: m[2] };
+    var next = m[1] === "reset" ? "#newpass" : "#app";
+    try {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search + next);
+    } catch (e) {
+      window.location.hash = next;
+    }
+    if (m[1] === "confirm") {
+      restoring = true;
+      document.documentElement.classList.add("ptg-loading");
+    }
+    return true;
+  }
+  takeLinkToken();
+  // The same link pasted into a tab that already has the site open.
+  window.addEventListener("hashchange", function() {
+    if (takeLinkToken()) {
+      restore();
+    }
+  });
+  function confirmFromLink(token) {
+    Api.post("/api/auth/confirm-email", { token: token }, { auth: false }).then(function(d) {
+      becomeUser(d.user, d.token, true);
+      startSession(false);
+      return loadAll().then(function() {
+        if (hashName() !== "app") {
+          window.location.hash = "#app";
+        }
+        finishRestore();
+        Sync.toast("Your email is confirmed. Welcome to Parents Go To!", 6e3);
+      });
+    }, function(err) {
+      window.location.hash = "#signin";
+      finishRestore();
+      if (window.PTGAuthNotice) {
+        window.PTGAuthNotice(message(err));
+      }
+    })["catch"](function(err) {
+      report("confirming your email", err);
+      finishRestore();
+    });
+  }
 
   function finishRestore() {
     restoring = false;
@@ -839,6 +968,21 @@
     fire("ptg:auth");
   }
   function restore() {
+    if (linkToken) {
+      var link = linkToken;
+      linkToken = null;
+      if (link.kind === "confirm") {
+        confirmFromLink(link.token);
+        return;
+      }
+      resetToken = link.token;
+      restoring = false;
+      document.documentElement.classList.remove("ptg-loading");
+      newPassLede("Choose a new password for your account. You'll use it to sign in from now on.");
+      Sync.pullPublic();
+      fire("ptg:recovery");
+      return;
+    }
     if (!Api.token()) {
       Sync.pullPublic();
       finishRestore();
@@ -852,6 +996,7 @@
         tempLogin = { user: u, token: token, remember: Api.remembered(), password: "" };
         restoring = false;
         document.documentElement.classList.remove("ptg-loading");
+        newPassLede("You signed in with a temporary password. Choose a new one for your account.");
         fire("ptg:recovery");
         return;
       }

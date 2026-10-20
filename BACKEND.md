@@ -43,10 +43,11 @@ The methods the pages call, and what each does on the server:
 | Method | API |
 |---|---|
 | `signIn(email, password, role, remember)` | `POST /api/auth/login`. Resolves `{ needsCode: true }` for administrators |
-| `adminFactor()`, `verifyAdminCode(id, code)` | `POST /api/auth/admin-code` (the administrator code; there is no authenticator app) |
-| `signUp(name, email, password)` | `POST /api/auth/register`. Accounts are ready straight away |
-| `resetPassword(email)` | `POST /api/auth/forgot-password`: the administrators are told, and they give a temporary password |
-| `setNewPassword(pw)`, `continueAfterRecovery()` | After signing in with a temporary password: `PUT /api/auth/password`, then into the app |
+| `adminFactor()`, `verifyAdminCode(id, code)` | `POST /api/auth/admin-code`: the six-digit code emailed to that administrator for this sign-in (or, if the server has no email set up, the shared administrator code). There is no authenticator app |
+| `signUp(name, email, password)` | `POST /api/auth/register`. With email set up, resolves `{ confirm: true }` and the page shows "Confirm your email" |
+| `resendConfirmation(email)` | `POST /api/auth/resend-confirmation` |
+| `resetPassword(email)` | `POST /api/auth/forgot-password`: emails a reset link (or, without email, tells the administrators) |
+| `setNewPassword(pw)`, `continueAfterRecovery()` | From an emailed reset link: `POST /api/auth/reset-password`. After signing in with a temporary password: `PUT /api/auth/password`. Then into the app |
 | `verifyPassword(pw)`, `changePassword(pw)` | `POST /api/auth/verify-password`, then `PUT /api/auth/password` |
 | `changeEmail(email)`, `rename(name)` | `PATCH /api/auth/me`. The email changes at once and fires `ptg:email-changed` |
 | `signOut()`, `signOutOthers()` | `POST /api/auth/logout`, `POST /api/auth/logout-others` |
@@ -59,6 +60,8 @@ The methods the pages call, and what each does on the server:
 | `downloadShot("api:<id>")` | `GET /api/support/:id/screenshot` |
 
 Google sign-in, push notifications to phones and emailed codes aren't offered, so `signInWithGoogle`, `enablePush` and `sendPasswordCode` don't exist and the pages hide those options.
+
+**Links in emails** open `reading-for-pleasure.html#reset=<token>` (choose a new password) or `#confirm=<token>` (a new account confirming its email). `backend.js` takes the token out of the address bar before anything else runs, then shows "Choose a new password", or confirms the account and opens the shelf.
 
 **Opening a page.** If a sign-in token is saved, `backend.js` checks it with `GET /api/auth/me`, opens the session quietly and loads everything, then fires `ptg:auth` (while it works, `PTGBackend.restoring` is true and the page waits). After every load it fires `ptg:data`.
 
@@ -124,7 +127,7 @@ register(listAdapter({
 |---|---|
 | `reading-for-pleasure.html`, `index.html`, `contact.html`, `project.html` | Load the four files after `store.js` |
 | Every page | `connect-src` in the Content-Security-Policy allows the API (and `localhost:5000` for local development). The contact email is now the client's, tsander2@usc.edu.au |
-| `reading-for-pleasure.html` | The administrator-code, "forgot password" and "choose a new password" screens describe how this backend works. The Google sign-in buttons are hidden |
-| `script.js` | The console's "Temporary password" button shows the new password to pass on. Small wording changes to match |
+| `reading-for-pleasure.html` | The administrator-code and "choose a new password" screens describe how this backend works. The Google sign-in buttons are hidden |
+| `script.js` | The console's "Temporary password" button shows the new password to pass on. Wishlist cards say who added each book ("Added by Harry · 20 Oct"); books a child adds from their reading space record their name. Small wording changes to match |
 | `settings.js` | Deleting an account asks for the password. Changing the sign-in email takes effect at once. The emailed-code reset option is hidden |
 | `page-loading.js` | Shows the loading state when a saved sign-in is being restored |

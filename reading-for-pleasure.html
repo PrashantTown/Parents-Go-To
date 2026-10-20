@@ -1593,7 +1593,7 @@
           Back to sign in
         </button>
         <h1 id="h-forgot" tabindex="-1">Reset your password</h1>
-        <p class="lede">Enter the email address on your account. We&rsquo;ll let the site&rsquo;s administrators know, and they&rsquo;ll give you a temporary password to sign in with.</p>
+        <p class="lede">Enter the email address on your account and we&rsquo;ll send a reset link. The link works once and expires after 30 minutes.</p>
 
         <form id="forgotForm" class="stagger" novalidate>
           <div class="field">
@@ -1610,7 +1610,7 @@
           </div>
 
           <button type="submit" class="submit" id="forgotSubmit">
-            <span>Ask for a reset</span>
+            <span>Send reset link</span>
             <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg>
           </button>
 
@@ -1624,9 +1624,9 @@
             <rect x="7" y="15" width="46" height="32" rx="4"/>
             <path class="flap" d="M7.8 18 30 34 52.2 18"/>
           </svg>
-          <h1 id="h-sent" tabindex="-1">Request sent</h1>
-          <p>If an account exists for <strong id="sentEmail">that address</strong>, an administrator will be in touch with a temporary password.</p>
-          <p>Sign in with it, and you&rsquo;ll be asked to choose a new password straight away.</p>
+          <h1 id="h-sent" tabindex="-1">Check your inbox</h1>
+          <p>If an account exists for <strong id="sentEmail">that address</strong>, a reset link is on its way.</p>
+          <p>It can take a minute to arrive. Check your spam folder before requesting another.</p>
           <div class="actions">
             <button type="button" class="submit submit--ghost" id="resend">
               <span id="resendLabel">Send it again</span>
@@ -1640,7 +1640,7 @@
 
       <section class="view" id="view-newpass" aria-labelledby="h-newpass">
         <h1 id="h-newpass" tabindex="-1">Choose a new password</h1>
-        <p class="lede">You signed in with a temporary password. Choose a new password for your account.</p>
+        <p class="lede" id="newpassLede">Choose a new password for your account.</p>
 
         <div class="alert" id="newpassAlert" role="alert">
           <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.8v4M8 10.8v.1"/></svg>
@@ -1689,7 +1689,7 @@
           Cancel and sign out
         </button>
         <h1 id="h-code" tabindex="-1">One more step</h1>
-        <p class="lede">Administrator sign-in needs a second step. Enter the six-digit administrator code for <strong id="codeEmail">your account</strong>.</p>
+        <p class="lede">Administrator sign-in needs a second step: a six-digit code for <strong id="codeEmail">your account</strong>.</p>
 
         <div class="code-enrol" id="codeEnrol" hidden>
           <p><strong>First time here?</strong> Link an authenticator app to this account. Open Google
