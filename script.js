@@ -3724,11 +3724,17 @@ const BookField = (() => {
     shelf.parentNode.hidden = !now.length;
     $("emptyNow").classList.toggle("is-on", !now.length);
     renderReaders();
+    var picks = catalogueItems();
     $("catTiles").innerHTML = CATEGORIES.map(function(c) {
       var n = mine.filter(function(b) {
         return b.category === c.id;
       }).length;
-      return '<button class="cat" type="button" data-cat="' + c.id + '">' + '<span class="ico" style="background:' + c.solid + '">' + svg(c.icon, 20) + "</span>" + '<span><span class="nm">' + esc(c.name) + "</span>" + '<span class="ct">' + n + (n === 1 ? " book" : " books") + "</span></span>" + "</button>";
+      // Nothing of this kind on the shelf yet: offer the team's picks instead.
+      var d = n ? 0 : picks.filter(function(x) {
+        return x.category === c.id && !discOwned(x);
+      }).length;
+      var ct = n ? n + (n === 1 ? " book" : " books") : d ? d + (d === 1 ? " book" : " books") + " to discover" : "0 books";
+      return '<button class="cat" type="button" data-cat="' + c.id + '"' + (d ? ' data-cat-discover="1"' : "") + ">" + '<span class="ico" style="background:' + c.solid + '">' + svg(c.icon, 20) + "</span>" + '<span><span class="nm">' + esc(c.name) + "</span>" + '<span class="ct">' + ct + "</span></span>" + "</button>";
     }).join("");
   }
   var pg = {
@@ -4539,7 +4545,12 @@ const BookField = (() => {
     $("libv-tab-discover").addEventListener("click", function() {
       window.setTimeout(renderDiscover, 0);
     });
-    window.addEventListener("ptg:catalogue", renderDiscover);
+    window.addEventListener("ptg:catalogue", function() {
+      renderDiscover();
+      if (started) {
+        renderDashboard();
+      }
+    });
     window.addEventListener("ptg:store", function(e) {
       var key = e.detail && e.detail.key;
       if (key === "ptg-catalogue-v1" || key === "ptg-genres-v1") {
@@ -5598,6 +5609,22 @@ const BookField = (() => {
       return;
     }
     hit = t.closest("[data-cat]");
+    if (hit && hit.hasAttribute("data-cat-discover") && $("libv-tab-discover") && $("dCat")) {
+      // Open Discover books, showing the team's picks in that category.
+      goTab("library", {
+        focus: false
+      });
+      $("libv-tab-discover").click();
+      if (![].some.call($("dCat").options, function(o) {
+        return o.value === hit.getAttribute("data-cat");
+      })) {
+        renderDiscover();
+      }
+      $("dCat").value = hit.getAttribute("data-cat");
+      disc.page = 1;
+      renderDiscover();
+      return;
+    }
     if (hit) {
       state.cat = hit.getAttribute("data-cat");
       $("fCat").value = state.cat;
@@ -8128,11 +8155,14 @@ const BookField = (() => {
     var list = state.more.acc ? every : every.slice(0, rowLimit());
     var filtered = !!(state.accStatus || state.accRole || state.q);
     $("admAccCount").textContent = every.length + (every.length === 1 ? " account" : " accounts") + (filtered ? " match your filters" : " registered");
+    // People reset their own password by email. Only while the server has no
+    // email set up does the console offer a temporary password instead.
+    var tempPasswords = !!(window.PTGBackend && window.PTGBackend.emailOn === false);
     $("admAccRows").innerHTML = list.map(function(a) {
       var s = shelfFor(a.email);
       var suspended = a.status === "suspended";
       var isMe = String(a.email).toLowerCase() === String(me()).toLowerCase();
-      return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Temporary password</button>' + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + (isMe || a.role === "admin" ? "" : '<button class="btn btn--quiet btn--sm" type="button" data-delete-account="' + esc(a.email) + '">Delete<span class="vh"> the account ' + esc(a.email) + "</span></button>") + "</span>" + "</td>" + "</tr>";
+      return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + (tempPasswords ? '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Temporary password</button>' : "") + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + (isMe || a.role === "admin" ? "" : '<button class="btn btn--quiet btn--sm" type="button" data-delete-account="' + esc(a.email) + '">Delete<span class="vh"> the account ' + esc(a.email) + "</span></button>") + "</span>" + "</td>" + "</tr>";
     }).join("") + moreRow("acc", list.length, every.length, "tr");
     $("admEmptyAcc").classList.toggle("is-on", !every.length);
     $("admAccTable").parentNode.hidden = !list.length;

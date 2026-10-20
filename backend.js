@@ -754,6 +754,14 @@
         throw error(message(err));
       });
     },
+    // Another administrator: they get an email to choose their password.
+    addAdmin: function(email, name) {
+      return Api.post("/api/admin/admins", { email: String(email).trim(), name: String(name || "").trim() }).then(function() {
+        return loadAdmin();
+      }, function(err) {
+        throw error(message(err));
+      });
+    },
     adminDeleteAccount: function(email) {
       var a = accountFor(email);
       if (!a || !isAdmin()) {
@@ -1034,6 +1042,13 @@
       finishRestore();
     });
   }
+
+  // Is email set up on the server? (Invitations then say they were emailed.)
+  Api.get("/api/health", { auth: false }).then(function(d) {
+    Backend.emailOn = !!(d && d.email);
+    window.PTG_CONFIG = window.PTG_CONFIG || {};
+    window.PTG_CONFIG.inviteEmails = Backend.emailOn;
+  }, noop);
 
   domReady.then(function() {
     var box = document.getElementById("remember");

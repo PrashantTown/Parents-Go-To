@@ -4310,6 +4310,7 @@
           <p class="sub">Every family account registered on this site. Suspending an account blocks
              sign-in without deleting anything the family has saved.</p>
         </div>
+        <button class="btn btn--primary" type="button" id="admAddAdmin">Add an administrator</button>
         <button class="btn btn--ghost" type="button" id="admAccountsCsv">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M10 2.8v9"/><path d="m6.6 8.4 3.4 3.4 3.4-3.4"/><path d="M3.4 13.4v2.2A1.6 1.6 0 0 0 5 17.2h10a1.6 1.6 0 0 0 1.6-1.6v-2.2"/>
@@ -5501,6 +5502,38 @@
     </form>
   </dialog>
 
+  <dialog id="addAdminDialog" aria-labelledby="aadmDlgTitle" aria-describedby="aadmDlgSub">
+    <form method="dialog" id="addAdminForm" novalidate>
+      <div class="dlg-head">
+        <div class="grow">
+          <h2 id="aadmDlgTitle">Add an administrator</h2>
+          <p id="aadmDlgSub">We email them a link to choose their own password. After that, every time they sign in we email them a six-digit code.</p>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Close without adding anyone"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button>
+      </div>
+
+      <div class="dlg-body">
+        <div class="fields">
+          <div class="f wide">
+            <label for="aadmName">Their name</label>
+            <input type="text" id="aadmName" name="name" autocomplete="off" maxlength="120">
+          </div>
+          <div class="f wide">
+            <label for="aadmEmail">Their email address</label>
+            <input type="email" id="aadmEmail" name="email" autocomplete="off" spellcheck="false" aria-describedby="aadmEmailErr">
+            <p class="err" id="aadmEmailErr">Enter an email address, like name@example.com.</p>
+          </div>
+        </div>
+        <p class="err" id="aadmProblem" role="alert"></p>
+      </div>
+
+      <div class="dlg-foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancel</button>
+        <button class="btn btn--primary" type="submit" id="aadmSave">Send the invitation</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="accountDeleteDialog" aria-labelledby="adelDlgTitle" aria-describedby="adelDlgSub">
     <form method="dialog" id="accountDeleteForm" novalidate>
       <div class="dlg-head">
@@ -6063,6 +6096,7 @@
 <script src="chat-init.js"></script>
 <script src="motion.js"></script>
 <script src="admin-ux.js"></script>
+<script src="admins.js"></script>
 <script src="stack.js"></script>
 <script src="back.js"></script>
 </body>

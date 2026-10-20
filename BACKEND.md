@@ -23,7 +23,7 @@ The pages were written to call `window.PTGBackend` for anything that needs a ser
 | Parent | `demo@parentsgoto.test` | `demo1234` |
 | Administrator | `admin@parentsgoto.test` | `demo1234-admin` |
 
-The administrator also enters the six-digit administrator code (`ADMIN_LOGIN_CODE` in the backend's settings), if one is set.
+Administrators also enter a six-digit code. With email set up on the backend, a fresh code is emailed to the administrator's own address at every sign-in, so the demo administrator (a `.test` address) can't sign in then; use a real administrator account. Without email, it's the shared `ADMIN_LOGIN_CODE`, if one is set.
 
 ## The four files
 
@@ -52,14 +52,18 @@ The methods the pages call, and what each does on the server:
 | `changeEmail(email)`, `rename(name)` | `PATCH /api/auth/me`. The email changes at once and fires `ptg:email-changed` |
 | `signOut()`, `signOutOthers()` | `POST /api/auth/logout`, `POST /api/auth/logout-others` |
 | `deleteAccount(password)` | `DELETE /api/auth/me` |
-| `accounts()`, `setAccountStatus()`, `sendReset()`, `adminDeleteAccount()` | `/api/admin/users…`. `sendReset` returns a temporary password for the administrator to pass on |
+| `accounts()`, `setAccountStatus()`, `adminDeleteAccount()` | `/api/admin/users…` |
+| `addAdmin(email, name)` | `POST /api/admin/admins`: adds an administrator and emails them a link to choose their password (needs email on the server) |
+| `sendReset(email)` | `POST /api/admin/users/:id/temp-password`: a temporary password for the administrator to pass on. The console offers it only while the server has no email set up |
 | `audit()`, `auditList()` | `/api/audit` |
 | `sharedShelves()`, `acceptInvite(ref)` | `/api/family/shared`, `/api/family/:id/accept` |
 | `sharedWishlist(token)` | `GET /api/share/:token` |
-| `contact(…)`, `subscribe(email)` | `POST /api/support` (the console's inbox) |
+| `contact(…)`, `subscribe(email)` | `POST /api/support`: the console's inbox, and emailed to the team when email is on |
 | `downloadShot("api:<id>")` | `GET /api/support/:id/screenshot` |
 
-Google sign-in, push notifications to phones and emailed codes aren't offered, so `signInWithGoogle`, `enablePush` and `sendPasswordCode` don't exist and the pages hide those options.
+`PTGBackend.emailOn` is true when the backend has email set up (from `GET /api/health`); it also sets `PTG_CONFIG.inviteEmails`, so the carer screen says the invitation was emailed.
+
+Google sign-in, push notifications to phones and the Settings page's emailed password code aren't offered (a forgotten password is reset from an emailed link instead), so `signInWithGoogle`, `enablePush` and `sendPasswordCode` don't exist and the pages hide those options.
 
 **Links in emails** open `reading-for-pleasure.html#reset=<token>` (choose a new password) or `#confirm=<token>` (a new account confirming its email). `backend.js` takes the token out of the address bar before anything else runs, then shows "Choose a new password", or confirms the account and opens the shelf.
 
@@ -127,7 +131,8 @@ register(listAdapter({
 |---|---|
 | `reading-for-pleasure.html`, `index.html`, `contact.html`, `project.html` | Load the four files after `store.js` |
 | Every page | `connect-src` in the Content-Security-Policy allows the API (and `localhost:5000` for local development). The contact email is now the client's, tsander2@usc.edu.au |
-| `reading-for-pleasure.html` | The administrator-code and "choose a new password" screens describe how this backend works. The Google sign-in buttons are hidden |
-| `script.js` | The console's "Temporary password" button shows the new password to pass on. Wishlist cards say who added each book ("Added by Harry · 20 Oct"); books a child adds from their reading space record their name. Small wording changes to match |
+| `reading-for-pleasure.html` | The administrator-code and "choose a new password" screens describe how this backend works. The Google sign-in buttons are hidden. The console's Accounts page has an **Add an administrator** button and dialog, and the page loads `admins.js` |
+| `admins.js` (new) | The **Add an administrator** dialog: checks the email, calls `PTGBackend.addAdmin`, and refreshes the accounts list |
+| `script.js` | The console's "Temporary password" button only appears while the server has no email set up; with email, people reset their own password from an emailed link. Wishlist cards say who added each book ("Added by Harry · 20 Oct"); books a child adds from their reading space record their name. A category with no books on the family's shelf yet says how many there are to discover, and opens **Library > Discover books** on that category. Small wording changes to match |
 | `settings.js` | Deleting an account asks for the password. Changing the sign-in email takes effect at once. The emailed-code reset option is hidden |
 | `page-loading.js` | Shows the loading state when a saved sign-in is being restored |
