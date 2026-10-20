@@ -106,9 +106,6 @@
     }
     return a;
   }
-  function grp(inner, attrs) {
-    return el("g", attrs || {}, inner);
-  }
   function dots(y, sp, r, col) {
     col = col || "#2A1B12";
     return circle(50 - sp, y, r, col) + circle(50 + sp, y, r, col);
@@ -776,7 +773,6 @@
     return name || "Avatar";
   }
   var cache = null;
-  // Forget the cached copy when the signed-in person's looks are loaded.
   window.addEventListener("ptg:store", function(e) {
     if (e.detail && e.detail.key === STORE_KEY) {
       cache = null;

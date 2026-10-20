@@ -42,16 +42,23 @@
 })();
 
 (function() {
-  document.querySelectorAll("[data-href]").forEach(function(card) {
-    card.style.cursor = "pointer";
-    card.addEventListener("click", function(event) {
-      if (event.target.closest("a")) return;
-      window.location.href = card.dataset.href;
-    });
-    card.addEventListener("keydown", function(event) {
-      if (event.key !== "Enter" || event.target !== card) return;
-      window.location.href = card.dataset.href;
-    });
+  function go(card) {
+    var url = card.dataset.href || "";
+    if (/^https:/i.test(url)) {
+      window.open(url, "_blank", "noopener");
+    } else if (url) {
+      window.location.href = url;
+    }
+  }
+  document.addEventListener("click", function(event) {
+    var card = event.target.closest && event.target.closest("[data-href]");
+    if (!card || event.target.closest("a, button")) return;
+    go(card);
+  });
+  document.addEventListener("keydown", function(event) {
+    var card = event.target.closest && event.target.closest("[data-href]");
+    if (!card || event.key !== "Enter" || event.target !== card) return;
+    go(card);
   });
 })();
 

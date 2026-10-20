@@ -2,9 +2,11 @@
 <html lang="en-AU">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Parents Go To - Reading for Pleasure. Your family's shelf, in one place." />
+<meta name="description" content="Reading for Pleasure on Parents Go To: curated books and trusted reading resources for children aged 0 to 18, matched to each child's age and interests." />
 <title>Parents Go To &mdash; Reading for Pleasure</title>
+<script src="page-loading.js"></script>
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 88'%3E%3ClinearGradient id='d' x1='48' y1='1' x2='48' y2='39' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%235BCF7C'/%3E%3Cstop offset='.5' stop-color='%2325C497'/%3E%3Cstop offset='1' stop-color='%2301A79A'/%3E%3C/linearGradient%3E%3ClinearGradient id='h' x1='48' y1='26' x2='48' y2='66' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%232BC48F'/%3E%3Cstop offset='.45' stop-color='%2301AF9F'/%3E%3Cstop offset='1' stop-color='%230A6C86'/%3E%3C/linearGradient%3E%3Cpath d='M11 39A37 37 0 0 1 85 39Z' fill='url(%23d)'/%3E%3Cpath d='M48 65 23 40.2A12.6 12.6 0 0 1 48 39.2 12.6 12.6 0 0 1 73 40.2Z' fill='url(%23h)' stroke='%23fff' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E" />
 
@@ -52,6 +54,10 @@
 
 </head>
 <body>
+<div class="page-loading" role="status" aria-live="polite">
+  <span class="page-loading-ring" aria-hidden="true"></span>
+  <p>Signing you in&hellip;</p>
+</div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
 <symbol id="rfp-logo" viewBox="0 0 96 88">
@@ -178,8 +184,9 @@
     <h1 class="hero-title">Your family&rsquo;s <em>shelf</em>, in one place.</h1>
 
     <p class="hero-lede">
-      Keep track of what everyone is reading, pick up where you left off,
-      and find the next book together.
+      Curated books and trusted reading resources for children aged 0 to 18, matched to
+      each child&rsquo;s age and interests. Save what they read, keep a wishlist the family
+      can see, and share ideas with other parents.
     </p>
 
     <div class="hero-cta">
@@ -206,8 +213,9 @@
 
       <div class="about-body rise-in" data-d="1">
         <p>
-          Parents Go To is one place for the reading resources that matter to your
-          family. We gather trusted books, guides and library links for children aged 0 to 18,
+          Reading for Pleasure is the first project on Parents Go To, one place for the reading
+          resources that matter to your family. We gather trusted books, guides and library
+          links for children aged 0 to 18,
           and sort them by age and by interest, so you are not starting from a search box
           every time.
         </p>
@@ -336,8 +344,8 @@
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 10.66A7.5 7.5 0 1 1 9.34 2.5 5.83 5.83 0 0 0 17.5 10.66Z"/></svg>
           </span>
                 <div>
-                  <h4>A bedtime mode they can use alone</h4>
-                  <p>A calm, dark screen for recording tonight&rsquo;s reading in three taps: who, which book, how long. There is nothing to wander into, and the way out can be locked with your password.</p>
+                  <h4>A bedtime mode, with you in charge</h4>
+                  <p>A calm, dark screen where a child can record tonight&rsquo;s reading in three taps: who, which book, how long. It opens from your account, there is nothing to wander into, and the way out can be locked with your password.</p>
                 </div>
               </li>
             </ul>
@@ -386,19 +394,19 @@
 
       <ol class="rfp-steps rise-in" data-d="1">
         <li>
-          <h3>Set up your family profile</h3>
-          <p>Add your children&rsquo;s ages, your suburb and anything a provider should know,
-             such as allergies or support needs.</p>
+          <h3>Create your parent account</h3>
+          <p>Add each child&rsquo;s age band and what they like to read. Children do not need
+             accounts of their own.</p>
         </li>
         <li>
-          <h3>Compare what is near you</h3>
-          <p>Filter by age, day and distance. Listings sit side by side, so you are
-             comparing like with like.</p>
+          <h3>Find what suits each child</h3>
+          <p>Browse curated books and approved resources, filtered by age, interest and
+             category, with your children&rsquo;s favourites shown first.</p>
         </li>
         <li>
-          <h3>Book without signing up again</h3>
-          <p>We pass your details to the provider you chose, and only to them. Your bookings
-             stay in one dashboard.</p>
+          <h3>Save, track and share</h3>
+          <p>Add books to your shelf, log reading, and share a wishlist with family.
+             Suggestions and posts are checked by a moderator before they appear.</p>
         </li>
       </ol>
   </div>
@@ -423,7 +431,7 @@
             </span>
             <span>
               <span class="detail-label">Email</span>
-              <span class="detail-value"><a href="mailto:tsander2@usc.edu.au">tsander2@usc.edu.au</a></span>
+              <span class="detail-value"><a href="mailto:parentsgoto@gmail.com">parentsgoto@gmail.com</a></span>
             </span>
           </li>
 
@@ -434,16 +442,6 @@
             <span>
               <span class="detail-label">Phone</span>
               <span class="detail-value"><a href="tel:0754565633">07 5456 5633</a></span>
-            </span>
-          </li>
-
-          <li>
-            <span class="detail-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5.4" y="2.2" width="9.2" height="15.6" rx="1.8"/><path d="M8.6 15h2.8"/></svg>
-            </span>
-            <span>
-              <span class="detail-label">Mobile</span>
-              <span class="detail-value"><a href="tel:0407991974">0407 991 974</a></span>
             </span>
           </li>
 
@@ -513,9 +511,9 @@
         <div class="cf-panel" id="contactDone" tabindex="-1" hidden>
           <p class="cf-badge">
             <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.4 10.4 3.6 3.6 7.6-8"/></svg>
-            Saved
+            Sent
           </p>
-          <h3>Your message is stored</h3>
+          <h3>Your message has reached us</h3>
           <p>
             Keep this reference. It is how an administrator finds your message in the
             console, and how you can ask about it later.
@@ -531,16 +529,15 @@
         <div class="cf-panel cf-fail" id="contactFail" tabindex="-1">
           <p class="cf-badge">
             <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.4"/><path d="M10 6.2v4.4M10 13.6v.1"/></svg>
-            Not saved
+            Not sent
           </p>
-          <h3>This browser would not store it</h3>
+          <h3>Your message did not reach us</h3>
           <p>
-            Nothing has been kept, and there is no reference number, because there is no
-            message. This usually means private browsing is on or the storage this site
-            is allowed is full.
+            Nothing has been kept, and there is no reference number. This usually means
+            the internet connection dropped for a moment.
           </p>
           <p>
-            Try again in a normal window, or use the email address beside this form.
+            Check your connection and try again, or use the email address beside this form.
           </p>
         </div>
       </div>
@@ -585,14 +582,16 @@
       reading on a phone, not for a lawyer.
     </p>
 
-    <p class="policy-updated">Last updated 5 September 2026. Applies to the Parents Go To website and app.</p>
+    <p class="policy-updated">Last updated 13 October 2026. Applies to the Parents Go To website and app.</p>
 
     <div class="policy-flag">
-      <b>Where your shelf is kept.</b>
+      <b>Where your information is kept.</b>
       <p>
-        Everything you type stays in this browser, on this device, in an area called
-        local storage. Clearing your browser data clears your shelf. Nothing is
-        transmitted to us, and nothing can be recovered by us if you lose it.
+        With your account, in a database run for us by Supabase, on servers in Sydney,
+        Australia. It is sent there over an encrypted connection, and rules in the
+        database itself decide who can read each piece &mdash; so your shelf is visible
+        only to you and the adults you invite, whichever device you sign in from.
+        Clearing your browser data does not delete it.
       </p>
     </div>
 
@@ -604,8 +603,13 @@
       <h3>About you</h3>
       <ul>
         <li>Your name and email address, so the account has an owner.</li>
-        <li>Your password, so nobody else can open your shelf.</li>
-        <li>Your settings &mdash; theme, text size, notification choices.</li>
+        <li>Your password, so nobody else can open your shelf. It is stored scrambled
+            (hashed), so nobody &mdash; including us &mdash; can read it.</li>
+        <li>Your settings &mdash; theme, text size, notification choices &mdash; and a
+            profile picture, if you add one.</li>
+        <li>Messages you send in the app&rsquo;s chats, and the alerts the app shows you.
+            If you turn on notifications on a device, an address for that device so alerts
+            can reach it.</li>
         <li>Anything you type into a support report or a resource suggestion.</li>
         <li>Anything you write on the message board, including the age band you attach to
             it if you attach one, and whether it is waiting for review, published or
@@ -627,21 +631,21 @@
         recognise you, and the message is not linked to any account.
       </p>
       <p>
-        That message is stored in the browser you sent it from and stays on that device.
-        It is not transmitted and we do not receive it.
+        That message is sent to us and stored with a reference number, so we can find it
+        when you ask about it. If you sign up for news, we keep the email address you gave
+        until you unsubscribe.
       </p>
 
       <h3>About your children</h3>
       <ul>
         <li>A first name, or whatever you choose to call them. It does not have to be their real name.</li>
-        <li>An age, if you give one. It is optional.</li>
         <li>A reading level and their favourite categories, used to filter the shelf.</li>
         <li>What they are reading, what they have finished, and how far through they are.</li>
       </ul>
 
       <p>
-        We do not ask for a surname, a school, an address, a photograph or a date of
-        birth, and there is nowhere in the app to enter one. We do not collect
+        We do not ask for a surname, a school, an address, a photograph, an exact age or a
+        date of birth, and there is nowhere in the app to enter one. We do not collect
         anything from a child directly &mdash; a parent or guardian enters everything,
         and bedtime mode lets a child log a book without creating a profile of their
         own.
@@ -649,7 +653,7 @@
 
       <h2 id="privacy-why">Why we collect it</h2>
       <p>
-        The age and reading level exist so the library can show books that suit each
+        The reading level exists so the library can show books that suit each
         child instead of everything at once. Reading progress exists so a half-finished
         book can be picked back up. Your email exists so you can sign in and get your
         password back. That is the whole list. We do not build advertising profiles,
@@ -665,30 +669,34 @@
             choose one year or three years.</li>
         <li><b>Support reports, contact form messages and resource suggestions</b>
             &mdash; kept while they are open and for a reasonable period after they are
-            closed, so a decision can be explained if you ask about it. The store holds
-            the most recent 200 and drops the oldest beyond that.</li>
+            closed, so a decision can be explained if you ask about it.</li>
         <li><b>A shared wishlist</b> &mdash; until the expiry you chose when you shared
             it, or until you press Stop sharing, whichever comes first.</li>
         <li><b>Message board posts</b> &mdash; kept while the board holds them. A post a
             moderator removes stops being visible to other parents but is marked removed
             rather than erased, so the decision and its reason can still be explained.
-            The board holds the most recent 200 posts and drops the oldest beyond that.</li>
+            </li>
         <li><b>Other adults you have invited</b> &mdash; kept while they are on the shelf,
             and kept after you withdraw their access, marked withdrawn and dated. A record
             of who could once see your children that disappears the moment they stop being
-            able to is not a record. This device holds the 12 most recent of these across
-            every account on it, invited and withdrawn together, and drops the oldest
-            beyond that.</li>
-        <li><b>Book reviews</b> &mdash; the same rules as a board post, and the same limit
-            of 200. A review outlives the book it is about: books are held in memory and
-            rebuilt every time the page loads, while a review is written to storage, so
-            deleting a book from your shelf does not delete what you wrote about it. It
-            stays in your own list, marked as being about a book you no longer have.</li>
+            able to is not a record.</li>
+        <li><b>Book reviews</b> &mdash; the same rules as a board post. A review keeps the
+            title and author of its book, so deleting a book from your shelf does not delete
+            what you wrote about it. It stays in your own list, marked as being about a book
+            you no longer have.</li>
+        <li><b>Chat messages</b> &mdash; until the person who sent them deletes them, or the
+            chat is deleted.</li>
       </ul>
-      <p>When you delete your account, all of it goes at once. There is no archive copy.</p>
+      <p>
+        When you delete your account, all of it goes at once: your shelf, your children,
+        your posts, reviews, suggestions, chat messages, support reports and any files you
+        uploaded. Two things stay, without a link to your account: the record administrators
+        keep of their own moderation and account decisions, and anything that belongs to
+        another family&rsquo;s account, such as an invitation they sent you.
+      </p>
 
       <h2 id="privacy-who">Who can see it</h2>
-      <p><b>By default, only you.</b> A child&rsquo;s name, age and reading level never leave your account unless you choose to share something.</p>
+      <p><b>By default, only you.</b> A child&rsquo;s first name and reading level never leave your account unless you choose to share something.</p>
       <ul>
         <li><b>Anyone you send a wishlist link to</b> sees the books on that wishlist and
             the first name of the child it is for &mdash; or only their initial, if you
@@ -700,24 +708,31 @@
             one. They do not see your email, your children, your library or your reading
             log. A message is only ever seen by other parents after an administrator has
             published it &mdash; until then it is visible to you alone.</li>
-        <li><b>Other parents who own the same book</b> see any review you publish of it:
-            the name on your account, your rating and what you wrote. They do not see the
-            rest of your shelf, which child it was for, or anything else about your
+        <li><b>Other signed-in parents</b> can see any review you publish: the name on your
+            account, your rating and what you wrote, shown with the book. They do not see
+            the rest of your shelf, which child it was for, or anything else about your
             account. As with a message, a review is only ever seen by anyone else after an
             administrator has published it, and if you change a published review it comes
             back off the book until it has been looked at again.</li>
         <li><b>An administrator</b> sees your account name and email, and anything you
             send them: a support report, a message from the contact form, a resource you
             suggest, or a message you write on the board. They cannot open your shelf, and
-            they never see your children&rsquo;s names, ages or reading history &mdash;
+            they never see your children&rsquo;s names, reading levels or reading history &mdash;
             unless you write one into a box yourself. See below.</li>
         <li><b>Another adult you invite onto your shelf</b> would see the most of anyone,
             which is why the invite dialog lists what before it lists a field. They would
-            see your children by name, with their ages and reading levels, and everything on
+            see your children by name, with their reading levels, and everything on
             the shelf and in the reading log. This is the only route in the product by which
             a child&rsquo;s name reaches somebody outside your account by design rather than
             because you typed it into a box. You choose it, you can see who has it on your
             Profiles tab, and you can withdraw it. There is more about it below.</li>
+        <li><b>People in a chat with you</b> see the messages in that chat. Administrators
+            cannot read chats.</li>
+        <li><b>The companies that run the service for us</b>, only as needed to do that job:
+            Supabase stores the data and handles sign-in; an email service sends sign-in,
+            password and invitation emails; and your browser&rsquo;s own notification service
+            delivers alerts if you turn them on. They may not use your information for
+            anything else.</li>
         <li><b>Nobody else.</b> There are no third-party trackers, no analytics scripts
             and no advertising on this site.</li>
       </ul>
@@ -730,7 +745,7 @@
       </p>
       <p>
         A carer &mdash; a second parent, a grandparent, whoever reads with your children
-        &mdash; sees your children <b>by name</b>, with their ages and reading levels, and
+        &mdash; sees your children <b>by name</b>, with their reading levels, and
         everything on the shelf. That is the point of inviting them: somebody who cannot see
         what a child is reading cannot help them read. But it is a real disclosure, so the
         invite dialog names the children it is about before it asks you for anything, rather
@@ -745,9 +760,11 @@
         giving a reason.
       </p>
       <p>
-        <b>No invitation email is sent.</b> Nobody is asked to accept one, and there is no
-        separate sign-in for an invited adult. What we store is a name,
-        an email address and the fact that you said this person should have access.
+        <b>They have to accept.</b> We may email the address you give an invitation that
+        says who it is from. The person needs their own Parents Go To account with that
+        email address, and sees nothing of your shelf until they sign in and accept. What
+        we store is their name, the email address and the fact that you said this person
+        should have access.
       </p>
       <p>
         Withdrawing keeps the record. The person moves to a list of people who used to have
@@ -758,8 +775,9 @@
 
       <h2 id="privacy-freetext">Boxes you can type anything into</h2>
       <p>
-        Four places in this app let you write whatever you like: the contact form on the
-        home page, a support report, the message board, and a review of a book. Everywhere
+        A few places in this app let you write whatever you like: the contact form on the
+        home page, a support report, the message board, a review of a book, a resource
+        suggestion, and chat. Everywhere
         else, the app asks for specific things and keeps them where they belong &mdash; a child&rsquo;s name
         and age sit inside your account and no administrator has a screen that can show
         them.
@@ -793,27 +811,27 @@
         nothing about publishing a review requires anybody to hand that over.
       </p>
       <p>
-        What we cannot do is stop you. There is no
-        filter reading your message before it is stored and no check on what goes in. The
-        protection here is a request, a prompt and a way of taking something down
-        afterwards &mdash; not a control. A message removed by a moderator stops being
-        visible to other parents, but it is marked removed rather than erased, and it stays
-        in this browser&rsquo;s storage until the site data is cleared.
+        What we cannot do is stop you completely. A simple automatic check holds back
+        posts that look like they name a person or link to an unfamiliar site, so a
+        moderator sees them first, but it is not a guarantee. The real protection is a
+        request, a prompt and a way of taking something down afterwards. A message removed
+        by a moderator stops being visible to other parents. It is marked removed rather
+        than erased, and is deleted when you delete it yourself or delete your account.
       </p>
 
       <h2 id="privacy-copy">How to get a copy</h2>
       <p>
         Go to <b>Settings &rarr; Privacy &amp; safety</b> and choose <b>Download my
-        data</b>. You get everything the app holds about your family as a single file
-        you can keep or move to another device. You do not have to ask us, and you do
+        data</b>. You get your family&rsquo;s shelf as a single file you can keep. You do not have to ask us, and you do
         not have to give a reason.
       </p>
 
       <h2 id="privacy-delete">How to delete it</h2>
       <p>
         In the same place, choose <b>Delete my account</b>. That removes your account,
-        every child profile, the library, the wishlist and the reading log. It cannot
-        be undone, so take a copy first if you want one. Individual children can be
+        every child profile, the library, the wishlist, the reading log and everything you
+        have written in the app, as listed under &ldquo;How long we keep it&rdquo;. It
+        cannot be undone, so take a copy first if you want one. Individual children can be
         removed one at a time from the Profiles tab.
       </p>
 
@@ -1021,7 +1039,7 @@
       on purpose. If anything here is unclear, ask us before you sign up.
     </p>
 
-    <p class="policy-updated">Last updated 21 September 2026. Applies to the Parents Go To website and app.</p>
+    <p class="policy-updated">Last updated 9 October 2026. Applies to the Parents Go To website and app.</p>
 
     <div class="policy-body">
 
@@ -1052,8 +1070,9 @@
 
       <h2 id="terms-posting">What you post</h2>
       <p>
-        Message board posts, book reviews and resource suggestions are read by a moderator
-        before anyone else sees them. When you post, you agree to:
+        Message board posts, book reviews and resource suggestions are checked before anyone
+        else sees them &mdash; by a moderator, or by automatic checks that hold anything
+        doubtful back for a moderator. When you post, you agree to:
       </p>
       <ul>
         <li>be kind, and write the way you would to another parent at the school gate;</li>
@@ -1078,8 +1097,9 @@
       <h2 id="terms-data">Your data is yours</h2>
       <p>
         You can download everything on your shelf, or delete your account, from
-        <b>Settings &rarr; Privacy &amp; safety</b>. Your shelf is kept in the browser
-        on your device, so clearing your browser data also clears it.
+        <b>Settings &rarr; Privacy &amp; safety</b>. Your shelf is kept with your account,
+        so you can sign in from any device and find it there. The
+        <a href="#page-privacy">privacy notice</a> says where it is stored.
       </p>
 
       <h2 id="terms-changes">Changes to the service and these terms</h2>
@@ -1247,25 +1267,17 @@
             <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg>
           </button>
 
-          <p class="divider" aria-hidden="true">or continue with</p>
+          <p class="divider" aria-hidden="true">or</p>
           <div class="oauth">
-            <button type="button" class="oauth-btn" data-oauth="Google">
+            <button type="button" class="oauth-btn" data-oauth="google">
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.71a5.4 5.4 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l3.01-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.17 6.66 3.58 9 3.58Z"/></svg>
-              Google
-            </button>
-            <button type="button" class="oauth-btn" data-oauth="Facebook">
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#1877F2" d="M18 9a9 9 0 1 0-10.41 8.89v-6.29H5.31V9h2.28V7.02c0-2.25 1.34-3.5 3.4-3.5.98 0 2.01.18 2.01.18v2.21h-1.13c-1.11 0-1.46.69-1.46 1.4V9h2.48l-.4 2.6h-2.08v6.29A9 9 0 0 0 18 9Z"/><path fill="#FFFFFF" d="m12.49 11.6.4-2.6h-2.48V7.31c0-.71.35-1.4 1.46-1.4H13V3.7s-1.03-.18-2.01-.18c-2.06 0-3.4 1.25-3.4 3.5V9H5.31v2.6h2.28v6.29a9.09 9.09 0 0 0 2.82 0V11.6h2.08Z"/></svg>
-              Facebook
+              Continue with Google
             </button>
           </div>
           <p class="oauth-note" id="signinOauthNote" role="status"></p>
+          <p class="oauth-legal">New to Parents Go To? Continue with Google and we&rsquo;ll ask you to confirm a couple of details before your account is ready.</p>
 
           <p class="foot">New here? <button type="button" class="link" data-go="create">Create a family account</button></p>
-
-          <p class="foot" style="padding-top:.7rem;border-top:0;margin-top:.2rem">
-
-            <b style="color:var(--ink)"></b>
-          </p>
         </form>
       </section>
 
@@ -1275,7 +1287,7 @@
           Back to sign in
         </button>
         <h1 id="h-create" tabindex="-1">Create your family account</h1>
-        <p class="lede">One account for the whole family. You can add your children&rsquo;s reading profiles once you&rsquo;re in.</p>
+        <p class="lede">One parent account for the whole family. You add your children&rsquo;s reading profiles once you&rsquo;re in &mdash; children do not sign in themselves.</p>
 
         <div class="alert" id="createAlert" role="alert">
           <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.8v4M8 10.8v.1"/></svg>
@@ -1414,20 +1426,164 @@
             <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg>
           </button>
 
-          <p class="divider" aria-hidden="true">or sign up with</p>
+          <p class="divider" aria-hidden="true">or</p>
           <div class="oauth">
-            <button type="button" class="oauth-btn" data-oauth="Google">
+            <button type="button" class="oauth-btn" data-oauth="google">
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.71a5.4 5.4 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l3.01-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.17 6.66 3.58 9 3.58Z"/></svg>
-              Google
-            </button>
-            <button type="button" class="oauth-btn" data-oauth="Facebook">
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#1877F2" d="M18 9a9 9 0 1 0-10.41 8.89v-6.29H5.31V9h2.28V7.02c0-2.25 1.34-3.5 3.4-3.5.98 0 2.01.18 2.01.18v2.21h-1.13c-1.11 0-1.46.69-1.46 1.4V9h2.48l-.4 2.6h-2.08v6.29A9 9 0 0 0 18 9Z"/><path fill="#FFFFFF" d="m12.49 11.6.4-2.6h-2.48V7.31c0-.71.35-1.4 1.46-1.4H13V3.7s-1.03-.18-2.01-.18c-2.06 0-3.4 1.25-3.4 3.5V9H5.31v2.6h2.28v6.29a9.09 9.09 0 0 0 2.82 0V11.6h2.08Z"/></svg>
-              Facebook
+              Continue with Google
             </button>
           </div>
           <p class="oauth-note" id="createOauthNote" role="status"></p>
 
           <p class="foot">Already have an account? <button type="button" class="link" data-go="signin">Sign in</button></p>
+        </form>
+      </section>
+
+      <section class="view" id="view-welcome" aria-labelledby="h-welcome">
+        <p class="gn-step"><span>Step 1 of 2</span> &middot; Your details</p>
+        <h1 id="h-welcome" tabindex="-1">Finish setting up your account</h1>
+        <p class="lede">You&rsquo;re nearly there. Add the same details as a normal sign-up, then pick what your family likes to read.</p>
+
+        <div class="account-chip">
+          <span class="account-chip-g" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.71a5.4 5.4 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l3.01-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.17 6.66 3.58 9 3.58Z"/></svg>
+          </span>
+          <span class="account-chip-text">
+            <span class="account-chip-label">Signed in with Google</span>
+            <strong id="welcomeEmail">your Google account</strong>
+          </span>
+          <button type="button" class="link account-chip-switch" id="welcomeSwitch">Not you?</button>
+        </div>
+
+        <div class="alert" id="welcomeAlert" role="alert">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.8v4M8 10.8v.1"/></svg>
+          <span id="welcomeAlertText"></span>
+        </div>
+
+        <form id="welcomeForm" class="stagger" novalidate>
+          <div class="field">
+            <label for="wName">Your name</label>
+            <div class="control">
+              <input type="text" id="wName" name="name" autocomplete="name" maxlength="60"
+                     placeholder="Alex Reid" aria-describedby="wNameHint" required>
+            </div>
+            <p class="hint" id="wNameHint">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.8v4M8 10.8v.1"/></svg>
+              <span></span>
+            </p>
+            <p class="note">This is how you appear to family members you invite. You can change it later in Settings.</p>
+          </div>
+
+          <div class="field">
+            <label for="wPassword">Create a password</label>
+            <div class="control">
+              <input type="password" id="wPassword" name="new-password" autocomplete="new-password"
+                     placeholder="At least 10 characters"
+                     aria-describedby="wPwHint wCapsHint wPwRules wMeterStatus" required>
+              <button type="button" class="reveal" id="wReveal" aria-pressed="false" aria-label="Show password">
+                <svg class="icon-on" width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1.8 10S4.9 4.6 10 4.6 18.2 10 18.2 10 15.1 15.4 10 15.4 1.8 10 1.8 10Z"/><circle cx="10" cy="10" r="2.5"/></svg>
+                <svg class="icon-off" width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8.2 4.9A7.6 7.6 0 0 1 10 4.7c5.1 0 8.2 5.3 8.2 5.3a15 15 0 0 1-2.6 3.2M4.6 6.1A14.6 14.6 0 0 0 1.8 10s3.1 5.3 8.2 5.3c1.3 0 2.4-.3 3.4-.8"/><path d="M2.6 2.6l14.8 14.8"/></svg>
+              </button>
+            </div>
+
+            <div class="meter" id="wMeter" data-score="0">
+              <div class="meter-track" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <div class="meter-row">
+                <span class="meter-label" id="wMeterLabel">Not set yet</span>
+                <span class="meter-tip" id="wMeterTip">Longer is stronger</span>
+              </div>
+              <p class="vh" id="wMeterStatus" role="status" aria-live="polite"></p>
+            </div>
+
+            <ul class="rules" id="wPwRules" aria-label="Password requirements">
+                <li data-rule="len" data-met="false">
+                  <svg class="rule-i" viewBox="0 0 16 16" aria-hidden="true">
+                    <circle class="r-dot" cx="8" cy="8" r="3.2"/>
+                    <path class="r-tick" d="M4.1 8.3 6.8 11l5.1-5.9"/>
+                  </svg>
+                  <span>10 or more characters</span>
+                </li>
+                <li data-rule="upper" data-met="false">
+                  <svg class="rule-i" viewBox="0 0 16 16" aria-hidden="true">
+                    <circle class="r-dot" cx="8" cy="8" r="3.2"/>
+                    <path class="r-tick" d="M4.1 8.3 6.8 11l5.1-5.9"/>
+                  </svg>
+                  <span>A capital letter</span>
+                </li>
+                <li data-rule="lower" data-met="false">
+                  <svg class="rule-i" viewBox="0 0 16 16" aria-hidden="true">
+                    <circle class="r-dot" cx="8" cy="8" r="3.2"/>
+                    <path class="r-tick" d="M4.1 8.3 6.8 11l5.1-5.9"/>
+                  </svg>
+                  <span>A lowercase letter</span>
+                </li>
+                <li data-rule="digit" data-met="false">
+                  <svg class="rule-i" viewBox="0 0 16 16" aria-hidden="true">
+                    <circle class="r-dot" cx="8" cy="8" r="3.2"/>
+                    <path class="r-tick" d="M4.1 8.3 6.8 11l5.1-5.9"/>
+                  </svg>
+                  <span>A number</span>
+                </li>
+                <li data-rule="sym" data-met="false">
+                  <svg class="rule-i" viewBox="0 0 16 16" aria-hidden="true">
+                    <circle class="r-dot" cx="8" cy="8" r="3.2"/>
+                    <path class="r-tick" d="M4.1 8.3 6.8 11l5.1-5.9"/>
+                  </svg>
+                  <span>A symbol, like ! ? # or –</span>
+                </li>
+            </ul>
+
+            <p class="hint" id="wCapsHint">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 2.4 13 7.6h-2.6v3.2H5.6V7.6H3L8 2.4Z"/></svg>
+              <span>Caps Lock is on.</span>
+            </p>
+            <p class="note">So you can also sign in with your email address, not only with Google.</p>
+            <p class="hint" id="wPwHint">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.8v4M8 10.8v.1"/></svg>
+              <span></span>
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="wConfirm">Confirm password</label>
+            <div class="control">
+              <input type="password" id="wConfirm" name="confirm-password" autocomplete="new-password"
+                     placeholder="Type it once more" aria-describedby="wConfirmHint" required>
+            </div>
+            <p class="hint" id="wConfirmHint">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.8v4M8 10.8v.1"/></svg>
+              <span></span>
+            </p>
+          </div>
+
+
+          <div class="terms">
+            <label class="check">
+              <input type="checkbox" id="wGuardian" name="guardian" aria-describedby="wGuardianHint" required>
+              <span>I am the parent or legal guardian of the children I add to this account.</span>
+            </label>
+            <p class="hint" id="wGuardianHint">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.8v4M8 10.8v.1"/></svg>
+              <span></span>
+            </p>
+          </div>
+          <div class="terms">
+            <label class="check">
+              <input type="checkbox" id="wTerms" name="terms" aria-describedby="wTermsHint" required>
+              <span>I agree to the <a class="link" href="#page-terms">Terms of Use</a> and the <a class="link" href="#page-privacy">Privacy Notice</a>.</span>
+            </label>
+            <p class="hint" id="wTermsHint">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="8" cy="8" r="6.4"/><path d="M8 4.8v4M8 10.8v.1"/></svg>
+              <span></span>
+            </p>
+          </div>
+
+          <button type="submit" class="submit" id="welcomeSubmit">
+            <span>Continue</span>
+            <svg class="arrow" width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3.4 9h11M10 4.4 14.6 9 10 13.6"/></svg>
+          </button>
+
+          <p class="foot">Changed your mind? <button type="button" class="link" id="welcomeCancel">Cancel and delete this account</button></p>
         </form>
       </section>
 
@@ -1831,8 +1987,8 @@
 
         <div class="who-wrap">
           <button class="who" type="button" id="whoBtn" aria-expanded="false" aria-controls="whoMenu">
-            <span class="avatar" id="whoAvatar" style="background:#0D3B32">S</span>
-            <span class="who-name" id="whoName">Sarah</span>
+            <span class="avatar" id="whoAvatar" style="background:#0D3B32"></span>
+            <span class="who-name" id="whoName"></span>
             <svg class="chev" width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m1 1 5 5 5-5"/>
             </svg>
@@ -1952,9 +2108,9 @@
     <section class="panel is-active wrap" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard" tabindex="-1">
 
       <div class="greet">
-        <span class="avatar" id="greetAvatar" style="background:#0D3B32">S</span>
+        <span class="avatar" id="greetAvatar" style="background:#0D3B32"></span>
         <div>
-          <h1 id="h-dashboard" tabindex="-1"><span id="greetLine">Good evening, Sarah</span></h1>
+          <h1 id="h-dashboard" tabindex="-1"><span id="greetLine">Welcome back</span></h1>
           <p class="date" id="greetDate">Today</p>
         </div>
       </div>
@@ -2019,6 +2175,7 @@
               <span class="pg-legend" aria-hidden="true">
                 <span><i class="pg-key pg-key--now"></i><span id="pgKeyNow">This week</span></span>
                 <span><i class="pg-key pg-key--was"></i><span id="pgKeyWas">Last week</span></span>
+                <span id="pgKeyOnline" hidden><i class="pg-key pg-key--online"></i>Opened online</span>
               </span>
             </figcaption>
             <div class="pg-plot" id="pgPlot"></div>
@@ -2082,12 +2239,31 @@
         <button class="btn btn--primary" type="button" data-app-go="library">Go to the library</button>
       </div>
 
+      <section id="onlineRow" aria-labelledby="onlineH" hidden>
+        <div class="row-head">
+          <h2 id="onlineH">Read or watch online</h2>
+          <span class="note">Opens on the book&rsquo;s own site.</span>
+        </div>
+        <p class="online-sum" id="onlineSum"></p>
+        <div class="online-list" id="onlineList"></div>
+      </section>
+
       <section id="readersRow" hidden>
         <div class="row-head">
           <h2>How everyone is going</h2>
           <span class="note">Pick a reader to see only their books</span>
         </div>
         <div class="readers" id="readerCards"></div>
+      </section>
+
+      <section class="team-posts" aria-labelledby="teamPostsTitle">
+        <div class="row-head">
+          <h2 id="teamPostsTitle">Latest from the team</h2>
+          <span class="spacer"></span>
+          <button class="btn btn--quiet btn--sm" type="button" data-app-go="resources">See all resources</button>
+        </div>
+        <div class="resources" id="teamPosts" hidden></div>
+        <p class="team-empty" id="teamPostsEmpty">Nothing from the team yet. Guides and news they publish will appear here.</p>
       </section>
 
       <div class="row-head">
@@ -2119,15 +2295,26 @@
       <h2 class="vh">You and your children</h2>
       <div class="profiles" id="profileCards"></div>
 
+      <div class="shared-block" id="sharedBlock" hidden>
+        <div class="fam-head">
+          <div class="grow">
+            <h2 id="h-shared" tabindex="-1">Shelves shared with you</h2>
+            <p class="fam-sub">Families who invited you. You can follow their children&rsquo;s
+               reading here. Only they can change their shelf.</p>
+          </div>
+        </div>
+        <div class="shared-list" id="sharedList"></div>
+      </div>
+
       <div class="fam-block">
 
         <div class="fam-head">
           <div class="grow">
             <h2 id="h-family" tabindex="-1">Other adults on this shelf</h2>
             <p class="fam-sub">A second parent, a grandparent, an after-school carer &mdash;
-               someone who reads with your children and can record it. They see the shelf
-               and the children on it. They cannot change your account or speak for your
-               family.</p>
+               someone who reads with your children. Once they accept, they can see the shelf,
+               the children on it and their reading, and message you. They cannot change
+               anything on it, your account, or speak for your family.</p>
           </div>
           <button class="btn btn--primary" type="button" id="famAdd">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -2184,6 +2371,8 @@
       <div class="vswitch" id="libViews" role="tablist" aria-label="Library views">
         <button class="vswitch-btn" type="button" role="tab" id="libv-tab-books"
                 aria-controls="libv-books" aria-selected="true">Your books</button>
+        <button class="vswitch-btn" type="button" role="tab" id="libv-tab-discover"
+                aria-controls="libv-discover" aria-selected="false" tabindex="-1">Discover books</button>
         <button class="vswitch-btn" type="button" role="tab" id="libv-tab-reviews"
                 aria-controls="libv-reviews" aria-selected="false" tabindex="-1">Reviews</button>
       </div>
@@ -2247,6 +2436,75 @@
 
       </div>
 
+      <div id="libv-discover" role="tabpanel" aria-labelledby="libv-tab-discover" tabindex="-1" hidden>
+
+        <h2 class="vh">Discover books</h2>
+        <p class="disc-intro">Books recommended by the Children&rsquo;s Book Council of Australia, the
+           State Library of Queensland, Australian booksellers and more. Open a book on its own
+           site to find out about it, read or watch it, then add it to your shelf to track reading.</p>
+
+        <div class="disc-likes">
+          <p class="disc-likes-h" id="discLikesH">What your family likes</p>
+          <p class="disc-likes-note" id="discLikesNote">Tap what your children enjoy. Matching books come first.</p>
+          <div class="disc-chips" id="discLikes" role="group" aria-labelledby="discLikesH"></div>
+        </div>
+
+        <div class="toolbar disc-toolbar">
+          <div class="tool tool--grow">
+            <label for="dSearch">Search</label>
+            <input type="search" id="dSearch" placeholder="Title or author" autocomplete="off">
+          </div>
+          <div class="tool">
+            <label for="dSource">Recommended by</label>
+            <select id="dSource"><option value="">All lists</option></select>
+          </div>
+          <div class="tool">
+            <label for="dAge">Age band</label>
+            <select id="dAge"><option value="">Any age</option></select>
+          </div>
+          <div class="tool">
+            <label for="dCat">Category</label>
+            <select id="dCat"><option value="">All categories</option></select>
+          </div>
+          <div class="tool">
+            <label for="dSort">Order</label>
+            <select id="dSort">
+              <option value="">Best for your family</option>
+              <option value="title">Title A to Z</option>
+              <option value="new">Newest first</option>
+            </select>
+          </div>
+          <label class="disc-free">
+            <input type="checkbox" id="dFree">
+            <span>Free to read or watch</span>
+          </label>
+          <span class="spacer"></span>
+          <button class="btn btn--quiet btn--sm" type="button" id="dClear">Clear filters</button>
+        </div>
+
+        <p class="result-count" id="discCount" role="status" aria-live="polite" tabindex="-1"></p>
+        <p class="vh" id="discSay" role="status" aria-live="polite"></p>
+        <div class="disc-grid" id="discGrid"></div>
+        <nav class="pager" id="discPager" aria-label="Pages of books" hidden></nav>
+
+        <div class="empty" id="discEmpty">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="19" cy="19" r="13"/><path d="m29 29 8 8"/>
+          </svg>
+          <h3 id="discEmptyH">No books match</h3>
+          <p id="discEmptyP">Try a different search, or clear the filters.</p>
+        </div>
+
+        <p class="disc-credit">Lists from the <a class="link" href="https://cbca.org.au/" target="_blank" rel="noopener">Children&rsquo;s Book Council of Australia</a>,
+           <a class="link" href="https://www.slq.qld.gov.au/first5forever/books" target="_blank" rel="noopener">State Library of Queensland</a>,
+           the <a class="link" href="https://www.aba.org.au/member-resources/reading-guides/kids-reading-guide/" target="_blank" rel="noopener">Australian Booksellers Association</a>,
+           <a class="link" href="https://www.childrenslaureate.org.au/kids/" target="_blank" rel="noopener">Australian Children&rsquo;s Laureate</a>,
+           <a class="link" href="https://storyboxhub.com/childrensbookweek" target="_blank" rel="noopener">StoryBox Hub</a>,
+           <a class="link" href="https://libguides.library.qut.edu.au/c.php?g=427340&amp;p=2922377" target="_blank" rel="noopener">QUT Library</a> and
+           <a class="link" href="https://www.commonsensemedia.org/lists/50-books-all-kids-should-read-before-theyre-12" target="_blank" rel="noopener">Common Sense Media</a>.
+           Links open on their sites.</p>
+      </div>
+
       <div id="libv-reviews" role="tabpanel" aria-labelledby="libv-tab-reviews" tabindex="-1" hidden>
 
         <h2 class="vh">Book reviews</h2>
@@ -2261,6 +2519,7 @@
             <label for="rvBook">Which book?</label>
             <select id="rvBook"><option value="">Choose a book&hellip;</option></select>
           </div>
+          <p class="rv-intro" id="rvIntro">Pick a book from your shelf to see what other parents thought of it, or to write your own review. Every review is checked by a moderator first.</p>
         </div>
 
         <p class="vh" id="rvSay" role="status" aria-live="polite"></p>
@@ -2638,7 +2897,7 @@
                 <span class="avatar avatar--xl" id="setAvatarPreview" style="background:#0D3B32">S</span>
                 <div class="set-photo-copy">
                   <b>Profile picture</b>
-                  <span id="setPhotoNote">A JPG or PNG under 2&nbsp;MB. It stays in this browser and is never uploaded.</span>
+                  <span id="setPhotoNote">A JPG or PNG under 2&nbsp;MB. It is saved with your account.</span>
                   <div class="set-photo-acts">
                     <input class="set-file" type="file" id="setPhotoFile" accept="image/png,image/jpeg,image/webp">
                     <label class="btn btn--primary btn--sm" for="setPhotoFile">Upload a picture</label>
@@ -2751,8 +3010,8 @@
                     <label for="setPassNew">New password</label>
                     <input type="password" id="setPassNew" autocomplete="new-password" required>
                     <div class="pw-meter" id="setPwMeter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-                    <p class="hint" id="setPwHint">At least 8 characters. A short phrase you will remember beats a clever one you will not.</p>
-                    <p class="err" id="setPassNewErr">Use at least 8 characters.</p>
+                    <p class="hint" id="setPwHint">At least 10 characters. A short phrase you will remember beats a clever one you will not.</p>
+                    <p class="err" id="setPassNewErr">Use at least 10 characters.</p>
                   </div>
                   <div class="f wide">
                     <label for="setPassCopy">Repeat the new password</label>
@@ -2826,8 +3085,8 @@
                       <label for="setResetPass">New password</label>
                       <input type="password" id="setResetPass" autocomplete="new-password" required>
                       <div class="pw-meter" id="setResetMeter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-                      <p class="hint" id="setResetHint">At least 8 characters. A short phrase you will remember beats a clever one you will not.</p>
-                      <p class="err" id="setResetPassErr">Use at least 8 characters.</p>
+                      <p class="hint" id="setResetHint">At least 10 characters. A short phrase you will remember beats a clever one you will not.</p>
+                      <p class="err" id="setResetPassErr">Use at least 10 characters.</p>
                     </div>
                     <div class="f wide">
                       <label for="setResetCopy">Repeat the new password</label>
@@ -2934,6 +3193,15 @@
                         logging a book.</span>
                 </div>
                 <label class="sw"><input type="checkbox" id="setBlockLinks" checked><span class="sw-track" aria-hidden="true"></span><span class="vh">Block outside links in bedtime mode</span></label>
+              </div>
+
+              <div class="set-switch">
+                <div class="grow">
+                  <b>Let children open free books and read-alongs</b>
+                  <span>Shows the Read free and Watch buttons for books on your shelf, so a child
+                        can open the book on the library or StoryBox site. Other links stay blocked.</span>
+                </div>
+                <label class="sw"><input type="checkbox" id="setKidsReads" checked><span class="sw-track" aria-hidden="true"></span><span class="vh">Let children open free books and read-alongs</span></label>
               </div>
 
               <hr class="set-rule">
@@ -3222,15 +3490,14 @@
               <div class="set-faq" id="setFaq">
                 <details>
                   <summary>Where is my shelf actually stored?</summary>
-                  <p>In this browser, on this device. Nothing is sent to a server. That means it
-                     is private by default, and also that clearing your browser data clears the
-                     shelf. Keep using the same browser on the same device and it stays put.</p>
+                  <p>With your account, on secure servers in Australia. Only you, and adults you
+                     invite onto your shelf, can see it. Clearing your browser data does not delete
+                     it &mdash; sign in again and it is all there.</p>
                 </details>
                 <details>
-                  <summary>Can I move the shelf to a new phone or laptop?</summary>
-                  <p>Not yet. The shelf lives in this browser on this device. You can save a copy
-                     with Download my data under Privacy &amp; safety, but there is no way to load
-                     it back in on another device yet.</p>
+                  <summary>Can I use the shelf on a new phone or laptop?</summary>
+                  <p>Yes. Sign in with the same email address and password on the new device and
+                     your shelf is there. Changes show up on every device you are signed in on.</p>
                 </details>
                 <details>
                   <summary>My child logged a book on the wrong name. Can I fix it?</summary>
@@ -3256,14 +3523,14 @@
 
               <h3 class="set-sub">Other ways to reach us</h3>
               <div class="set-contact">
-                <a class="set-contact-card" href="mailto:tsander2@usc.edu.au">
+                <a class="set-contact-card" href="mailto:parentsgoto@gmail.com">
                   <span class="ico">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <rect x="2.6" y="4.4" width="14.8" height="11.2" rx="1.8"/><path d="m2.9 5.6 7.1 5 7.1-5"/>
                     </svg>
                   </span>
                   <b>Email support</b>
-                  <span>tsander2@usc.edu.au — we answer within two working days.</span>
+                  <span>parentsgoto@gmail.com — we answer within two working days.</span>
                 </a>
                 <button class="set-contact-card" type="button" id="setContactForm">
                   <span class="ico">
@@ -3420,15 +3687,15 @@
                    aria-describedby="famEmailNote">
             <p class="err" id="famEmailErr">Enter an email address in the usual shape, like name@example.com.</p>
             <p class="err" id="famDupeErr">Somebody with that address is already on this shelf.</p>
-            <p class="share-hint" id="famEmailNote">Checked for shape only. Nothing here can tell
-               whether the address exists, and nothing is sent to it.</p>
+            <p class="share-hint" id="famEmailNote">Use the address they will sign in with. If they do not
+               have an account yet, they can create one with this address and accept the invitation.</p>
           </div>
         </div>
 
         <h3 class="vh">What they will be able to do</h3>
         <ul class="fam-can">
           <li class="yes"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.4 10.4 3.6 3.6 7.6-8"/></svg><span><b>Can</b> see the whole shelf: every book, who is reading what, and how far through they are</span></li>
-          <li class="yes"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.4 10.4 3.6 3.6 7.6-8"/></svg><span><b>Can</b> see your children by name, with their ages and reading levels</span></li>
+          <li class="yes"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.4 10.4 3.6 3.6 7.6-8"/></svg><span><b>Can</b> see your children by name, with their reading levels</span></li>
           <li class="yes"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.4 10.4 3.6 3.6 7.6-8"/></svg><span><b>Can</b> record a reading session and mark a book started or finished</span></li>
           <li class="yes"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.4 10.4 3.6 3.6 7.6-8"/></svg><span><b>Can</b> add a book and put something on the wishlist</span></li>
           <li class="no"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="m5.4 5.4 9.2 9.2M14.6 5.4l-9.2 9.2"/></svg><span><b>Cannot</b> add, edit or remove a child</span></li>
@@ -3458,6 +3725,25 @@
     </div>
   </dialog>
 
+  <dialog id="sharedDialog" class="shared-dlg" aria-labelledby="sharedDlgTitle" aria-describedby="sharedDlgSub">
+    <div class="dlg-head">
+      <div class="grow">
+        <p class="shared-badge">View only</p>
+        <h2 id="sharedDlgTitle">Shared shelf</h2>
+        <p id="sharedDlgSub"></p>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Close the shared shelf">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="m5 5 10 10M15 5 5 15"/>
+        </svg>
+      </button>
+    </div>
+    <div class="dlg-body" id="sharedBody"></div>
+    <div class="dlg-foot">
+      <button class="btn btn--primary" type="button" data-close>Close</button>
+    </div>
+  </dialog>
+
   <dialog id="familyWithdrawDialog" aria-labelledby="famwDlgTitle">
     <form method="dialog" id="familyWithdrawForm" novalidate>
       <div class="dlg-head">
@@ -3475,11 +3761,9 @@
       <div class="dlg-body">
         <p class="fam-who" id="famwWho"></p>
         <p class="fam-limit">
-          They move to the list of people who used to have access, with the date. Nothing is
-          deleted, so you can still see that they were on the shelf, and you can invite them
-          again later. <b>What this cannot do is reach out and take anything back.</b> On the
-          live site it would stop them signing in; here there is nothing to stop, because
-          there was never anywhere for them to sign in to.
+          They can no longer open this shelf, and they move to the list of people who used to
+          have access, with the date. You can invite them again later. <b>What this cannot do is
+          take back anything they already saw or wrote down.</b>
         </p>
       </div>
 
@@ -3644,7 +3928,7 @@
       <div class="dlg-head">
         <div class="grow">
           <h2 id="childDlgTitle">Add a child</h2>
-          <p id="childDlgSub">This is only used to filter the shelf. Nothing leaves this page.</p>
+          <p id="childDlgSub">Used to suggest the right books. Only you, and adults you invite, can see it.</p>
         </div>
         <button class="icon-btn" type="button" data-close aria-label="Close without saving">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -3658,18 +3942,13 @@
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="4" y="8.6" width="12" height="8.4" rx="1.8"/><path d="M6.8 8.6V6.4a3.2 3.2 0 0 1 6.4 0v2.2"/>
           </svg>
-          <span>We keep only a first name, an age and a reading level &mdash; enough to match books to the right child. It is never shown outside your account unless you share a wishlist yourself. <a class="link" href="#page-privacy">Read the privacy notice</a>.</span>
+          <span>We keep only a first name and a reading level &mdash; enough to match books to the right child. It is never shown outside your account unless you share a wishlist yourself. <a class="link" href="#page-privacy">Read the privacy notice</a>.</span>
         </p>
         <div class="fields">
           <div class="f wide">
             <label for="kName">First name</label>
             <input type="text" id="kName" name="name" autocomplete="off" required>
             <p class="err" id="kNameErr">Enter the name you call them by.</p>
-          </div>
-          <div class="f">
-            <label for="kAge">Age <span class="opt">(optional)</span></label>
-            <input type="number" id="kAge" name="age" min="0" max="18" step="1" inputmode="numeric" aria-describedby="kAgeErr">
-            <p class="err" id="kAgeErr">Enter an age from 0 to 18, or leave it blank.</p>
           </div>
           <div class="f">
             <label for="kBand">Reading level</label>
@@ -3861,7 +4140,7 @@
 
           <div class="who-menu" id="admWhoMenu" hidden>
             <h2 id="admWhoMenuLabel">Signed in as</h2>
-            <p class="who-email" id="admEmail">admin@example.com</p>
+            <p class="who-email" id="admEmail"></p>
             <hr>
 
             <div class="theme-row">
@@ -3944,6 +4223,13 @@
           </svg>
           Moderation
           <span class="count count--alert" id="admCountQueue">0</span>
+        </button>
+        <button type="button" role="tab" id="admtab-support" aria-controls="admpanel-support" aria-selected="false" tabindex="-1" data-admin-go="support">
+          <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 4h14v10H7l-4 3Z"/><path d="M7 8h6M7 11h4"/>
+          </svg>
+          Support
+          <span class="count count--alert" id="admRailReports" hidden>0</span>
         </button>
         <button type="button" role="tab" id="admtab-resources" aria-controls="admpanel-resources" aria-selected="false" tabindex="-1" data-admin-go="resources">
           <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -4215,14 +4501,48 @@
 
     </section>
 
+    <section class="panel wrap" id="admpanel-support" role="tabpanel" aria-labelledby="admtab-support" tabindex="-1" hidden>
+
+      <div class="panel-head">
+        <div class="grow">
+          <span class="eyebrow">Help desk</span>
+          <h1 id="h-adm-support" tabindex="-1">Support messages</h1>
+          <p class="sub">Technical problems parents report from their settings, and messages sent from the
+             contact form by people who are not signed in. Mark each one as being looked at, then close it
+             when it is sorted.</p>
+        </div>
+      </div>
+
+      <div class="adm-support">
+      <div class="set-report-filter" role="group" aria-label="Filter reports">
+        <button class="chip" type="button" data-rep-filter="open" aria-pressed="true">Open</button>
+        <button class="chip" type="button" data-rep-filter="closed" aria-pressed="false">Closed</button>
+        <button class="chip" type="button" data-rep-filter="all" aria-pressed="false">Everything</button>
+      </div>
+
+      <ul class="set-report-list" id="admReportList"></ul>
+      <div class="empty" id="admEmptyReports">
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 4h16v12H8l-4 4Z"/><path d="M9 9h6M9 12h4"/>
+        </svg>
+        <h2>Nothing reported</h2>
+        <p>When a parent reports a technical problem from their settings, or somebody
+           who is not signed in sends a message from the contact form on the home page,
+           it lands here.</p>
+      </div>
+
+      </div>
+
+    </section>
+
     <section class="panel wrap" id="admpanel-resources" role="tabpanel" aria-labelledby="admtab-resources" tabindex="-1" hidden>
 
       <div class="panel-head">
         <div class="grow">
           <span class="eyebrow">Dashboard content</span>
-          <h1 id="h-adm-resources" tabindex="-1">Posts &amp; approved resources</h1>
-          <p class="sub">Anything published here shows on every family dashboard, filtered by the
-             category and age band you give it.</p>
+          <h1 id="h-adm-resources" tabindex="-1">Posts &amp; resources</h1>
+          <p class="sub" id="admResSub">Posts for family dashboards and project pages, the tiles on the home page,
+             and the book catalogue families see under Discover books.</p>
         </div>
         <button class="btn btn--primary" type="button" id="admNewPost">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -4232,6 +4552,13 @@
         </button>
       </div>
 
+      <div class="vswitch adm-subtabs" id="admResViews" role="tablist" aria-label="Posts and resources sections">
+        <button class="vswitch-btn" type="button" role="tab" id="admres-tab-posts" aria-controls="admres-posts" aria-selected="true" data-admres="posts">Posts</button>
+        <button class="vswitch-btn" type="button" role="tab" id="admres-tab-projects" aria-controls="admres-projects" aria-selected="false" tabindex="-1" data-admres="projects">Project tiles</button>
+        <button class="vswitch-btn" type="button" role="tab" id="admres-tab-catalogue" aria-controls="admres-catalogue" aria-selected="false" tabindex="-1" data-admres="catalogue">Book catalogue</button>
+      </div>
+
+      <div id="admres-posts" role="tabpanel" aria-labelledby="admres-tab-posts">
       <div class="toolbar">
         <div class="tool">
           <label for="admPostState">Status</label>
@@ -4264,6 +4591,71 @@
         <h2>Nothing published yet</h2>
         <p>Write the first post and it will appear on every family dashboard.</p>
         <button class="btn btn--primary" type="button" id="admEmptyPostAdd">Write a post</button>
+      </div>
+      </div>
+
+      <div id="admres-projects" role="tabpanel" aria-labelledby="admres-tab-projects" hidden>
+      <div class="cat-block" id="projBlock">
+        <div class="panel-head cat-head">
+          <div class="grow">
+            <h2 id="h-adm-projects" tabindex="-1">Projects &amp; tiles</h2>
+            <p class="sub">The services shown as tiles on the home page. Add a project, choose whether it is open
+               or coming soon, and give it its own resource categories. Hidden projects stay here but
+               nobody else sees them.</p>
+          </div>
+          <button class="btn btn--primary" type="button" id="projNew">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M8 3v10M3 8h10"/>
+            </svg>
+            Add a project
+          </button>
+        </div>
+        <p class="result-count" id="projCountA" role="status" aria-live="polite"></p>
+        <p class="vh" id="projSay" role="status" aria-live="polite"></p>
+        <ul class="cat-list" id="projList"></ul>
+      </div>
+      </div>
+
+      <div id="admres-catalogue" role="tabpanel" aria-labelledby="admres-tab-catalogue" hidden>
+      <div class="cat-block" id="catBlock">
+        <div class="panel-head cat-head">
+          <div class="grow">
+            <h2 id="h-adm-catalogue" tabindex="-1">Book catalogue</h2>
+            <p class="sub">The recommended books parents see under Library &rarr; Discover books. Each one links
+               to the site it came from. Hidden books stay here but families do not see them.</p>
+          </div>
+          <button class="btn btn--primary" type="button" id="catNew">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M8 3v10M3 8h10"/>
+            </svg>
+            Add a book
+          </button>
+        </div>
+
+        <div class="toolbar">
+          <div class="tool cat-search">
+            <label for="catSearch">Search</label>
+            <input type="search" id="catSearch" placeholder="Title or author" autocomplete="off">
+          </div>
+          <div class="tool">
+            <label for="catSourceF">Recommended by</label>
+            <select id="catSourceF"><option value="">All lists</option></select>
+          </div>
+          <div class="tool">
+            <label for="catStateF">Shown to families</label>
+            <select id="catStateF">
+              <option value="">Shown and hidden</option>
+              <option value="published">Shown</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="result-count" id="catCount" role="status" aria-live="polite"></p>
+        <p class="vh" id="catSay" role="status" aria-live="polite"></p>
+        <div class="disc-grid adm-cat-grid" id="catList"></div>
+        <nav class="pager" id="catPager" aria-label="Catalogue pages" hidden></nav>
+      </div>
       </div>
 
     </section>
@@ -4357,8 +4749,7 @@
             <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="10" cy="10" r="7.3"/><path d="M7.9 7.7a2.2 2.2 0 1 1 3 2.1c-.6.3-.9.8-.9 1.4v.4"/><path d="M10 14.3h.01"/>
             </svg>
-            Support &amp; reports
-            <span class="rail-count" id="admRailReports" hidden>0</span>
+            Report a problem
           </a>
         </nav>
 
@@ -4465,7 +4856,7 @@
                 <span class="avatar avatar--xl" id="admSetAvatarPreview" style="background:#123F5B">A</span>
                 <div class="set-photo-copy">
                   <b>Profile picture</b>
-                  <span id="admSetPhotoNote">A JPG or PNG under 2&nbsp;MB. It stays in this browser and is never uploaded.</span>
+                  <span id="admSetPhotoNote">A JPG or PNG under 2&nbsp;MB. It is saved with your account.</span>
                   <div class="set-photo-acts">
                     <input class="set-file" type="file" id="admSetPhotoFile" accept="image/png,image/jpeg,image/webp">
                     <label class="btn btn--primary btn--sm" for="admSetPhotoFile">Upload a picture</label>
@@ -4837,32 +5228,12 @@
 
           <section class="set-card" id="adm-set-help" tabindex="-1" aria-labelledby="admSetHelpH" hidden>
             <div class="set-card-head">
-              <h2 id="admSetHelpH">Support &amp; reports</h2>
-              <p>Problems parents have reported from inside the app, messages sent from the
-                 contact form on the home page, and a way to send one on to whoever maintains
-                 the platform.</p>
+              <h2 id="admSetHelpH">Report a problem</h2>
+              <p>Send a fault in the console to whoever maintains the platform. Messages and
+                 problem reports from parents are on the Support tab.</p>
             </div>
 
             <div class="set-card-body">
-
-              <h3 class="set-sub">Reports from parents</h3>
-
-              <div class="set-report-filter" role="group" aria-label="Filter reports">
-                <button class="chip" type="button" data-rep-filter="open" aria-pressed="true">Open</button>
-                <button class="chip" type="button" data-rep-filter="closed" aria-pressed="false">Closed</button>
-                <button class="chip" type="button" data-rep-filter="all" aria-pressed="false">Everything</button>
-              </div>
-
-              <ul class="set-report-list" id="admReportList"></ul>
-              <div class="empty" id="admEmptyReports">
-                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M4 4h16v12H8l-4 4Z"/><path d="M9 9h6M9 12h4"/>
-                </svg>
-                <h3>Nothing reported</h3>
-                <p>When a parent reports a technical problem from their settings, or somebody
-                   who is not signed in sends a message from the contact form on the home page,
-                   it lands here.</p>
-              </div>
 
               <hr class="set-rule">
 
@@ -4960,9 +5331,10 @@
                 </details>
                 <details>
                   <summary>A parent says their shelf has vanished.</summary>
-                  <p>The shelf lives in their browser, so clearing site data or switching device
-                     empties it. There is no restore yet, so it cannot be brought back from the
-                     console. Download my data only saves a copy for their own records.</p>
+                  <p>Shelves are saved with the account, not the browser, so clearing site data or
+                     changing device does not empty them. Check they are signed in with the same
+                     email address, or the same Google account, they used before. The Accounts
+                     tab shows how many children and books each account holds.</p>
                 </details>
               </div>
 
@@ -4986,6 +5358,182 @@
     </div>
   </footer>
 
+  <dialog id="projDialog" class="cat-dlg" aria-labelledby="projDlgTitle">
+    <form method="dialog" id="projForm" novalidate>
+      <div class="dlg-head">
+        <div class="grow">
+          <h2 id="projDlgTitle">Add a project</h2>
+          <p>Shown as a tile on the home page.</p>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Close without saving">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="m5 5 10 10M15 5 5 15"/>
+          </svg>
+        </button>
+      </div>
+      <div class="dlg-body">
+        <div class="fields">
+          <div class="f wide">
+            <label for="projTitleI">Project name</label>
+            <input type="text" id="projTitleI" maxlength="80" required>
+            <p class="err" id="projTitleIErr">Give the project a name.</p>
+          </div>
+          <div class="f">
+            <label for="projSlug">Short web name</label>
+            <input type="text" id="projSlug" maxlength="40" autocomplete="off" spellcheck="false" aria-describedby="projSlugHint">
+            <p class="hint" id="projSlugHint">Lower-case letters, numbers and dashes. It cannot be changed later.</p>
+            <p class="err" id="projSlugErr">Use 2 to 40 lower-case letters, numbers or dashes, not already used by another project.</p>
+          </div>
+          <div class="f">
+            <label for="projStatus">Status</label>
+            <select id="projStatus">
+              <option value="open">Open now</option>
+              <option value="soon">Coming soon</option>
+              <option value="hidden">Hidden</option>
+            </select>
+            <p class="err" id="projStatusErr">Reading for Pleasure is the main service and cannot be hidden.</p>
+          </div>
+          <div class="f wide">
+            <label for="projBlurb">Short description</label>
+            <textarea id="projBlurb" maxlength="400" rows="3"></textarea>
+          </div>
+          <div class="f wide">
+            <label for="projLink">Page it opens <span class="opt">(optional)</span></label>
+            <input type="text" id="projLink" maxlength="500" placeholder="Leave empty to use a ready-made page" autocomplete="off" spellcheck="false" aria-describedby="projLinkHint">
+            <p class="hint" id="projLinkHint">Empty uses a ready-made page that lists this project&rsquo;s resources. Or enter a page on this site, like four-voices.html, or a full https:// address.</p>
+            <p class="err" id="projLinkErr">Use a page name ending in .html, or an address starting with https://</p>
+          </div>
+          <div class="f wide">
+            <label for="projImage">Logo or picture <span class="opt">(optional)</span></label>
+            <input type="text" id="projImage" maxlength="500" placeholder="https://" autocomplete="off" spellcheck="false">
+            <p class="err" id="projImageErr">Use an https:// image address, or an image file on this site, like logo.svg.</p>
+          </div>
+          <div class="f wide" id="projCatsWrap">
+            <label for="projCats">Resource categories <span class="opt">(one per line)</span></label>
+            <textarea id="projCats" rows="4" placeholder="Sleep&#10;Healthy eating&#10;Screen time"></textarea>
+            <p class="hint" id="projCatsHint">Admins pick one of these when posting a resource for this project. Families can filter by them.</p>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancel</button>
+        <button class="btn btn--primary" type="submit" id="projSave">Save project</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="catDialog" class="cat-dlg" aria-labelledby="catDlgTitle">
+    <form method="dialog" id="catForm" novalidate>
+      <div class="dlg-head">
+        <div class="grow">
+          <h2 id="catDlgTitle">Add a book</h2>
+          <p>Families see these details under Discover books.</p>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Close without saving">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="m5 5 10 10M15 5 5 15"/>
+          </svg>
+        </button>
+      </div>
+      <div class="dlg-body">
+        <div class="fields">
+          <div class="f wide">
+            <label for="catTitle">Title</label>
+            <input type="text" id="catTitle" maxlength="300" required>
+            <p class="err" id="catTitleErr">Give the book a title.</p>
+          </div>
+          <div class="f wide">
+            <label for="catAuthor">Author and illustrator <span class="opt">(optional)</span></label>
+            <input type="text" id="catAuthor" maxlength="300">
+          </div>
+          <div class="f">
+            <label for="catSource">Recommended by</label>
+            <select id="catSource"></select>
+          </div>
+          <div class="f">
+            <label for="catYear">Year <span class="opt">(optional)</span></label>
+            <input type="number" id="catYear" min="1600" max="2100" inputmode="numeric">
+          </div>
+          <div class="f">
+            <label for="catPages">Pages <span class="opt">(optional)</span></label>
+            <input type="number" id="catPages" min="1" max="5000" inputmode="numeric">
+          </div>
+          <div class="f">
+            <label for="catAges">Age band</label>
+            <select id="catAges"></select>
+          </div>
+          <div class="f">
+            <label for="catCat">Category</label>
+            <select id="catCat"></select>
+          </div>
+          <div class="f wide">
+            <label for="catNote">Award or note <span class="opt">(optional)</span></label>
+            <input type="text" id="catNote" maxlength="300" placeholder="For example: Winner, Picture Book of the Year 2026">
+          </div>
+          <div class="f wide">
+            <label for="catLink">Link to the book on its site</label>
+            <input type="url" id="catLink" maxlength="1000" placeholder="https://">
+            <p class="err" id="catLinkErr">Links must start with https://</p>
+          </div>
+          <div class="f">
+            <label for="catRead">Free reading link <span class="opt">(optional)</span></label>
+            <input type="url" id="catRead" maxlength="1000" placeholder="https://">
+            <p class="err" id="catReadErr">Links must start with https://</p>
+          </div>
+          <div class="f">
+            <label for="catWatch">Video or read-along link <span class="opt">(optional)</span></label>
+            <input type="url" id="catWatch" maxlength="1000" placeholder="https://">
+            <p class="err" id="catWatchErr">Links must start with https://</p>
+          </div>
+          <div class="f wide">
+            <label for="catCover">Cover image link <span class="opt">(optional)</span></label>
+            <input type="url" id="catCover" maxlength="1000" placeholder="https://">
+            <p class="err" id="catCoverErr">Links must start with https://</p>
+          </div>
+          <div class="f wide">
+            <label class="cat-show"><input type="checkbox" id="catShown" checked> Show this book to families</label>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancel</button>
+        <button class="btn btn--primary" type="submit" id="catSave">Save book</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="accountDeleteDialog" aria-labelledby="adelDlgTitle" aria-describedby="adelDlgSub">
+    <form method="dialog" id="accountDeleteForm" novalidate>
+      <div class="dlg-head">
+        <div class="grow">
+          <h2 id="adelDlgTitle">Delete this account</h2>
+          <p id="adelDlgSub">This permanently deletes <b id="adelWho"></b> and everything in it: their children, shelf, wishlist, posts, reviews, chat messages, reports and uploaded files. It cannot be undone.</p>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Close without deleting">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="m5 5 10 10M15 5 5 15"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="dlg-body">
+        <div class="fields">
+          <div class="f wide">
+            <label for="adelEmail">Type the account&rsquo;s email address to confirm</label>
+            <input type="email" id="adelEmail" name="email" autocomplete="off" spellcheck="false" aria-describedby="adelEmailErr">
+            <p class="err" id="adelEmailErr">That does not match the email address of this account.</p>
+          </div>
+        </div>
+        <p class="err" id="adelProblem" role="alert"></p>
+      </div>
+
+      <div class="dlg-foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancel</button>
+        <button class="btn btn--danger" type="submit" id="adelSave">Delete account</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="postDialog" aria-labelledby="postDlgTitle">
     <form method="dialog" id="postForm" novalidate>
       <div class="dlg-head">
@@ -5007,6 +5555,11 @@
             <input type="text" id="pTitle" name="title" autocomplete="off" required>
             <p class="err" id="pTitleErr">Give the post a headline so parents know what it is.</p>
           </div>
+          <div class="f wide">
+            <label for="pProject">Which project is it for?</label>
+            <select id="pProject" name="project"></select>
+            <p class="hint" id="pProjectHint">Reading for Pleasure posts show on family dashboards. Posts for other projects show on that project&rsquo;s page.</p>
+          </div>
           <div class="f">
             <label for="pCat">Category</label>
             <select id="pCat" name="category"></select>
@@ -5026,12 +5579,12 @@
             <p class="err" id="pLinkErr">A link has to start with http:// or https://.</p>
           </div>
           <div class="f wide">
-            <span class="lbl" id="pStateLabel" style="display:block;margin-bottom:.45rem;font-size:.85rem;font-weight:600">Publish now?</span>
-            <div class="segment segment--wide" id="pStateSeg" data-role="draft">
+            <span class="lbl" id="pStateLabel" style="display:block;margin-bottom:.45rem;font-size:.85rem;font-weight:600">Status</span>
+            <div class="segment segment--compact" id="pStateSeg" data-role="draft" role="radiogroup" aria-labelledby="pStateLabel">
               <input type="radio" name="pstate" id="pstate-draft" value="draft" checked>
-              <label for="pstate-draft">Keep as a draft</label>
+              <label for="pstate-draft">Draft</label>
               <input type="radio" name="pstate" id="pstate-published" value="published">
-              <label for="pstate-published">Publish to dashboards</label>
+              <label for="pstate-published">Publish</label>
             </div>
           </div>
         </div>
@@ -5341,6 +5894,10 @@
     <div class="kids-empty" id="kidsBrowseEmpty" hidden>
       <p id="kidsBrowseEmptyTxt">Nothing new to find right now — check back soon!</p>
     </div>
+    <div class="kids-more" id="kidsMoreWrap" hidden>
+      <h2 id="kidsMoreH">More books to find</h2>
+      <div class="kids-books" id="kidsMoreList"></div>
+    </div>
   </section>
 
   <section class="kids-step" id="kidsStepWishlist" hidden>
@@ -5391,6 +5948,11 @@
       <div>
         <h1 id="kidsLogTitle">How long did you read?</h1>
         <p class="lead" id="kidsLogSub">Pick the closest one.</p>
+
+        <div class="kids-open" id="kidsOpenRow" hidden>
+          <p id="kidsOpenLead">Read it here, then come back and tell us how long.</p>
+          <div class="kids-open-btns" id="kidsOpenBtns"></div>
+        </div>
 
         <div class="mins" id="kidsMins" role="group" aria-label="How many minutes">
           <button type="button" data-mins="5"  aria-pressed="false">5<small>min</small></button>
@@ -5467,32 +6029,10 @@
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
-<script>
-(function() {
-  [ "localStorage", "sessionStorage" ].forEach(function(name) {
-    try {
-      var s = window[name], old = [], i, k;
-      for (i = 0; i < s.length; i++) {
-        k = s.key(i);
-        if (k && k.indexOf("pgt") === 0) {
-          old.push(k);
-        }
-      }
-      old.forEach(function(k) {
-        var n = "ptg" + k.slice(3);
-        if (s.getItem(n) === null) {
-          s.setItem(n, s.getItem(k));
-        }
-        s.removeItem(k);
-      });
-    } catch (e) {}
-  });
-})();
-</script>
-<script src="vendor/supabase.js"></script>
-<script src="config.js"></script>
-<script src="backend.js"></script>
+<script src="vendor/three.min.js" defer></script>
+<script src="storage-rename.js"></script>
+<script src="store.js"></script>
+<script src="invites.js"></script>
 <script src="suggest.js"></script>
 <script src="lock.js"></script>
 <script src="notify.js"></script>
@@ -5506,6 +6046,8 @@
 <script src="backdrop.js"></script>
 <script src="studio.js"></script>
 <script src="settings.js"></script>
+<script src="catalogue-admin.js"></script>
+<script src="projects-admin.js"></script>
 <script src="contact.js"></script>
 <script src="board.js"></script>
 <script src="reviews.js"></script>

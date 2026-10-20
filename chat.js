@@ -12,22 +12,6 @@
   function mail(v) {
     return String(v == null ? "" : v).trim().toLowerCase();
   }
-  function token() {
-    var abc = "abcdefghijklmnopqrstuvwxyz0123456789";
-    var out = "", i, arr;
-    if (window.crypto && window.crypto.getRandomValues) {
-      arr = new window.Uint8Array(10);
-      window.crypto.getRandomValues(arr);
-      for (i = 0; i < 10; i++) {
-        out += abc.charAt(arr[i] % abc.length);
-      }
-    } else {
-      for (i = 0; i < 10; i++) {
-        out += abc.charAt(Math.floor(Math.random() * abc.length));
-      }
-    }
-    return out;
-  }
   function blank() {
     return {
       threads: [],

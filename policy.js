@@ -109,7 +109,8 @@
     }
     from = {
       hash: window.location.hash,
-      side: openSide()
+      side: openSide(),
+      scroll: window.pageYOffset || 0
     };
     parked = [];
     var open = document.querySelectorAll("dialog[open]");
@@ -143,21 +144,49 @@
       backLinks[b].lastChild.textContent = " " + text.trim();
     }
   }
+  function returning() {
+    return !!(from && parked.length && window.location.hash === from.hash);
+  }
+  function holdStill() {
+    root.classList.add("ptg-instant");
+  }
   function goBack(e) {
     e.preventDefault();
     var side = memberSide();
-    window.location.hash = from && from.hash ? from.hash : side === "admin" ? "#admin" : side === "app" ? "#app" : "#";
+    var hash = from && from.hash ? from.hash : side === "admin" ? "#admin" : side === "app" ? "#app" : "#";
+    if (from && parked.length && hash === from.hash) {
+      holdStill();
+    }
+    window.location.hash = hash;
   }
   function reopenParked() {
-    var list = parked;
-    window.setTimeout(function() {
-      for (var d = 0; d < list.length; d++) {
-        if (!list[d].open && !list[d].closest("[hidden]") && list[d].showModal) {
-          list[d].showModal();
-        }
+    for (var d = 0; d < parked.length; d++) {
+      if (!parked[d].open && !parked[d].closest("[hidden]") && parked[d].showModal) {
+        parked[d].showModal();
       }
-    }, 60);
+    }
+    window.scrollTo({
+      top: from.scroll || 0,
+      behavior: "instant"
+    });
+    window.requestAnimationFrame(function() {
+      root.classList.remove("ptg-instant");
+      if (document.getAnimations) {
+        document.getAnimations().forEach(function(a) {
+          try {
+            if (a.animationName && a.effect && a.effect.getTiming().iterations !== Infinity) {
+              a.finish();
+            }
+          } catch (err) {}
+        });
+      }
+    });
   }
+  window.addEventListener("popstate", function() {
+    if (returning()) {
+      holdStill();
+    }
+  });
   landing.addEventListener("click", function(e) {
     var b = e.target.closest ? e.target.closest(".policy-back, .policy-home") : null;
     if (b) {
@@ -167,8 +196,10 @@
   window.addEventListener("hashchange", function() {
     apply();
     if (!showing) {
-      if (from && window.location.hash === from.hash) {
+      if (returning()) {
         reopenParked();
+      } else {
+        root.classList.remove("ptg-instant");
       }
       from = null;
       parked = [];

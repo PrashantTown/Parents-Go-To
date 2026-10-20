@@ -315,11 +315,68 @@
             title: rec.name || rec.email,
             note: "Family member",
             kind: "shelf",
+            link: rec.id,
+            email: rec.email,
             colour: colourFor(them)
           });
         }
       }
     }
+    var B = window.PTGBackend;
+    var shared = B && typeof B.familyContacts === "function" ? B.familyContacts() : null;
+    var seen = {};
+    out.forEach(function(r) {
+      seen[r.id] = true;
+    });
+    (shared || []).forEach(function(c) {
+      if (c.iInvited || !c.email) {
+        return;
+      }
+      var other = C.ADULT(c.email);
+      var key = "shelf:" + c.email + ":" + c.linkId;
+      var nm = {};
+      nm[me] = C.meName();
+      nm[other] = c.name || c.email;
+      var th = C.open({
+        kind: "shelf",
+        key: key,
+        title: c.name || c.email,
+        members: [ other, me ],
+        names: nm
+      });
+      if (th && !seen[th.id]) {
+        seen[th.id] = true;
+        out.push({
+          id: th.id,
+          title: c.name || c.email,
+          note: "Shared their shelf with you",
+          kind: "shelf",
+          link: c.linkId,
+          email: c.email,
+          colour: colourFor(other)
+        });
+      }
+    });
+    C.threads("shelf").forEach(function(th) {
+      if (seen[th.id]) {
+        return;
+      }
+      var other = (th.members || []).filter(function(m) {
+        return m !== me;
+      })[0];
+      if (!other) {
+        return;
+      }
+      seen[th.id] = true;
+      out.push({
+        id: th.id,
+        title: th.names && th.names[other] || String(other).replace(/^mail:/, ""),
+        note: "Family member",
+        kind: "shelf",
+        email: String(other).replace(/^mail:/, ""),
+        colour: colourFor(other)
+      });
+    });
     return out;
   }
   function circle(el, opts) {
@@ -334,7 +391,7 @@
     var rows = [];
     var query = "";
     el.classList.add("cr");
-    el.innerHTML = '<div class="cr-side">' + '<div class="cr-side-top">' + '<h3 class="cr-h">' + esc(opts.title || "Your family") + "</h3>" + '<div class="cr-find">' + icon(ICON.search, 16) + '<label class="cb-sr" for="' + uid + '-q">Search your family</label>' + '<input type="search" id="' + uid + '-q" placeholder="Search" autocomplete="off">' + "</div>" + "</div>" + '<div class="cr-list" id="' + uid + '-list" role="list"></div>' + '<p class="cr-scope">' + icon(ICON.shield, 16) + "<span>" + esc(opts.scope || "You can only message your children and the grown-ups you have " + "added to this shelf.") + "</span></p>" + "</div>" + '<div class="cr-main" id="' + uid + '-main"></div>';
+    el.innerHTML = '<div class="cr-side">' + '<div class="cr-side-top">' + '<h3 class="cr-h">' + esc(opts.title || "Your family") + "</h3>" + '<div class="cr-find">' + icon(ICON.search, 16) + '<label class="cb-sr" for="' + uid + '-q">Search your family</label>' + '<input type="search" id="' + uid + '-q" placeholder="Search" autocomplete="off">' + "</div>" + "</div>" + '<div class="cr-list" id="' + uid + '-list" role="list"></div>' + '<p class="cr-scope">' + icon(ICON.shield, 16) + "<span>" + esc(opts.scope || "You can only message your children and the grown-ups who share " + "a family shelf with you.") + "</span></p>" + "</div>" + '<div class="cr-main" id="' + uid + '-main"></div>';
     var list = document.getElementById(uid + "-list");
     var main = document.getElementById(uid + "-main");
     var find = document.getElementById(uid + "-q");
@@ -362,7 +419,7 @@
     function drawList() {
       rows = contacts();
       var shown = rows.filter(function(r) {
-        return !query || String(r.title).toLowerCase().indexOf(query) !== -1;
+        return !query || (String(r.title) + " " + String(r.email || "") + " " + String(r.note || "")).toLowerCase().indexOf(query) !== -1;
       });
       var html = "", i, r, n, last, preview;
       if (!rows.length) {
@@ -450,6 +507,24 @@
         paintList();
         paintMain();
       },
+      show: function(link) {
+        rows = contacts();
+        var hit = rows.filter(function(r) {
+          return r.link === link || r.id === link;
+        })[0];
+        if (!hit) {
+          return false;
+        }
+        query = "";
+        find.value = "";
+        active = hit.id;
+        paintList();
+        paintMain();
+        if (box) {
+          box.focus();
+        }
+        return true;
+      },
       reset: function() {
         active = null;
         query = "";
@@ -515,8 +590,14 @@
     panelEl.style.left = "auto";
     panelEl.style.bottom = "auto";
   }
-  function openPanel() {
-    if (!panelEl || isOpen()) {
+  function openPanel(opts) {
+    if (!panelEl) {
+      return;
+    }
+    if (isOpen()) {
+      if (opts && opts.link && panelRoster) {
+        panelRoster.show(opts.link);
+      }
       return;
     }
     lastFocus = document.activeElement;
@@ -540,6 +621,9 @@
       });
     } else {
       panelRoster.refresh();
+    }
+    if (opts && opts.link && panelRoster.show(opts.link)) {
+      return;
     }
     var h = document.getElementById("cpTitle");
     if (h && h.focus) {
@@ -633,11 +717,34 @@
     count();
     return panelEl;
   }
+  document.addEventListener("click", function(e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-chat-link]") : null;
+    if (!t) {
+      return;
+    }
+    e.preventDefault();
+    var link = t.getAttribute("data-chat-link");
+    window.setTimeout(function() {
+      window.PTGChatBox.chatWith(link);
+    }, 0);
+  });
   window.PTGChatBox = {
     mount: mount,
     circle: circle,
     panel: panel,
     openPanel: openPanel,
+    chatWith: function(link) {
+      if (!panelEl) {
+        panel(document.getElementById("chatBtn"));
+      }
+      openPanel({ link: link });
+    },
+    chatWith: function(link) {
+      if (!panelEl) {
+        panel(document.getElementById("chatBtn"));
+      }
+      openPanel({ link: link });
+    },
     closePanel: closePanel,
     colourFor: colourFor,
     recount: function() {

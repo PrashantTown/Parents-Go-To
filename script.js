@@ -42,8 +42,6 @@
 
 (function() {
   "use strict";
-  // Who is using this tab. The real sign-in lives in backend.js; this keeps
-  // the small synchronous API the rest of the site already uses.
   var signedIn = false;
   var who = null;
   function announce() {
@@ -145,7 +143,6 @@
   function backend() {
     return window.PTGBackend || null;
   }
-  // The signed-in person, shaped like an entry in the admin account list.
   function self() {
     var S = window.PTGSession;
     if (!S.active()) {
@@ -160,8 +157,6 @@
       lastSeen: Date.now()
     };
   }
-  // Accounts now live in the database. Admins see every account; everyone
-  // else only sees themselves. Passwords are never held by the website.
   window.PTGAccounts = {
     exists: function() {
       return false;
@@ -228,8 +223,6 @@
 
 (function() {
   "use strict";
-  // Entries made in this tab show straight away; admins also see the
-  // shared log loaded from the database.
   var entries = [];
   var seq = 0;
   window.PTGAudit = {
@@ -361,11 +354,10 @@ const BookField = (() => {
     a: "#2F6E86",
     n: "paper"
   } ];
-  const IMPRINTS = [ "Lantern & Vale", "Hollow Press", "Marrow House", "Ninth Field", "Quiet Editions", "Sparrow & Co.", "The Reading Room", "Bellweather" ];
-  const KICKERS = [ "A NOVEL", "STORIES", "ESSAYS", "A MEMOIR", "POEMS", "A NOVEL", "A NOVEL", "NEW EDITION" ];
-  const SHELF = [ [ "The Lantern Grove", "M. Adeyemi" ], [ "Small Weather", "Rosa Linde" ], [ "A Field Guide to Wonder", "J. Prakash" ], [ "Paper Boats", "Nia Okonkwo" ], [ "The Quiet Hour", "H. Bergström" ], [ "Moth & Moon", "Ivy Calder" ], [ "Everything Blooms Late", "T. Marchetti" ], [ "Notes on Rain", "S. Devkota" ], [ "The Sleeping Orchard", "A. Fontaine" ], [ "Cartography of Home", "Leo Vance" ], [ "A Diary of Light", "Mira Sen" ], [ "The Long Way Round", "D. Halloran" ], [ "Salt & Cedar", "K. Iwasaki" ], [ "How to Hold a River", "P. Nakamura" ], [ "The Sunday Bell", "E. Whitlock" ], [ "Fables for Fast Days", "R. Amado" ], [ "Blue Hour Almanac", "C. Oyelaran" ], [ "The Paper Kite", "Suri Thapa" ], [ "A Room of Small Doors", "V. Kaur" ], [ "Nine Kinds of Quiet", "B. Larsen" ], [ "The Garden Ledger", "O. Farrow" ], [ "Tide & Tinder", "M. Rahal" ], [ "Winter Grammar", "J. Ferreira" ], [ "The Borrowed Lamp", "A. Quintero" ], [ "Every Loud Thing", "N. Bassey" ], [ "A Short History of Naps", "G. Weiss" ], [ "The Map is Wet", "L. Tamang" ], [ "Songs for Slow Trains", "F. Osei" ], [ "Bright Ordinary Days", "H. Okafor" ], [ "The Hour Before Supper", "J. Mireles" ], [ "A Ladder of Afternoons", "P. Sørensen" ], [ "Keeping the Bees", "C. Nwosu" ] ];
+  const IMPRINTS = [ "Reading for Pleasure" ];
+  const KICKERS = [ "A CLASSIC" ];
+  const SHELF = [ [ "Alice's Adventures in Wonderland", "Lewis Carroll", "A CLASSIC" ], [ "The Tale of Peter Rabbit", "Beatrix Potter", "PICTURE BOOK" ], [ "The Wind in the Willows", "Kenneth Grahame", "A CLASSIC" ], [ "The Secret Garden", "Frances Hodgson Burnett", "A CLASSIC" ], [ "Peter Pan", "J. M. Barrie", "ADVENTURE" ], [ "The Jungle Book", "Rudyard Kipling", "STORIES" ], [ "Just So Stories", "Rudyard Kipling", "STORIES" ], [ "Treasure Island", "Robert Louis Stevenson", "ADVENTURE" ], [ "A Child's Garden of Verses", "Robert Louis Stevenson", "POEMS" ], [ "The Wonderful Wizard of Oz", "L. Frank Baum", "ADVENTURE" ], [ "Anne of Green Gables", "L. M. Montgomery", "A CLASSIC" ], [ "Heidi", "Johanna Spyri", "A CLASSIC" ], [ "Black Beauty", "Anna Sewell", "A CLASSIC" ], [ "Little Women", "Louisa May Alcott", "A CLASSIC" ], [ "The Velveteen Rabbit", "Margery Williams", "PICTURE BOOK" ], [ "The Railway Children", "E. Nesbit", "A CLASSIC" ], [ "Five Children and It", "E. Nesbit", "ADVENTURE" ], [ "The Adventures of Pinocchio", "Carlo Collodi", "A CLASSIC" ], [ "Dot and the Kangaroo", "Ethel Pedley", "AN AUSSIE CLASSIC" ], [ "Grimms' Fairy Tales", "Brothers Grimm", "FAIRY TALES" ], [ "Aesop's Fables", "Aesop", "FABLES" ], [ "Fairy Tales", "Hans Christian Andersen", "FAIRY TALES" ], [ "The Princess and the Goblin", "George MacDonald", "A CLASSIC" ], [ "The Story of Doctor Dolittle", "Hugh Lofting", "ADVENTURE" ], [ "The Tale of Squirrel Nutkin", "Beatrix Potter", "PICTURE BOOK" ], [ "Mother Goose Nursery Rhymes", "Traditional", "RHYMES" ] ];
   const rnd = (a, b) => a + Math.random() * (b - a);
-  const pick = arr => arr[Math.random() * arr.length | 0];
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
   const easeOut = t => 1 - Math.pow(1 - t, 3);
   function luminance(hex) {
@@ -782,7 +774,7 @@ const BookField = (() => {
     g.fillRect(0, 0, W, H);
   }
   function drawSpine(g, W, H, b) {
-    const {scheme: scheme, title: title, author: author, imprint: imprint} = b;
+    const {scheme: scheme, title: title, author: author} = b;
     const cloth = shade(scheme.g, luminance(scheme.g) > .5 ? -.1 : -.14);
     const ink = scheme.i, A = scheme.a;
     g.fillStyle = cloth;
@@ -1281,7 +1273,7 @@ const BookField = (() => {
       const specs = [];
       const offset = Math.random() * SHELF.length | 0;
       for (let i = 0; i < n; i++) {
-        const [title, author] = SHELF[(i + offset) % SHELF.length];
+        const [title, author, kicker] = SHELF[(i + offset) % SHELF.length];
         specs.push({
           token: myToken,
           index: i,
@@ -1292,7 +1284,7 @@ const BookField = (() => {
           sHi: sHi,
           scheme: schemes[(i * 5 + (Math.random() * 3 | 0)) % schemes.length],
           variant: (i * 3 + (Math.random() * 10 | 0)) % 10,
-          kicker: KICKERS[Math.random() * KICKERS.length | 0],
+          kicker: kicker || KICKERS[0],
           imprint: IMPRINTS[Math.random() * IMPRINTS.length | 0],
           wf: rnd(.92, 1.08),
           df: rnd(.62, 1.75)
@@ -1670,13 +1662,13 @@ const BookField = (() => {
     const soff = Math.random() * SCHEMES.length | 0;
     const n = clamp(Math.round((window.innerWidth < 560 ? 6 : 10) * cfg.density), 4, 14);
     for (let i = 0; i < n; i++) {
-      const [title, author] = SHELF[(i + off) % SHELF.length];
+      const [title, author, kicker] = SHELF[(i + off) % SHELF.length];
       const spec = {
         title: title,
         author: author,
         scheme: SCHEMES[(i + soff) % SCHEMES.length],
         variant: (i * 3 + (Math.random() * 10 | 0)) % 10,
-        kicker: KICKERS[i % KICKERS.length],
+        kicker: kicker || KICKERS[0],
         imprint: IMPRINTS[i % IMPRINTS.length],
         wf: 1,
         df: 1
@@ -1862,6 +1854,12 @@ const BookField = (() => {
       title: "Enter your one-time code",
       first: $("otp")
     },
+    welcome: {
+      el: $("view-welcome"),
+      head: $("h-welcome"),
+      title: "Finish setting up your account",
+      first: $("wName")
+    },
     genres: {
       el: $("view-genres"),
       head: $("h-genres"),
@@ -1935,7 +1933,7 @@ const BookField = (() => {
     if (window.PTGSession) {
       window.PTGSession.end();
     }
-    [ "signinForm", "createForm", "forgotForm", "codeForm", "genresForm", "newpassForm" ].forEach(function(id) {
+    [ "signinForm", "createForm", "forgotForm", "codeForm", "welcomeForm", "genresForm", "newpassForm" ].forEach(function(id) {
       var f = $(id);
       if (f) {
         f.reset();
@@ -2008,17 +2006,6 @@ const BookField = (() => {
   window.PTGAuthNotice = function(message) {
     showAlert("signinAlert", "signinAlertText", message);
   };
-  function busy(button, label, ms, then) {
-    var span = button.querySelector("span");
-    var was = span.textContent;
-    button.classList.add("is-busy");
-    span.textContent = label;
-    window.setTimeout(function() {
-      button.classList.remove("is-busy");
-      span.textContent = was;
-      then();
-    }, ms);
-  }
   function bindReveal(buttonId, inputId) {
     var btn = $(buttonId), input = $(inputId);
     btn.addEventListener("click", function() {
@@ -2114,7 +2101,8 @@ const BookField = (() => {
     var pass = password.value;
     busyWhile($("signinSubmit"), "Checking…", function() {
       return backend().then(function(b) {
-        return b.signIn(who, pass, admin ? "admin" : "parent");
+        var keep = document.getElementById("remember");
+        return b.signIn(who, pass, admin ? "admin" : "parent", !keep || keep.checked);
       });
     }).then(function(result) {
       password.value = "";
@@ -2129,13 +2117,16 @@ const BookField = (() => {
       go("done");
       openShelfShortly();
     }, function(err) {
-      showAlert("signinAlert", "signinAlertText", err.message);
       password.value = "";
+      if (err.notConfirmed) {
+        showSent("signup", who);
+        route.textContent = "Your email address is not confirmed yet. Open the link we emailed you, or send it again.";
+        return;
+      }
+      showAlert("signinAlert", "signinAlertText", err.message);
       password.focus();
     });
   });
-  // Administrators confirm with an authenticator app (two-factor). The first
-  // time, the app is linked by scanning a QR code.
   var factor = null, codeFor = "", codeTries = 0;
   function svgSrc(qr) {
     var text = String(qr || "");
@@ -2232,10 +2223,14 @@ const BookField = (() => {
     });
   });
   function startHash(role) {
+    var back = window.PTGReturnTo ? window.PTGReturnTo.take(role) : "";
+    if (back) {
+      return back;
+    }
     var S = window.PTGSettings, who = window.PTGSession ? window.PTGSession.email() : "";
     var tab = S && S.pref ? String(S.pref("startTab", role, who) || "") : "";
     if (role === "admin") {
-      return /^(accounts|moderation|resources|log)$/.test(tab) ? "#" + tab : "#admin";
+      return /^(accounts|moderation|support|resources|log)$/.test(tab) ? "#" + tab : "#admin";
     }
     return /^(profiles|library|wishlist)$/.test(tab) ? "#" + tab : "#app";
   }
@@ -2317,6 +2312,168 @@ const BookField = (() => {
         window.PTGGenres.skip(genresFor);
       }
       genresFinish("Your account is ready. Setting up your shelf…");
+    });
+  }
+  var welcomeForm = $("welcomeForm");
+  var wName = $("wName"), wGuardian = $("wGuardian"), wTerms = $("wTerms");
+  var welcomeFor = "";
+  var wPassword = $("wPassword"), wConfirm = $("wConfirm");
+  var wRuleEls = wPassword ? [].slice.call($("wPwRules").querySelectorAll("li")) : [];
+  function paintWelcomeMeter() {
+    var s = score(wPassword.value);
+    $("wMeter").dataset.score = String(s.n);
+    $("wMeterLabel").textContent = WORDS[s.n];
+    $("wMeterTip").textContent = s.tip;
+    wRuleEls.forEach(function(li, i) {
+      li.setAttribute("data-met", s.met[i] ? "true" : "false");
+    });
+    return s;
+  }
+  function checkWelcomePassword() {
+    var v = wPassword.value;
+    if (!v) {
+      return setHint(wPassword, "wPwHint", "Choose a password.");
+    }
+    var s = score(v);
+    if (s.common) {
+      return setHint(wPassword, "wPwHint", "That one is on every guessing list. Try a short phrase instead.");
+    }
+    var left = stillNeeds(s);
+    if (left.length) {
+      return setHint(wPassword, "wPwHint", "Your password still needs " + asList(left) + ".");
+    }
+    return setHint(wPassword, "wPwHint", "");
+  }
+  function checkWelcomeConfirm() {
+    if (!wConfirm.value) {
+      return setHint(wConfirm, "wConfirmHint", "Type the password once more to confirm it.");
+    }
+    if (wConfirm.value !== wPassword.value) {
+      return setHint(wConfirm, "wConfirmHint", "These two don’t match yet.");
+    }
+    return setHint(wConfirm, "wConfirmHint", "");
+  }
+  function afterSetup(needs) {
+    var asked = window.PTGGenres && window.PTGGenres.asked(welcomeFor);
+    if (needs && needs.interests || !asked && window.PTGGenres) {
+      genresBegin(welcomeFor);
+      return;
+    }
+    genresFinish("Your account is ready. Setting up your shelf…");
+  }
+  function toSignin() {
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, "", "#signin");
+    }
+    go("signin");
+  }
+  function startSetup(info) {
+    info = info || {};
+    var needs = info.needs || {};
+    welcomeFor = info.email || "";
+    if (!welcomeForm || !needs.details) {
+      genresBegin(welcomeFor);
+      return;
+    }
+    welcomeForm.reset();
+    showAlert("welcomeAlert", "welcomeAlertText", "");
+    setHint(wName, "wNameHint", "");
+    setHint(wPassword, "wPwHint", "");
+    setHint(wConfirm, "wConfirmHint", "");
+    [ wPassword, wConfirm ].forEach(function(input) {
+      input.type = "password";
+    });
+    $("wReveal").setAttribute("aria-pressed", "false");
+    $("wReveal").setAttribute("aria-label", "Show password");
+    setHint(wGuardian, "wGuardianHint", "");
+    setHint(wTerms, "wTermsHint", "");
+    $("welcomeEmail").textContent = welcomeFor || "your Google account";
+    wName.value = info.name || "";
+    paintWelcomeMeter();
+    go("welcome");
+  }
+  window.PTGStartSetup = startSetup;
+  window.addEventListener("ptg:setup", function(e) {
+    startSetup(e.detail);
+  });
+  function checkWelcome() {
+    var results = [];
+    var n = wName.value.trim();
+    results.push(setHint(wName, "wNameHint", !n ? "Enter your name so we know what to call you." : n.length < 2 ? "That looks too short — enter your full name." : n.length > 60 ? "Keep it under 60 characters." : ""));
+    results.push(checkWelcomePassword());
+    results.push(checkWelcomeConfirm());
+    results.push(setHint(wGuardian, "wGuardianHint", wGuardian.checked ? "" : "Please confirm you are the parent or guardian."));
+    results.push(setHint(wTerms, "wTermsHint", wTerms.checked ? "" : "Please agree to the Terms of Use and Privacy Notice to continue."));
+    return results;
+  }
+  if (welcomeForm) {
+    bindReveal("wReveal", "wPassword");
+    bindCaps("wPassword", "wCapsHint");
+    wPassword.addEventListener("input", function() {
+      paintWelcomeMeter();
+      if (wConfirm.value) {
+        checkWelcomeConfirm();
+      }
+    });
+    [ wName, wPassword, wConfirm, wGuardian, wTerms ].forEach(function(input) {
+      input.addEventListener(input.type === "checkbox" ? "change" : "input", function() {
+        if (input.getAttribute("aria-invalid") === "true") {
+          checkWelcome();
+        }
+      });
+    });
+    welcomeForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      showAlert("welcomeAlert", "welcomeAlertText", "");
+      var bad = checkWelcome().filter(function(ok) {
+        return !ok;
+      }).length;
+      if (bad) {
+        var firstBad = welcomeForm.querySelector('[aria-invalid="true"]');
+        if (firstBad) {
+          firstBad.focus();
+        }
+        return;
+      }
+      var name = wName.value.trim();
+      var pass = wPassword.value;
+      busyWhile($("welcomeSubmit"), "Saving…", function() {
+        return backend().then(function(b) {
+          return b.completeSetup(name, pass);
+        });
+      }).then(function(needs) {
+        wPassword.value = "";
+        wConfirm.value = "";
+        if (window.PTGAudit) {
+          window.PTGAudit.write("auth", "Family account created with Google", welcomeFor);
+        }
+        afterSetup(needs);
+      }, function(err) {
+        showAlert("welcomeAlert", "welcomeAlertText", err.message);
+      });
+    });
+    $("welcomeSwitch").addEventListener("click", function() {
+      resetAuthForms();
+      toSignin();
+      window.PTGAuthNotice("Signed out. Choose Continue with Google again to pick a different account.");
+    });
+    $("welcomeCancel").addEventListener("click", function() {
+      if (!window.confirm("Delete this new account? Nothing has been saved to it yet, and you can sign up again any time.")) {
+        return;
+      }
+      var btn = $("welcomeCancel");
+      btn.disabled = true;
+      backend().then(function(b) {
+        return b.deleteAccount();
+      }).then(function() {
+        resetAuthForms();
+        toSignin();
+        window.PTGAuthNotice("Your account was deleted. Nothing was kept.");
+      }, function(err) {
+        showAlert("welcomeAlert", "welcomeAlertText", err.message);
+      }).then(function() {
+        btn.disabled = false;
+      });
     });
   }
   bindReveal("cReveal", "cPassword");
@@ -2578,8 +2735,6 @@ const BookField = (() => {
       showAlert("createAlert", "createAlertText", err.message);
     });
   });
-  // The "Check your inbox" screen is shared by password resets and new
-  // accounts that need their email confirmed.
   var sentMode = "reset", sentTo = "";
   var sentHead = $("h-sent");
   var sentParas = [].slice.call($("view-sent").querySelectorAll(".done > p"));
@@ -2678,7 +2833,6 @@ const BookField = (() => {
       startCooldown(30);
     });
   });
-  // Arriving from an emailed reset link: choose a new password.
   var newpassForm = $("newpassForm");
   if (newpassForm) {
     bindReveal("nReveal", "nPassword");
@@ -2785,6 +2939,22 @@ const BookField = (() => {
       force(name);
     }
   }
+  (function prefillInvite() {
+    var m = /[?&]invite=([^&#]+)/.exec(window.location.search || "");
+    var addr = "";
+    try {
+      addr = m ? decodeURIComponent(m[1].replace(/\+/g, " ")).trim().toLowerCase() : "";
+    } catch (e) {}
+    if (!addr || addr.indexOf("@") < 1 || addr.length > 254) {
+      return;
+    }
+    [ "email", "cEmail" ].forEach(function(id) {
+      var input = document.getElementById(id);
+      if (input && !input.value) {
+        input.value = addr;
+      }
+    });
+  })();
   function stopCorrecting() {
     while (timers.length) {
       window.clearTimeout(timers.pop());
@@ -2807,9 +2977,11 @@ const BookField = (() => {
       return;
     }
     switchTo(name);
+    var later = { "view-welcome": 1, "view-genres": 1, "view-done": 1, "view-sent": 1, "view-code": 1, "view-newpass": 1 };
     [ 80, 300, 900 ].forEach(function(ms) {
       timers.push(window.setTimeout(function() {
-        if (active() !== VIEWS[name]) {
+        var now = active();
+        if (now !== VIEWS[name] && !later[now]) {
           switchTo(name);
         }
       }, ms));
@@ -2849,13 +3021,33 @@ const BookField = (() => {
     if (!btn) {
       return;
     }
-    var provider = btn.getAttribute("data-oauth");
     var form = btn.closest("form");
     var note = form ? form.querySelector(".oauth-note") : null;
-    if (note) {
-      note.textContent = provider + " sign-in is not connected yet.";
-      note.classList.add("is-on");
+    function tell(text) {
+      if (note) {
+        note.textContent = text;
+        note.classList.toggle("is-on", !!text);
+      }
     }
+    var admin = document.getElementById("role-admin");
+    if (form && form.contains(admin) && admin.checked) {
+      tell("Administrators sign in with their email address, password and authenticator code.");
+      return;
+    }
+    var consent = [ "cGuardian", "cTerms" ].every(function(id) {
+      var box = document.getElementById(id);
+      return box && form && form.contains(box) && box.checked;
+    });
+    if (!window.PTGBackend || !window.PTGBackend.signInWithGoogle) {
+      tell("Google sign-in is not available right now. Use your email address instead.");
+      return;
+    }
+    btn.disabled = true;
+    tell("Opening Google…");
+    window.PTGBackend.signInWithGoogle({ consent: consent }).catch(function(err) {
+      btn.disabled = false;
+      tell(err && err.message ? err.message : "Google sign-in did not start. Try again.");
+    });
   });
 })();
 
@@ -3046,142 +3238,6 @@ const BookField = (() => {
       cls: "tag--read"
     }
   };
-  function daysAgo(n) {
-    var d = new Date;
-    d.setDate(d.getDate() - n);
-    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
-  }
-  function demoChildren() {
-    return [ {
-      id: "c1",
-      name: "Harry",
-      age: 6,
-      band: "5–7",
-      colour: "#B3402E",
-      likes: [ "picture", "early", "poetry" ]
-    }, {
-      id: "c2",
-      name: "Leo",
-      age: 9,
-      band: "7–9",
-      colour: "#0A6280",
-      likes: [ "graphic", "nonfic" ]
-    } ];
-  }
-  function demoBooks() {
-    return [ {
-      id: "b1",
-      title: "The Gruffalo",
-      author: "Julia Donaldson",
-      category: "picture",
-      ages: "3–5",
-      status: "reading",
-      who: [ "c1" ],
-      spine: "#0D3B32",
-      cover: "",
-      pages: 32,
-      page: 18,
-      started: daysAgo(3),
-      notes: "Harry does all the voices. The mouse is his favourite."
-    }, {
-      id: "b2",
-      title: "Frog and Toad Are Friends",
-      author: "Arnold Lobel",
-      category: "early",
-      ages: "5–7",
-      status: "toread",
-      who: [ "c1" ],
-      spine: "#B3402E",
-      cover: "",
-      pages: 64,
-      added: daysAgo(16),
-      notes: ""
-    }, {
-      id: "b3",
-      title: "Charlotte's Web",
-      author: "E. B. White",
-      category: "chapter",
-      ages: "7–9",
-      status: "reading",
-      who: [ "c2" ],
-      spine: "#0A6280",
-      cover: "",
-      pages: 184,
-      page: 96,
-      started: daysAgo(9),
-      notes: ""
-    }, {
-      id: "b4",
-      title: "The Magic School Bus: Inside the Human Body",
-      author: "Joanna Cole",
-      category: "nonfic",
-      ages: "7–9",
-      status: "read",
-      who: [ "c2" ],
-      spine: "#2C6B4F",
-      cover: "",
-      pages: 40,
-      page: 40,
-      rating: 5,
-      started: daysAgo(20),
-      finished: daysAgo(6),
-      notes: ""
-    }, {
-      id: "b5",
-      title: "Goodnight Moon",
-      author: "Margaret Wise Brown",
-      category: "bedtime",
-      ages: "0–3",
-      status: "read",
-      who: [],
-      spine: "#06283C",
-      cover: "",
-      pages: 32,
-      page: 32,
-      rating: 4,
-      started: daysAgo(48),
-      finished: daysAgo(41),
-      notes: ""
-    }, {
-      id: "b6",
-      title: "Amulet: The Stonekeeper",
-      author: "Kazu Kibuishi",
-      category: "graphic",
-      ages: "9–12",
-      status: "toread",
-      who: [ "c2" ],
-      spine: "#123F5B",
-      cover: "",
-      pages: 192,
-      added: daysAgo(2),
-      notes: ""
-    } ];
-  }
-  function demoWishlist() {
-    return [ {
-      id: "w1",
-      title: "Where the Wild Things Are",
-      author: "Maurice Sendak",
-      category: "picture",
-      ages: "3–5",
-      status: "toread",
-      who: [ "c1" ],
-      spine: "#E9A13B",
-      cover: "",
-      notes: "Seen at the library — ask about it."
-    }, {
-      id: "w2",
-      title: "Where the Sidewalk Ends",
-      author: "Shel Silverstein",
-      category: "poetry",
-      ages: "5–7",
-      status: "toread",
-      who: [],
-      spine: "#2F6E86",
-      cover: "",
-      notes: ""
-    } ];
-  }
   var children = [];
   var books = [];
   var wishlist = [];
@@ -3520,11 +3576,17 @@ const BookField = (() => {
       return matchesWho(b) && matchesQuery(b);
     });
   }
+  document.addEventListener("error", function(e) {
+    var t = e.target;
+    if (t && t.tagName === "IMG" && t.hasAttribute("data-drop-broken")) {
+      t.remove();
+    }
+  }, true);
   function coverHtml(b, kicker) {
     var slot = !!b.slot;
     var ink = slot ? "#4B5B55" : inkOn(b.spine || "#0A6280");
     var inner = '<span class="kicker">' + esc(kicker || (cat(b.category) ? cat(b.category).name : "Book")) + "</span>" + '<span class="ct">' + esc(b.title) + "</span>" + '<span class="ca">' + esc(b.author || "Author unknown") + "</span>";
-    var img = b.cover ? '<img src="' + esc(b.cover) + '" alt="" loading="lazy" onerror="this.remove()">' : "";
+    var img = b.cover ? '<img src="' + esc(b.cover) + '" alt="" loading="lazy" data-drop-broken>' : "";
     return '<span class="cover' + (slot ? " cover--slot" : "") + '"' + dustAttrs(b) + ' style="--spine:' + esc(b.spine || "#0A6280") + ";color:" + ink + '">' + img + inner + dustFlagHtml(b, true) + coverProgHtml(b) + "</span>";
   }
   function tagsHtml(b) {
@@ -3549,6 +3611,11 @@ const BookField = (() => {
     }
     return out;
   }
+  function bookLinks(b) {
+    var link = httpsOnly(b.link);
+    var reads = readButtons(b, 'data-trip-book="' + esc(b.id) + '"');
+    return (reads ? '<div class="read-row">' + reads + "</div>" : "") + (link ? '<p class="book-links"><a href="' + esc(link) + '" target="_blank" rel="noopener nofollow">' + esc(b.source ? discSource(b.source).go : "Open the link") + NEW_TAB + "</a></p>" : "");
+  }
   function bookCard(b, list) {
     var acts = list === "wishlist" ? '<button class="btn btn--ghost btn--sm" type="button" data-move="' + esc(b.id) + '">Move to library</button>' + '<button class="icon-btn" type="button" data-edit-wish="' + esc(b.id) + '" aria-label="Edit ' + esc(b.title) + '">' + svg('<path d="M13.4 3.6a1.9 1.9 0 0 1 2.7 2.7L7.4 15 3.6 16l1-3.8Z"/>', 17) + "</button>" : '<button class="btn btn--ghost btn--sm" type="button" data-cycle="' + esc(b.id) + '">' + (b.status === "read" ? "Read again" : b.status === "reading" ? "Mark finished" : "Start reading") + "</button>" + '<button class="icon-btn" type="button" data-edit-book="' + esc(b.id) + '" aria-label="Edit ' + esc(b.title) + '">' + svg('<path d="M13.4 3.6a1.9 1.9 0 0 1 2.7 2.7L7.4 15 3.6 16l1-3.8Z"/>', 17) + "</button>";
     var extra = "";
@@ -3562,7 +3629,7 @@ const BookField = (() => {
         }
       }
     }
-    return '<article class="book' + (b.slot ? " book--slot" : "") + '">' + coverHtml(b) + '<div class="book-body">' + '<h3 class="book-title">' + esc(b.title) + "</h3>" + '<p class="book-author">' + esc(b.author || "Author unknown") + "</p>" + extra + '<div class="book-meta">' + tagsHtml(b) + "</div>" + '<div class="book-acts">' + acts + '<button class="icon-btn" type="button" data-del="' + esc(b.id) + '" data-list="' + list + '" aria-label="Remove ' + esc(b.title) + '">' + svg('<path d="M4 6h12M8 6V4.4A1.4 1.4 0 0 1 9.4 3h1.2A1.4 1.4 0 0 1 12 4.4V6"/><path d="M5.6 6 6.3 16a1.4 1.4 0 0 0 1.4 1.3h4.6A1.4 1.4 0 0 0 13.7 16L14.4 6"/>', 17) + "</button>" + "</div>" + "</div>" + "</article>";
+    return '<article class="book' + (b.slot ? " book--slot" : "") + '">' + coverHtml(b) + '<div class="book-body">' + '<h3 class="book-title">' + esc(b.title) + "</h3>" + '<p class="book-author">' + esc(b.author || "Author unknown") + "</p>" + (list === "wishlist" ? "" : bookLinks(b) + (readDaysLine(b) ? '<p class="book-days">' + esc(readDaysLine(b)) + "</p>" : "")) + extra + '<div class="book-meta">' + tagsHtml(b) + "</div>" + '<div class="book-acts">' + acts + '<button class="icon-btn" type="button" data-del="' + esc(b.id) + '" data-list="' + list + '" aria-label="Remove ' + esc(b.title) + '">' + svg('<path d="M4 6h12M8 6V4.4A1.4 1.4 0 0 1 9.4 3h1.2A1.4 1.4 0 0 1 12 4.4V6"/><path d="M5.6 6 6.3 16a1.4 1.4 0 0 0 1.4 1.3h4.6A1.4 1.4 0 0 0 13.7 16L14.4 6"/>', 17) + "</button>" + "</div>" + "</div>" + "</article>";
   }
   function addTile(kind) {
     var copy = kind === "wishlist" ? {
@@ -3570,7 +3637,7 @@ const BookField = (() => {
       hint: "Something to borrow or ask for"
     } : {
       lbl: "Add a book",
-      hint: "Type it in, or edit the list in the code"
+      hint: "Type in a title, or find one in Discover books"
     };
     return '<button class="add-book" type="button" data-add="' + kind + '">' + '<span class="plus" aria-hidden="true">' + '<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' + 'stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>' + "</span>" + '<span class="lbl">' + copy.lbl + "</span>" + '<span class="hint">' + copy.hint + "</span>" + "</button>";
   }
@@ -3583,7 +3650,7 @@ const BookField = (() => {
   function renderGreeting() {
     var h = (new Date).getHours();
     var part = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
-    $("greetLine").textContent = part + ", " + parent.name;
+    $("greetLine").textContent = part + ", " + (String(parent.name || "").trim().split(/\s+/)[0] || parent.name);
     $("greetDate").textContent = (new Date).toLocaleDateString(appLocale(), {
       weekday: "long",
       day: "numeric",
@@ -3616,9 +3683,6 @@ const BookField = (() => {
     var mine = books.filter(matchesWho);
     var now = mine.filter(function(b) {
       return b.status === "reading";
-    });
-    var toread = mine.filter(function(b) {
-      return b.status === "toread";
     });
     var doneAll = mine.filter(function(b) {
       return b.status === "read";
@@ -3737,6 +3801,16 @@ const BookField = (() => {
     };
     var nowName = pg.week ? "Last week" : "This week";
     var wasName = pg.week ? "Week before" : "Last week";
+    var online = {};
+    books.filter(matchesWho).forEach(function(b) {
+      readDays(b).forEach(function(d) {
+        online[d] = (online[d] || 0) + 1;
+      });
+    });
+    var onlineWeek = now.some(function(d) {
+      return online[pgKey(d.date)];
+    });
+    $("pgKeyOnline").hidden = !onlineWeek;
     $("pgKeyNow").textContent = nowName;
     $("pgKeyWas").textContent = wasName;
     var axis = '<div class="pg-axis" aria-hidden="true">' + [ max, max / 2, 0 ].map(function(v) {
@@ -3750,8 +3824,9 @@ const BookField = (() => {
         day: "numeric",
         month: "short"
       });
-      var label = when + ": " + d.mins + " minutes. " + wasName + ": " + was[i].mins + " minutes.";
-      return '<div class="pg-day' + (future ? " is-future" : "") + (key === today ? " is-today" : "") + '" data-pg-day="' + i + '" tabindex="0" aria-label="' + esc(label) + '">' + '<div class="pg-pair">' + '<span class="pg-b pg-b--was" style="height:' + h(was[i].mins) + '"></span>' + '<span class="pg-b pg-b--now" style="height:' + h(d.mins) + '"></span>' + "</div>" + '<span class="pg-d">' + pgDays()[i] + "</span>" + "</div>";
+      var opened = online[key] || 0;
+      var label = when + ": " + d.mins + " minutes. " + wasName + ": " + was[i].mins + " minutes." + (opened ? " " + opened + (opened === 1 ? " book" : " books") + " opened online." : "");
+      return '<div class="pg-day' + (future ? " is-future" : "") + (key === today ? " is-today" : "") + '" data-pg-day="' + i + '" tabindex="0" aria-label="' + esc(label) + '">' + '<div class="pg-pair">' + '<span class="pg-b pg-b--was" style="height:' + h(was[i].mins) + '"></span>' + '<span class="pg-b pg-b--now" style="height:' + h(d.mins) + '"></span>' + "</div>" + '<span class="pg-d">' + pgDays()[i] + "</span>" + (opened ? '<span class="pg-o" aria-hidden="true" title="Opened online"></span>' : "") + "</div>";
     }).join("");
     $("pgPlot").innerHTML = axis + '<div class="pg-cols">' + '<div class="pg-lines" aria-hidden="true"><i style="bottom:100%"></i><i style="bottom:50%"></i><i style="bottom:0"></i></div>' + cols + "</div>";
     $("pgPlot").setAttribute("data-now", JSON.stringify(now.map(function(d) {
@@ -3760,10 +3835,27 @@ const BookField = (() => {
     $("pgPlot").setAttribute("data-was", JSON.stringify(was.map(function(d) {
       return d.mins;
     })));
-    $("pgTable").innerHTML = "<caption>Minutes read per day</caption><tr><th>Day</th><th>" + esc(nowName) + "</th><th>" + esc(wasName) + "</th></tr>" + now.map(function(d, i) {
-      return "<tr><td>" + pgDays()[i] + "</td><td>" + d.mins + "</td><td>" + was[i].mins + "</td></tr>";
+    $("pgPlot").setAttribute("data-online", JSON.stringify(now.map(function(d) {
+      return online[pgKey(d.date)] || 0;
+    })));
+    $("pgTable").innerHTML = "<caption>Minutes read per day</caption><tr><th>Day</th><th>" + esc(nowName) + "</th><th>" + esc(wasName) + "</th><th>Books opened online</th></tr>" + now.map(function(d, i) {
+      return "<tr><td>" + pgDays()[i] + "</td><td>" + d.mins + "</td><td>" + was[i].mins + "</td><td>" + (online[pgKey(d.date)] || 0) + "</td></tr>";
     }).join("");
     $("pgTip").hidden = true;
+    var gauge = avg, gaugeLbl = avg === null ? "" : "Through " + (trackedCount === 1 ? "the book" : "the books") + " being read";
+    if (avg === null) {
+      var mine = books.filter(matchesWho);
+      var done = mine.filter(function(b) {
+        return b.status === "read";
+      }).length;
+      if (mine.length) {
+        gauge = Math.round(done / mine.length * 100);
+        gaugeLbl = "Of the library finished · " + done + " of " + mine.length + (mine.length === 1 ? " book" : " books");
+      } else {
+        gaugeLbl = "Add books to see progress";
+      }
+    }
+    avg = gauge;
     var TICKS = 41, lit = avg === null ? -1 : Math.round(avg / 100 * (TICKS - 1)), dial = "";
     for (var t = 0; t < TICKS; t++) {
       var a = Math.PI - t / (TICKS - 1) * Math.PI;
@@ -3773,7 +3865,7 @@ const BookField = (() => {
     }
     $("pgDial").innerHTML = '<svg viewBox="0 0 200 104">' + dial + "</svg>";
     $("pgPct").textContent = avg === null ? "—" : avg + "%";
-    $("pgPctLbl").textContent = avg === null ? "Add page counts to see progress" : "Through " + (trackedCount === 1 ? "the book" : "the books") + " being read";
+    $("pgPctLbl").textContent = gaugeLbl;
   }
   var PG_MENUS = [ [ "pgSortBtn", "pgSortMenu" ], [ "pgFilterBtn", "pgFilterMenu" ], [ "pgWhoBtn", "pgWhoMenu" ] ];
   function pgClose(except) {
@@ -3866,7 +3958,7 @@ const BookField = (() => {
       var i = +day.getAttribute("data-pg-day");
       var now = JSON.parse($("pgPlot").getAttribute("data-now") || "[]");
       var was = JSON.parse($("pgPlot").getAttribute("data-was") || "[]");
-      t.innerHTML = "<b>" + pgDays()[i] + "</b>" + '<span><i class="pg-key pg-key--now"></i>' + esc($("pgKeyNow").textContent) + "<em>" + (now[i] || 0) + " min</em></span>" + '<span><i class="pg-key pg-key--was"></i>' + esc($("pgKeyWas").textContent) + "<em>" + (was[i] || 0) + " min</em></span>";
+      t.innerHTML = "<b>" + pgDays()[i] + "</b>" + '<span><i class="pg-key pg-key--now"></i>' + esc($("pgKeyNow").textContent) + "<em>" + (now[i] || 0) + " min</em></span>" + '<span><i class="pg-key pg-key--was"></i>' + esc($("pgKeyWas").textContent) + "<em>" + (was[i] || 0) + " min</em></span>" + ((JSON.parse($("pgPlot").getAttribute("data-online") || "[]")[i] || 0) ? '<span><i class="pg-key pg-key--online"></i>Opened online<em>' + JSON.parse($("pgPlot").getAttribute("data-online"))[i] + "</em></span>" : "");
       t.hidden = false;
       var plot = $("pgPlot"), cell = t.parentNode.getBoundingClientRect(), r = day.getBoundingClientRect();
       var x = r.left - cell.left + r.width / 2;
@@ -3927,10 +4019,616 @@ const BookField = (() => {
       var current = owned.filter(function(b) {
         return b.status === "reading";
       })[0];
-      html += '<article class="profile profile--kid" style="--kid:' + esc(k.colour) + '">' + '<div class="profile-banner" aria-hidden="true"></div>' + '<div class="profile-top">' + kidAvatar(k, "avatar avatar--lg") + '<div><div class="nm">' + esc(k.name) + "</div>" + '<span class="role">Child' + (k.age ? " &middot; " + k.age + " years old" : "") + "</span></div>" + "</div>" + "<dl>" + "<dt>Reading level</dt><dd>Ages " + esc(k.band) + "</dd>" + "<dt>Books</dt><dd>" + owned.length + "</dd>" + "<dt>Finished</dt><dd>" + done + "</dd>" + "</dl>" + '<div class="profile-stats">' + '<span><b>' + weekMins + "</b> min this week</span>" + '<span><b>' + run + "</b> " + (run === 1 ? "day" : "days") + " in a row</span>" + "</div>" + (current ? '<p class="profile-now"><span>Reading now</span>' + esc(current.title) + "</p>" : "") + (likes ? '<div class="taglist">' + likes + "</div>" : "") + '<div class="acts">' + '<button class="btn btn--primary btn--sm" type="button" data-open-kid="' + esc(k.id) + '">Open ' + esc(k.name) + "&rsquo;s " + (suggestedMode() === "night" ? "bedtime mode" : "reading space") + "</button>" + '<button class="btn btn--ghost btn--sm" type="button" data-edit-child="' + esc(k.id) + '">Edit</button>' + '<button class="btn btn--quiet btn--sm" type="button" data-see="' + esc(k.id) + '">See their books</button>' + '<button class="btn btn--quiet btn--sm look-btn" type="button" data-look="' + esc(k.id) + '">Avatar &amp; background</button>' + '<button class="btn btn--quiet btn--sm chat-btn" type="button" data-chat="' + esc(k.id) + '">Messages' + kidChatBadge(k.id) + "</button>" + "</div>" + "</article>";
+      html += '<article class="profile profile--kid" style="--kid:' + esc(k.colour) + '">' + '<div class="profile-banner" aria-hidden="true"></div>' + '<div class="profile-top">' + kidAvatar(k, "avatar avatar--lg") + '<div><div class="nm">' + esc(k.name) + "</div>" + '<span class="role">Child</span></div>' + "</div>" + "<dl>" + "<dt>Reading level</dt><dd>Ages " + esc(k.band) + "</dd>" + "<dt>Books</dt><dd>" + owned.length + "</dd>" + "<dt>Finished</dt><dd>" + done + "</dd>" + "</dl>" + '<div class="profile-stats">' + '<span><b>' + weekMins + "</b> min this week</span>" + '<span><b>' + run + "</b> " + (run === 1 ? "day" : "days") + " in a row</span>" + "</div>" + (current ? '<p class="profile-now"><span>Reading now</span>' + esc(current.title) + "</p>" : "") + (likes ? '<div class="taglist">' + likes + "</div>" : "") + '<div class="acts">' + '<button class="btn btn--primary btn--sm" type="button" data-open-kid="' + esc(k.id) + '">Open ' + esc(k.name) + "&rsquo;s " + (suggestedMode() === "night" ? "bedtime mode" : "reading space") + "</button>" + '<button class="btn btn--ghost btn--sm" type="button" data-edit-child="' + esc(k.id) + '">Edit</button>' + '<button class="btn btn--quiet btn--sm" type="button" data-see="' + esc(k.id) + '">See their books</button>' + '<button class="btn btn--quiet btn--sm look-btn" type="button" data-look="' + esc(k.id) + '">Avatar &amp; background</button>' + '<button class="btn btn--quiet btn--sm chat-btn" type="button" data-chat="' + esc(k.id) + '">Messages' + kidChatBadge(k.id) + "</button>" + "</div>" + "</article>";
     });
     html += '<button class="add-card" type="button" data-add="child">' + '<span class="plus" aria-hidden="true">' + '<svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' + 'stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>' + "</span>" + '<span class="lbl">Add a child</span>' + '<span class="hint">Give them a shelf of their own</span>' + "</button>";
     $("profileCards").innerHTML = html;
+  }
+  function sharedList() {
+    var B = window.PTGBackend;
+    return B && B.sharedShelves ? B.sharedShelves() || [] : [];
+  }
+  function sharedFamily(s) {
+    return String(s.ownerName || "A family").trim() + "’s family";
+  }
+  function daysAgo(dateText) {
+    var d = day(dateText);
+    if (!d) {
+      return null;
+    }
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.round((today - d) / 864e5);
+  }
+  function whenRead(dateText) {
+    var n = daysAgo(dateText);
+    return n === null ? "" : n <= 0 ? "Today" : n === 1 ? "Yesterday" : n < 14 ? n + " days ago" : niceDate(dateText);
+  }
+  function sharedCover(b) {
+    var spine = /^#[0-9a-f]{6}$/i.test(String(b.spine || "")) ? b.spine : "#0A6280";
+    var img = /^https:\/\//i.test(String(b.cover || "")) ? '<img src="' + esc(b.cover) + '" alt="" loading="lazy" data-drop-broken>' : "";
+    return '<span class="cover shared-cover" style="--spine:' + spine + ";color:" + inkOn(spine) + '">' + img + '<span class="ct">' + esc(b.title) + "</span>" + '<span class="ca">' + esc(b.author || "Author unknown") + "</span></span>";
+  }
+  function sharedProg(b) {
+    var p = pct(b);
+    if (p === null || b.status === "toread") {
+      return "";
+    }
+    return '<span class="prog prog--thin' + (p >= 100 ? " prog--done" : "") + '" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + p + '" aria-label="' + esc(b.title) + ' reading progress"><i style="width:' + p + '%"></i></span>' + '<span class="shared-pct">' + (b.status === "read" ? "Finished" : p + "% through") + "</span>";
+  }
+  function sharedBook(b, kids) {
+    var names = (b.who || []).map(function(id) {
+      var k = kids.filter(function(x) {
+        return x.id === id;
+      })[0];
+      return k ? k.name : null;
+    }).filter(Boolean);
+    var bits = [];
+    if (names.length) {
+      bits.push("For " + names.join(" & "));
+    }
+    if (b.status === "read" && b.finished) {
+      bits.push("Finished " + niceDate(b.finished));
+    }
+    return '<li class="shared-book">' + sharedCover(b) + '<div class="shared-book-body">' + '<p class="shared-book-title">' + esc(b.title) + "</p>" + '<p class="shared-book-author">' + esc(b.author || "Author unknown") + "</p>" + (bits.length ? '<p class="shared-book-meta">' + esc(bits.join(" · ")) + "</p>" : "") + sharedProg(b) + "</div></li>";
+  }
+  function sharedBooks(title, list, kids, empty) {
+    return '<section class="shared-sec"><h3>' + esc(title) + ' <span class="shared-n">' + list.length + "</span></h3>" + (list.length ? '<ul class="shared-books">' + list.map(function(b) {
+      return sharedBook(b, kids);
+    }).join("") + "</ul>" : '<p class="shared-empty">' + esc(empty) + "</p>") + "</section>";
+  }
+  function sharedKid(k, s) {
+    var mine = s.books.filter(function(b) {
+      return b.who && b.who.indexOf(k.id) !== -1;
+    });
+    var now = mine.filter(function(b) {
+      return b.status === "reading";
+    })[0];
+    var done = mine.filter(function(b) {
+      return b.status === "read";
+    }).length;
+    var week = s.sessions.filter(function(x) {
+      var n = daysAgo(x.date);
+      return x.childId === k.id && n !== null && n >= 0 && n < 7;
+    }).reduce(function(t, x) {
+      return t + (Number(x.minutes) || 0);
+    }, 0);
+    var p = now ? pct(now) : null;
+    return '<article class="shared-kid" style="--kid:' + esc(k.colour) + '">' + '<div class="profile-top">' + kidAvatar(k, "avatar avatar--lg") + '<div><div class="nm">' + esc(k.name) + "</div>" + '<span class="role">Ages ' + esc(k.band || "—") + "</span></div></div>" + '<p class="shared-kid-now">' + (now ? "<span>Reading now</span>" + esc(now.title) + (p !== null ? " · " + p + "%" : "") : "<span>Reading now</span><em>Nothing open at the moment</em>") + "</p>" + '<div class="profile-stats"><span><b>' + week + "</b> min this week</span><span><b>" + done + "</b> finished</span><span><b>" + mine.length + "</b> " + (mine.length === 1 ? "book" : "books") + "</span></div></article>";
+  }
+  function renderShared() {
+    var block = $("sharedBlock"), box = $("sharedList");
+    if (!block || !box) {
+      return;
+    }
+    var list = sharedList();
+    block.hidden = !list.length;
+    box.innerHTML = list.map(function(s) {
+      var last = s.sessions[0];
+      var now = s.books.filter(function(b) {
+        return b.status === "reading";
+      });
+      return '<article class="profile profile--shared">' + '<div class="profile-top">' + '<span class="avatar avatar--lg fam-avatar" aria-hidden="true">' + esc(initial(s.ownerName)) + "</span>" + '<div><div class="nm">' + esc(sharedFamily(s)) + "</div>" + '<span class="role">Shared with you' + (s.acceptedAt ? " &middot; joined " + esc(since(s.acceptedAt).toLowerCase()) : "") + "</span></div></div>" + "<dl>" + "<dt>Children</dt><dd>" + s.children.length + "</dd>" + "<dt>Books</dt><dd>" + s.books.length + "</dd>" + "<dt>Last reading</dt><dd>" + esc(last ? whenRead(last.date) : "Nothing logged yet") + "</dd>" + "</dl>" + (now.length ? '<p class="profile-now"><span>Reading now</span>' + esc(now.slice(0, 2).map(function(b) {
+        return b.title;
+      }).join(", ")) + (now.length > 2 ? " and " + (now.length - 2) + " more" : "") + "</p>" : "") + '<div class="acts"><button class="btn btn--primary btn--sm" type="button" data-shared-open="' + esc(s.ownerId) + '">Open their shelf<span class="vh">: ' + esc(sharedFamily(s)) + "</span></button>" + (s.linkId ? '<button class="btn btn--ghost btn--sm" type="button" data-chat-link="' + esc(s.linkId) + '">Message<span class="vh"> ' + esc(s.ownerName) + "</span></button>" : "") + "</div></article>";
+    }).join("");
+  }
+  function openShared(ownerId) {
+    var s = sharedList().filter(function(x) {
+      return x.ownerId === ownerId;
+    })[0];
+    var dlg = $("sharedDialog");
+    if (!s || !dlg) {
+      return;
+    }
+    $("sharedDlgTitle").textContent = sharedFamily(s) + " shelf";
+    $("sharedDlgSub").textContent = s.children.length + (s.children.length === 1 ? " child" : " children") + " · " + s.books.length + (s.books.length === 1 ? " book" : " books") + ". You can look, but only they can change it.";
+    var by = function(status) {
+      return s.books.filter(function(b) {
+        return b.status === status;
+      });
+    };
+    var kidName = function(id) {
+      var k = s.children.filter(function(x) {
+        return x.id === id;
+      })[0];
+      return k ? k.name : "";
+    };
+    var bookTitle = function(id) {
+      var b = s.books.concat(s.wishlist).filter(function(x) {
+        return x.id === id;
+      })[0];
+      return b ? b.title : "A book";
+    };
+    var log = s.sessions.slice(0, 12).map(function(x) {
+      return "<li><b>" + esc(whenRead(x.date)) + "</b><span>" + esc((kidName(x.childId) ? kidName(x.childId) + " read " : "Read ") + bookTitle(x.bookId)) + "</span><span>" + (Number(x.minutes) || 0) + " min" + (x.page ? " · to page " + esc(x.page) : "") + "</span></li>";
+    }).join("");
+    $("sharedBody").innerHTML = '<section class="shared-sec"><h3>Children <span class="shared-n">' + s.children.length + "</span></h3>" + (s.children.length ? '<div class="shared-kids">' + s.children.map(function(k) {
+      return sharedKid(k, s);
+    }).join("") + "</div>" : '<p class="shared-empty">No children have been added to this shelf yet.</p>') + "</section>" + sharedBooks("Reading now", by("reading"), s.children, "Nothing is being read right now.") + sharedBooks("Up next", by("toread"), s.children, "Nothing is waiting to be read.") + sharedBooks("Finished", by("read"), s.children, "No finished books yet.") + sharedBooks("Wishlist", s.wishlist, s.children, "The wishlist is empty.") + '<section class="shared-sec"><h3>Recent reading</h3>' + (log ? '<ul class="shared-log">' + log + "</ul>" : '<p class="shared-empty">No reading has been logged yet.</p>') + "</section>";
+    openDialog(dlg);
+    $("sharedBody").scrollTop = 0;
+  }
+  document.addEventListener("click", function(e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-shared-open]") : null;
+    if (t) {
+      openShared(t.getAttribute("data-shared-open"));
+    }
+  });
+  window.addEventListener("ptg:shared", renderShared);
+  var DISC_SOURCES = {
+    cbca: { name: "CBCA Book of the Year", go: "See the shortlist" },
+    slq: { name: "State Library of Queensland", go: "Book page" },
+    aba: { name: "Kids’ Reading Guide", go: "See the guide" },
+    laureate: { name: "Children’s Laureate", go: "Meet the Laureate" },
+    commonsense: { name: "Common Sense Media", go: "Read the review" },
+    other: { name: "Recommended", go: "Open the link" }
+  };
+  var DISC_STEP = 24;
+  var disc = { page: 1, filled: false };
+  var LIKE_RULES = {
+    "picture-books": [ [ "picture" ], "" ],
+    bedtime: [ [ "bedtime" ], "night|nights|sleep|sleepy|bed|bedtime|dream|dreams|dreamer|moon|goodnight|lullaby|darkest|darkness" ],
+    adventure: [ [], "adventure|adventures|quest|journey|run|hunt|wild|escape|treasure|island|odyssey|explore|explorer|bushranger|survive|surviving|survival|rescue|mission|pirate|pirates|voyage|wolf|wolves|nighthawks|odds" ],
+    fantasy: [ [], "magic|magical|dragon|dragons|wizard|wizards|fairy|fairies|witch|witches|creature|creatures|myth|myths|spell|earthsea|hobbit|wonderland|unicorn|giant|giants|enchanted|knight|chosen|fairytale|fairytales|wishbird|flame|fury|phantom|ghost|ghosts|time machine|time traveller|tooth fairy|hogwarts|narnia" ],
+    animals: [ [], "animal|animals|bee|bees|frog|frogs|egg|crocodile|bird|birds|seabird|seabirds|magpie|currawong|zoo|cat|cats|dog|dogs|bear|bears|wolf|wolves|elephant|elephants|marsupial|marsupials|echidna|possum|beetle|reptile|reptiles|bandicoot|thylacine|goose|chicken|horse|duck|pig|bug|bugs|fox|owl|whale|shark|turtle|koala|kangaroo|wombat|penguin|prawn|fish|dinosaur|pterosaurs|spider|mouse|rabbit|robot|tree|trees|leaf|garden|flower|flowers|flora|blooms|reef|ocean|river|gum|seed|plant|plants|bush|nature|sea|seas|forest|possums|wild" ],
+    funny: [ [], "funny|laugh|laughter|silly|joke|jokes|mess|wimpy|fail|piggins|clueless|fluff|inconveniences|awesome|naughty|chaos|prank|giggle|hilarious|ridiculous|disgrace|loo|peculiar|splat|stole|grumpy" ],
+    mystery: [ [], "mystery|mysteries|detective|case|clue|clues|secret|secrets|missing|holmes|spy|solve|solving|spooky|haunted|ghost|nowhere|stays between" ],
+    science: [ [ "nonfic" ], "science|space|dinosaur|pterosaurs|ocean|reef|plant|plants|airports|building|design|3d|body|planet|robot|machine|atlas|engineer|invent|maths|bugs|bees|buzz|flora|deadly|reptiles" ],
+    history: [ [], "history|war|shrine|parliament|cleopatra|ancient|democracy|myths|odyssey|bushranger|convict|anzac|queen|king|country|always was|first female" ],
+    comics: [ [ "graphic" ], "graphic|comic|comics|manga|heartstopper" ],
+    poetry: [ [ "poetry" ], "poem|poems|poetry|rhyme|rhymes|rhyming|verse|song|songs|alphabet|prayer" ],
+    "real-lives": [ [], "real|true|life|lives|biography|memoir|diary|friendship|friends|family|dad|dads|mum|nonno|grandma|grandpa|home|school|growing|parents|being|kid|i am|my people|believe" ]
+  };
+  Object.keys(LIKE_RULES).forEach(function(k) {
+    var r = LIKE_RULES[k];
+    LIKE_RULES[k] = { cats: r[0], re: r[1] ? new RegExp("(^|[^a-z])(" + r[1] + ")([^a-z]|$)", "i") : null };
+  });
+  var ICON_READ = '<path d="M10 5.3C8.4 4.1 6.3 3.6 3.4 3.6v11.6c2.9 0 5 .5 6.6 1.7 1.6-1.2 3.7-1.7 6.6-1.7V3.6c-2.9 0-5 .5-6.6 1.7Z"/><path d="M10 5.3v11.6"/>';
+  var ICON_PLAY = '<circle cx="10" cy="10" r="7.6"/><path d="M8.3 6.9v6.2l5-3.1Z" fill="currentColor"/>';
+  var ICON_OUT = '<path d="M11.5 3.5h5v5M16.5 3.5 9.8 10.2"/><path d="M14.5 11.5v4a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h4"/>';
+  var NEW_TAB = '<span class="vh"> (opens in a new tab)</span>';
+  function discSource(id) {
+    return DISC_SOURCES[id] || DISC_SOURCES.other;
+  }
+  function httpsOnly(v) {
+    return /^https:\/\/[^\s"'<>]+$/i.test(String(v || "")) ? String(v) : "";
+  }
+  function catalogueItems() {
+    var raw = null;
+    try {
+      raw = JSON.parse(window.PTGStore.getItem("ptg-catalogue-v1"));
+    } catch (e) {}
+    return raw && Array.isArray(raw.items) ? raw.items.filter(function(c) {
+      return c && c.title && c.state !== "hidden";
+    }) : [];
+  }
+  function catalogueItem(id) {
+    return catalogueItems().filter(function(c) {
+      return c.id === id;
+    })[0] || null;
+  }
+  function bookKey(title, author) {
+    return (String(title || "") + "|" + String(author || "").split(/,| and /)[0]).toLowerCase().replace(/[^a-z0-9|]/g, "");
+  }
+  function ownedCopy(c) {
+    var k = bookKey(c.title, c.author);
+    var hit = function(b) {
+      return b.catalogueId === c.id || bookKey(b.title, b.author) === k;
+    };
+    var b = books.filter(hit)[0];
+    if (b) {
+      return { list: "shelf", book: b };
+    }
+    b = wishlist.filter(hit)[0];
+    return b ? { list: "wishlist", book: b } : null;
+  }
+  function discOwned(c) {
+    var o = ownedCopy(c);
+    return o ? o.list : "";
+  }
+  function watchLabel(url) {
+    return /storyboxhub\.com/i.test(url) ? "Watch on StoryBox" : /youtu/i.test(url) ? "Watch read-along" : "Watch";
+  }
+  function readButtons(item, attr, small) {
+    var read = httpsOnly(item.readLink), watch = httpsOnly(item.watchLink);
+    var cls = "read-btn" + (small ? " read-btn--sm" : "");
+    return (read ? '<a class="' + cls + ' read-btn--read" href="' + esc(read) + '" target="_blank" rel="noopener nofollow" data-trip="read" ' + attr + ">" + svg(ICON_READ, 18) + "<span>Read free</span>" + svg(ICON_OUT, 13) + NEW_TAB + "</a>" : "") + (watch ? '<a class="' + cls + ' read-btn--watch" href="' + esc(watch) + '" target="_blank" rel="noopener nofollow" data-trip="watch" ' + attr + ">" + svg(ICON_PLAY, 18) + "<span>" + esc(watchLabel(watch)) + "</span>" + svg(ICON_OUT, 13) + NEW_TAB + "</a>" : "");
+  }
+  function discCover(c) {
+    var k = cat(c.category);
+    var spine = k ? k.solid : "#0A6280";
+    var img = httpsOnly(c.cover) ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" data-drop-broken>' : "";
+    return '<span class="cover disc-cover" style="--spine:' + spine + ";color:" + inkOn(spine) + '">' + img + '<span class="ct">' + esc(c.title) + "</span>" + '<span class="ca">' + esc(c.author || "") + "</span></span>";
+  }
+  function myEmail() {
+    var S = window.PTGSession;
+    return S && S.email ? S.email() : "";
+  }
+  function familyLikes() {
+    return window.PTGGenres ? window.PTGGenres.list(myEmail()) : [];
+  }
+  function likeName(id) {
+    var hit = window.PTGGenres ? window.PTGGenres.catalogue().filter(function(g) {
+      return g.value === id;
+    })[0] : null;
+    return hit ? hit.label : id;
+  }
+  function discTaste() {
+    return {
+      likes: familyLikes(),
+      kids: children.map(function(k) {
+        return { name: k.name, band: k.band, likes: k.likes || [] };
+      })
+    };
+  }
+  function discMatch(c, taste) {
+    var hay = String(c.title || "") + " " + String(c.note || "");
+    var hits = taste.likes.filter(function(g) {
+      var r = LIKE_RULES[g];
+      return r && (r.cats.indexOf(c.category) !== -1 || !!(r.re && r.re.test(hay)));
+    });
+    var why = hits.slice(0, 2).map(likeName);
+    var score = hits.length * 3;
+    taste.kids.forEach(function(k) {
+      var age = !!c.ages && k.band === c.ages;
+      var liked = !!c.category && k.likes.indexOf(c.category) !== -1;
+      if (age) {
+        score += 2;
+      }
+      if (liked) {
+        score += 1;
+      }
+      if (age && why.length < 2) {
+        why.push("Right age for " + k.name);
+      }
+    });
+    return { score: score, why: why };
+  }
+  function discCard(c, match) {
+    var src = discSource(c.source);
+    var k = cat(c.category);
+    var own = ownedCopy(c);
+    var free = !!(httpsOnly(c.readLink) || httpsOnly(c.watchLink));
+    var acts = own ? '<p class="disc-owned">' + svg('<path d="m4.5 10.5 3.5 3.5 7.5-8"/>', 15) + (own.list === "shelf" ? "On your shelf" : "On your wishlist") + "</p>" : '<button class="btn btn--primary btn--sm" type="button" data-disc-add="' + esc(c.id) + '">Add to library<span class="vh">: ' + esc(c.title) + "</span></button>" + '<button class="btn btn--quiet btn--sm" type="button" data-disc-wish="' + esc(c.id) + '">Add to wishlist<span class="vh">: ' + esc(c.title) + "</span></button>";
+    var forYou = match && match.score > 0 && match.why.length ? '<p class="disc-for">' + svg('<path d="M10 16.5s-6-3.6-6-8a3.4 3.4 0 0 1 6-2.2 3.4 3.4 0 0 1 6 2.2c0 4.4-6 8-6 8Z"/>', 14) + "<span><b>For you</b> · " + esc(match.why.join(" · ")) + "</span></p>" : "";
+    return '<article class="disc-card' + (forYou ? " is-for-you" : "") + '">' + discCover(c) + '<div class="disc-body">' + forYou + '<p class="disc-src">' + esc(src.name) + "</p>" + '<h3 class="disc-title">' + esc(c.title) + "</h3>" + '<p class="disc-author">' + esc(c.author || "Author unknown") + "</p>" + (c.note ? '<p class="disc-note">' + esc(c.note) + "</p>" : "") + '<div class="book-meta">' + (k ? '<span class="tag tag--cat" style="--tint:' + k.tint + ";--tone:" + k.tone + '">' + esc(k.name) + "</span>" : "") + (c.ages ? '<span class="tag">Ages ' + esc(c.ages) + "</span>" : "") + (c.year ? '<span class="tag">' + esc(c.year) + "</span>" : "") + (free ? '<span class="tag tag--free">Free to read once added</span>' : "") + "</div>" + '<div class="disc-acts">' + acts + "</div>" + "</div></article>";
+  }
+  function fillDiscFilters(items) {
+    if (disc.filled || !items.length) {
+      return;
+    }
+    disc.filled = true;
+    var used = {};
+    items.forEach(function(c) {
+      used[c.source || "other"] = true;
+    });
+    $("dSource").innerHTML = '<option value="">All lists</option>' + Object.keys(DISC_SOURCES).filter(function(id) {
+      return used[id];
+    }).map(function(id) {
+      return '<option value="' + id + '">' + esc(DISC_SOURCES[id].name) + "</option>";
+    }).join("");
+    $("dAge").innerHTML = '<option value="">Any age</option>' + AGE_BANDS.map(function(a) {
+      return '<option value="' + esc(a) + '">' + esc(a) + "</option>";
+    }).join("");
+    $("dCat").innerHTML = '<option value="">All categories</option>' + CATEGORIES.map(function(c) {
+      return '<option value="' + esc(c.id) + '">' + esc(c.name) + "</option>";
+    }).join("");
+  }
+  function renderDiscLikes() {
+    var box = $("discLikes");
+    if (!box || !window.PTGGenres) {
+      return;
+    }
+    var mine = familyLikes();
+    box.innerHTML = window.PTGGenres.catalogue().map(function(g) {
+      var on = mine.indexOf(g.value) !== -1;
+      return '<button type="button" class="disc-chip" data-like="' + esc(g.value) + '" aria-pressed="' + on + '">' + (on ? svg('<path d="m4.5 10.5 3.5 3.5 7.5-8"/>', 13) : "") + esc(g.label) + "</button>";
+    }).join("");
+    $("discLikesNote").textContent = mine.length ? "Books that match come first. Tap to change." : "Tap what your children enjoy and matching books come first.";
+  }
+  function pagerHtml(page, pages) {
+    var nums = [], i;
+    for (i = 1; i <= pages; i++) {
+      if (i === 1 || i === pages || Math.abs(i - page) <= 1) {
+        nums.push(i);
+      } else if (nums[nums.length - 1] !== 0) {
+        nums.push(0);
+      }
+    }
+    var chev = function(d) {
+      return svg('<path d="' + d + '"/>', 16);
+    };
+    return '<button type="button" class="pager-btn pager-step" data-page="' + (page - 1) + '"' + (page <= 1 ? " disabled" : "") + ">" + chev("m12 4.5-5.5 5.5 5.5 5.5") + '<span class="pager-word">Previous</span><span class="vh"> page</span></button>' + '<ol class="pager-nums">' + nums.map(function(n) {
+      return n === 0 ? '<li class="pager-gap" aria-hidden="true">…</li>' : '<li><button type="button" class="pager-btn" data-page="' + n + '"' + (n === page ? ' aria-current="page"' : "") + '><span class="vh">Page </span>' + n + "</button></li>";
+    }).join("") + "</ol>" + '<button type="button" class="pager-btn pager-step" data-page="' + (page + 1) + '"' + (page >= pages ? " disabled" : "") + '><span class="pager-word">Next</span><span class="vh"> page</span>' + chev("m8 4.5 5.5 5.5L8 15.5") + "</button>";
+  }
+  function renderDiscover() {
+    var panel = $("libv-discover"), grid = $("discGrid");
+    if (!panel || !grid || panel.hidden) {
+      return;
+    }
+    var items = catalogueItems();
+    fillDiscFilters(items);
+    renderDiscLikes();
+    var q = String($("dSearch").value || "").trim().toLowerCase();
+    var src = $("dSource").value, age = $("dAge").value, category = $("dCat").value, free = $("dFree").checked, order = $("dSort").value;
+    var taste = discTaste();
+    var list = [];
+    items.forEach(function(c, i) {
+      if (src && (c.source || "other") !== src) {
+        return;
+      }
+      if (age && c.ages !== age) {
+        return;
+      }
+      if (category && c.category !== category) {
+        return;
+      }
+      if (free && !httpsOnly(c.readLink) && !httpsOnly(c.watchLink)) {
+        return;
+      }
+      if (q && (c.title + " " + (c.author || "") + " " + (c.note || "")).toLowerCase().indexOf(q) === -1) {
+        return;
+      }
+      list.push({ c: c, i: i, m: discMatch(c, taste) });
+    });
+    list.sort(function(a, b) {
+      if (order === "title") {
+        return a.c.title.localeCompare(b.c.title);
+      }
+      if (order === "new") {
+        return (Number(b.c.year) || 0) - (Number(a.c.year) || 0) || a.i - b.i;
+      }
+      return b.m.score - a.m.score || a.i - b.i;
+    });
+    var forYou = list.filter(function(x) {
+      return x.m.score > 0 && x.m.why.length;
+    }).length;
+    var pages = Math.max(1, Math.ceil(list.length / DISC_STEP));
+    disc.page = Math.min(Math.max(1, disc.page), pages);
+    var from = (disc.page - 1) * DISC_STEP;
+    var shown = list.slice(from, from + DISC_STEP);
+    grid.innerHTML = shown.map(function(x) {
+      return discCard(x.c, x.m);
+    }).join("");
+    grid.hidden = !list.length;
+    var pager = $("discPager");
+    pager.hidden = pages <= 1;
+    pager.innerHTML = pages > 1 ? pagerHtml(disc.page, pages) : "";
+    var filtered = q || src || age || category || free;
+    var head = !items.length ? "" : list.length === items.length ? items.length + " recommended books" : list.length + " of " + items.length + " books match";
+    if (head && !order && forYou) {
+      head += " · " + forYou + " picked for your family, shown first";
+    }
+    if (head && pages > 1) {
+      head += " · page " + disc.page + " of " + pages;
+    }
+    $("discCount").textContent = head;
+    var empty = $("discEmpty");
+    empty.classList.toggle("is-on", !list.length);
+    $("discEmptyH").textContent = items.length ? "No books match" : "The book list is on its way";
+    $("discEmptyP").textContent = items.length ? "Try a different search, or clear the filters." : "Recommended books will appear here soon.";
+    $("dClear").hidden = !filtered && !order;
+  }
+  function catalogueBook(c, toWish) {
+    var k = cat(c.category);
+    var data = {
+      id: uid("b"),
+      title: c.title,
+      author: c.author || "",
+      category: k ? k.id : "",
+      ages: AGE_BANDS.indexOf(c.ages) !== -1 ? c.ages : "",
+      status: "toread",
+      who: [],
+      cover: httpsOnly(c.cover),
+      notes: "",
+      spine: k ? k.solid : "#0A6280",
+      link: httpsOnly(c.link),
+      readLink: httpsOnly(c.readLink),
+      watchLink: httpsOnly(c.watchLink),
+      source: c.source || "other",
+      catalogueId: c.id
+    };
+    if (!toWish) {
+      data.pages = Number(c.pages) > 0 ? Number(c.pages) : 0;
+      data.page = 0;
+    }
+    return data;
+  }
+  function addFromCatalogue(id, toWish) {
+    var c = catalogueItem(id);
+    if (!c || discOwned(c)) {
+      return null;
+    }
+    var data = catalogueBook(c, toWish);
+    (toWish ? wishlist : books).unshift(data);
+    note("Added " + data.title + (toWish ? " to the wishlist" : " to the library"));
+    $("discSay").textContent = data.title + (toWish ? " is on your wishlist." : " is on your shelf. Track it from Your books.");
+    say(data.title + (toWish ? " is on the wishlist" : " is on the shelf"));
+    renderAll();
+    return data;
+  }
+  (function bootDiscover() {
+    if (!$("libv-discover")) {
+      return;
+    }
+    var again = function() {
+      disc.page = 1;
+      renderDiscover();
+    };
+    $("dSearch").addEventListener("input", again);
+    [ "dSource", "dAge", "dCat", "dFree", "dSort" ].forEach(function(id) {
+      $(id).addEventListener("change", again);
+    });
+    $("dClear").addEventListener("click", function() {
+      $("dSearch").value = "";
+      $("dSource").value = "";
+      $("dAge").value = "";
+      $("dCat").value = "";
+      $("dSort").value = "";
+      $("dFree").checked = false;
+      again();
+      $("dSearch").focus();
+    });
+    $("discLikes").addEventListener("click", function(e) {
+      var t = e.target.closest ? e.target.closest("[data-like]") : null;
+      if (!t || !window.PTGGenres) {
+        return;
+      }
+      var v = t.getAttribute("data-like");
+      var mine = familyLikes();
+      var on = mine.indexOf(v) === -1;
+      mine = on ? mine.concat(v) : mine.filter(function(x) {
+        return x !== v;
+      });
+      if (mine.length) {
+        window.PTGGenres.save(myEmail(), mine);
+      } else {
+        window.PTGGenres.skip(myEmail());
+      }
+      again();
+      var back = $("discLikes").querySelector('[data-like="' + v + '"]');
+      if (back) {
+        back.focus();
+      }
+      $("discSay").textContent = likeName(v) + (on ? " added. Matching books come first." : " removed.");
+    });
+    $("discPager").addEventListener("click", function(e) {
+      var t = e.target.closest ? e.target.closest("[data-page]") : null;
+      if (!t || t.disabled) {
+        return;
+      }
+      disc.page = Number(t.getAttribute("data-page")) || 1;
+      renderDiscover();
+      var top = $("discCount");
+      if (top.scrollIntoView) {
+        top.scrollIntoView({ block: "start", behavior: window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      }
+      top.focus({ preventScroll: true });
+    });
+    $("discGrid").addEventListener("click", function(e) {
+      var t = e.target.closest ? e.target.closest("[data-disc-add], [data-disc-wish]") : null;
+      if (!t) {
+        return;
+      }
+      var wish = t.hasAttribute("data-disc-wish");
+      var at = [].indexOf.call($("discGrid").children, t.closest(".disc-card"));
+      addFromCatalogue(t.getAttribute(wish ? "data-disc-wish" : "data-disc-add"), wish);
+      var card = $("discGrid").children[at];
+      var owned = card && card.querySelector(".disc-owned");
+      if (owned) {
+        owned.setAttribute("tabindex", "-1");
+        owned.focus();
+      }
+    });
+    $("libv-tab-discover").addEventListener("click", function() {
+      window.setTimeout(renderDiscover, 0);
+    });
+    window.addEventListener("ptg:catalogue", renderDiscover);
+    window.addEventListener("ptg:store", function(e) {
+      var key = e.detail && e.detail.key;
+      if (key === "ptg-catalogue-v1" || key === "ptg-genres-v1") {
+        renderDiscover();
+      }
+    });
+  })();
+  var trip = null;
+  function readDays(b) {
+    return Array.isArray(b.readDays) ? b.readDays : [];
+  }
+  function dayWord(key) {
+    if (key === stamp()) {
+      return "today";
+    }
+    var d = new Date;
+    d.setDate(d.getDate() - 1);
+    return key === dateKey(d) ? "yesterday" : niceDate(key);
+  }
+  function readDaysLine(b) {
+    var days = readDays(b);
+    if (!days.length) {
+      return "";
+    }
+    return "Opened on " + days.length + (days.length === 1 ? " day" : " days") + " · last " + dayWord(days[days.length - 1]);
+  }
+  document.addEventListener("click", function(e) {
+    var a = e.target.closest ? e.target.closest("a[data-trip]") : null;
+    var b = a ? byId(books, a.getAttribute("data-trip-book") || "") : null;
+    if (!b) {
+      return;
+    }
+    var today = stamp();
+    var days = readDays(b).slice();
+    if (days.indexOf(today) === -1) {
+      days.push(today);
+    }
+    b.readDays = days.slice(-366);
+    b.lastOpened = Date.now();
+    delete b.slot;
+    if (b.status === "toread") {
+      b.status = "reading";
+      stampStatus(b, "reading");
+      note(b.title + " is now marked being read");
+    }
+    trip = kids.open ? { bookId: b.id, at: Date.now() } : null;
+    window.setTimeout(renderAll, 0);
+  });
+  function tripBack() {
+    if (!trip || document.visibilityState === "hidden") {
+      return;
+    }
+    var away = Date.now() - trip.at;
+    if (away < 6e4) {
+      return;
+    }
+    var t = trip;
+    trip = null;
+    if (!kids.open || away > 12 * 36e5 || !kids.book || kids.book.id !== t.bookId || $("kidsStepLog").hidden) {
+      return;
+    }
+    var mins = Math.min(120, Math.max(1, Math.round(away / 6e4)));
+    kids.mins = [ 5, 10, 15, 20, 30 ].reduce(function(best, x) {
+      return Math.abs(x - mins) < Math.abs(best - mins) ? x : best;
+    }, 15);
+    [].forEach.call($("kidsMins").querySelectorAll("[data-mins]"), function(btn) {
+      btn.setAttribute("aria-pressed", Number(btn.getAttribute("data-mins")) === kids.mins ? "true" : "false");
+    });
+    $("kidsLogSub").textContent = "Welcome back! You were away about " + mins + (mins === 1 ? " minute." : " minutes.");
+  }
+  document.addEventListener("visibilitychange", tripBack);
+  window.addEventListener("focus", tripBack);
+  function renderOnline() {
+    var row = $("onlineRow");
+    if (!row) {
+      return;
+    }
+    var rank = { reading: 0, toread: 1 };
+    var list = books.filter(function(b) {
+      return b.status !== "read" && matchesWho(b) && (httpsOnly(b.readLink) || httpsOnly(b.watchLink));
+    }).sort(function(a, b) {
+      return (rank[a.status] || 0) - (rank[b.status] || 0) || (Number(b.lastOpened) || 0) - (Number(a.lastOpened) || 0);
+    }).slice(0, 6);
+    row.hidden = !list.length;
+    var month = stamp().slice(0, 7), days = {}, opened = 0;
+    books.forEach(function(b) {
+      var hit = false;
+      readDays(b).forEach(function(d) {
+        if (d.slice(0, 7) === month) {
+          days[d] = true;
+          hit = true;
+        }
+      });
+      if (hit) {
+        opened++;
+      }
+    });
+    var nDays = Object.keys(days).length;
+    $("onlineSum").innerHTML = nDays ? "<b>" + nDays + "</b> " + (nDays === 1 ? "day" : "days") + " of reading online this month · <b>" + opened + "</b> " + (opened === 1 ? "book" : "books") + " opened" : "Each day you open a book here counts as a reading day.";
+    $("onlineList").innerHTML = list.map(function(b) {
+      var line = readDaysLine(b) || (b.status === "reading" ? "Being read" : "Not opened yet");
+      return '<article class="online-card">' + coverHtml(b) + '<div class="online-body"><h3 class="online-title">' + esc(b.title) + "</h3>" + '<p class="online-meta">' + esc(line) + "</p>" + '<div class="read-row">' + readButtons(b, 'data-trip-book="' + esc(b.id) + '"', true) + "</div></div></article>";
+    }).join("");
   }
   function kidChatBadge(id) {
     var n = window.PTGKidChat ? window.PTGKidChat.unread(id) : 0;
@@ -4136,7 +4834,7 @@ const BookField = (() => {
       });
       if (!saved) {
         e.preventDefault();
-        say("This browser is blocking local storage, so the suggestion was not saved.");
+        say("The suggestion was not saved. Check your internet connection and try again.");
         return;
       }
       note("Suggested " + title);
@@ -4222,7 +4920,7 @@ const BookField = (() => {
   var WELCOME_STEPS = [ {
     id: "child",
     title: "Add your child’s profile",
-    text: "Their name, age and the kinds of books they love.",
+    text: "Their first name, reading level and the kinds of books they love.",
     act: "Add a child",
     done: function() {
       return children.length > 0;
@@ -4339,16 +5037,36 @@ const BookField = (() => {
     bed.addEventListener("change", mark);
     bed.addEventListener("input", mark);
   })();
+  function fillCatPages() {
+    var items = null;
+    books.forEach(function(b) {
+      if (!b.catalogueId || Number(b.pages) > 0) {
+        return;
+      }
+      items = items || catalogueItems();
+      var c = items.filter(function(x) {
+        return x.id === b.catalogueId;
+      })[0];
+      if (c && Number(c.pages) > 0) {
+        b.pages = Number(c.pages);
+      }
+    });
+  }
   function renderAll() {
+    fillCatPages();
     renderCounts();
     renderGreeting();
     renderWhoChips();
     renderDashboard();
     renderWelcome();
     renderTonight();
+    renderOnline();
     renderProfiles();
+    renderShared();
+    renderDiscover();
     renderLibrary();
     renderResources();
+    renderTeamPosts();
     renderWishlist();
     renderMySuggestions();
     dustSweep();
@@ -4369,7 +5087,7 @@ const BookField = (() => {
     settings: "Settings"
   };
   function swapPanels(change, after) {
-    var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("ptg-reduce");
+    var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("ptg-reduce") || document.documentElement.classList.contains("ptg-instant");
     if (!document.startViewTransition || calm || document.hidden) {
       change();
       after();
@@ -4727,7 +5445,6 @@ const BookField = (() => {
     $("childSave").textContent = k ? "Save changes" : "Add child";
     $("childDelete").hidden = !k;
     $("kName").value = k ? k.name : "";
-    $("kAge").value = k && k.age != null ? k.age : "";
     $("kBand").value = k ? k.band : AGE_BANDS[1];
     likeBoxes().forEach(function(b) {
       b.checked = !!(k && k.likes && k.likes.indexOf(b.value) !== -1);
@@ -4736,8 +5453,6 @@ const BookField = (() => {
     pickSwatch($("kColour"), "kcolour", k ? k.colour : CHILD_COLOURS[children.length % CHILD_COLOURS.length]);
     $("kNameErr").classList.remove("is-on");
     $("kName").removeAttribute("aria-invalid");
-    $("kAgeErr").classList.remove("is-on");
-    $("kAge").removeAttribute("aria-invalid");
     openDialog(childDialog);
     window.setTimeout(function() {
       $("kName").focus();
@@ -4752,16 +5467,6 @@ const BookField = (() => {
       $("kName").focus();
       return;
     }
-    var age = $("kAge").value === "" ? null : Number($("kAge").value);
-    if (age !== null && !(age % 1 === 0 && age >= 0 && age <= 18)) {
-      e.preventDefault();
-      $("kAgeErr").classList.add("is-on");
-      $("kAge").setAttribute("aria-invalid", "true");
-      $("kAge").focus();
-      return;
-    }
-    $("kAgeErr").classList.remove("is-on");
-    $("kAge").removeAttribute("aria-invalid");
     var likes = likeBoxes().filter(function(b) {
       return b.checked;
     }).map(function(b) {
@@ -4769,7 +5474,6 @@ const BookField = (() => {
     });
     var data = {
       name: name,
-      age: age,
       band: $("kBand").value,
       likes: likes,
       colour: swatchValue("kcolour")
@@ -4778,6 +5482,7 @@ const BookField = (() => {
       Object.keys(data).forEach(function(key) {
         state.editingChild[key] = data[key];
       });
+      delete state.editingChild.age;
       note("Updated " + name + "’s profile");
       say("Saved " + name + "’s profile");
     } else {
@@ -4904,7 +5609,7 @@ const BookField = (() => {
     }
     hit = t.closest("[data-add]");
     if (hit) {
-      var kind = hit.getAttribute("data-add");
+      kind = hit.getAttribute("data-add");
       if (kind === "child") {
         openChild(null);
       } else {
@@ -5082,10 +5787,10 @@ const BookField = (() => {
   }
   function resourceList() {
     return approvedResources().filter(function(r) {
-      if (state.rCat && r.category !== state.rCat) {
+      if (state.rCat && r.category && r.category !== state.rCat) {
         return false;
       }
-      if (state.rAge && r.ages !== state.rAge) {
+      if (state.rAge && r.ages && r.ages !== state.rAge) {
         return false;
       }
       return true;
@@ -5095,15 +5800,14 @@ const BookField = (() => {
     var c = cat(r.category);
     var url = safeUrl(r.link);
     var host = hostOf(url);
-    var tags = (c ? '<span class="tag tag--cat" style="--tint:' + c.tint + ";--tone:" + c.tone + '">' + esc(c.name) + "</span>" : "") + (r.ages ? '<span class="tag">Ages ' + esc(r.ages) + "</span>" : "");
+    var tags = (c ? '<span class="tag tag--cat" style="--tint:' + c.tint + ";--tone:" + c.tone + '">' + esc(c.name) + "</span>" : '<span class="tag">All categories</span>') + '<span class="tag">' + (r.ages ? "Ages " + esc(r.ages) : "All ages") + "</span>";
     var source = url ? '<span class="dom">' + esc(host) + "</span>" : '<span class="dom dom--none">No link &mdash; written for this site</span>';
     var when = r.at ? '<span class="when">Approved ' + esc(onDay(r.at)) + "</span>" : "";
-    var open = url ? '<a class="res-open" href="' + esc(url) + '" target="_blank" rel="noopener nofollow">' + EXT_ICON + "Open the resource" + '<span class="vh"> (opens in a new tab)</span></a>' : "";
+    var open = url ? '<a class="res-open" href="' + esc(url) + '" target="_blank" rel="noopener nofollow">' + EXT_ICON + "Open the resource" + '<span class="vh">: ' + esc(r.title) + " (opens in a new tab)</span></a>" : "";
     return '<article class="res-card">' + '<div class="res-top">' + '<span class="kind">' + esc(r.kind) + "</span>" + "<h3>" + esc(r.title) + "</h3>" + "</div>" + '<p class="body">' + esc(r.body) + "</p>" + '<p class="meta">' + tags + "</p>" + '<p class="src">' + source + when + "</p>" + open + "</article>";
   }
   function renderResources() {
     var list = resourceList();
-    var all = approvedResources().length;
     var filtered = !!(state.rCat || state.rAge);
     $("resCount").textContent = list.length + (list.length === 1 ? " resource" : " resources") + (filtered ? " match your filters" : " approved so far");
     $("resGrid").innerHTML = list.map(resourceCard).join("");
@@ -5114,6 +5818,36 @@ const BookField = (() => {
       $("emptyResBody").textContent = filtered ? "Widen the search, or clear the filters to see everything that has been approved." : "When a moderator approves a guide or a link it will appear here.";
       $("emptyResClear").hidden = !filtered;
     }
+  }
+  function teamPosts() {
+    var posts = window.PTGAdmin ? window.PTGAdmin.publishedPosts() : [];
+    var picked = state.who !== "all" && child(state.who) ? [ child(state.who) ] : children;
+    var bands = picked.map(function(k) {
+      return k.band;
+    }).filter(Boolean);
+    var banded = !!setting("ageFilter") && bands.length > 0;
+    return posts.filter(function(p) {
+      return !banded || !p.ages || bands.indexOf(p.ages) !== -1;
+    }).sort(function(a, b) {
+      return (b.at || 0) - (a.at || 0);
+    }).slice(0, 3);
+  }
+  function renderTeamPosts() {
+    var list = teamPosts();
+    $("teamPosts").innerHTML = list.map(function(p) {
+      return resourceCard({
+        id: p.id,
+        kind: "From the team",
+        title: p.title,
+        body: p.body,
+        category: p.category,
+        ages: p.ages,
+        link: p.link,
+        at: p.at
+      });
+    }).join("");
+    $("teamPosts").hidden = !list.length;
+    $("teamPostsEmpty").hidden = list.length > 0;
   }
   function clearResFilters() {
     state.rCat = state.rAge = "";
@@ -5187,44 +5921,6 @@ const BookField = (() => {
   fillSelect($("fCat"), catOptions(), "All categories");
   fillSelect($("fAge"), ageOptions(), "Any age");
   var started = false;
-  function demoSessions() {
-    return [ {
-      id: "s1",
-      bookId: "b1",
-      childId: "c1",
-      date: daysAgo(1),
-      minutes: 15,
-      page: 18
-    }, {
-      id: "s2",
-      bookId: "b1",
-      childId: "c1",
-      date: daysAgo(2),
-      minutes: 10,
-      page: 11
-    }, {
-      id: "s3",
-      bookId: "b1",
-      childId: "c1",
-      date: daysAgo(3),
-      minutes: 20,
-      page: 6
-    }, {
-      id: "s4",
-      bookId: "b3",
-      childId: "c2",
-      date: daysAgo(1),
-      minutes: 30,
-      page: 96
-    }, {
-      id: "s5",
-      bookId: "b3",
-      childId: "c2",
-      date: daysAgo(4),
-      minutes: 25,
-      page: 71
-    } ];
-  }
   function anyBook(id) {
     return byId(books, id) || byId(wishlist, id) || null;
   }
@@ -5456,7 +6152,7 @@ const BookField = (() => {
   function kidsCoverHtml(b) {
     var p = pct(b);
     var ink = inkOn(b.spine || "#0A6280");
-    var img = b.cover ? '<img src="' + esc(b.cover) + '" alt="" loading="lazy" onerror="this.remove()">' : "";
+    var img = b.cover ? '<img src="' + esc(b.cover) + '" alt="" loading="lazy" data-drop-broken>' : "";
     return '<span class="kids-cover" style="--spine:' + esc(b.spine || "#0A6280") + ";color:" + ink + '">' + img + '<span class="ct">' + esc(b.title) + "</span>" + (p === null ? "" : '<span class="cbar"><i style="width:' + p + '%"></i></span>') + "</span>";
   }
   function renderKidsBooks() {
@@ -5518,9 +6214,16 @@ const BookField = (() => {
       return kidsHits(b, q);
     });
     kidsPaintClear("Browse");
+    var more = kidsCatPicks();
+    $("kidsMoreWrap").hidden = !more.length;
+    $("kidsMoreH").textContent = list.length ? "More books to find" : k ? "Books " + kidName(k) + " might like" : "Books you might like";
+    $("kidsMoreList").innerHTML = more.map(function(c) {
+      var wished = kidsCatWished(c);
+      return '<button class="kids-book' + (wished ? " is-added" : "") + '" type="button" data-kcat="' + esc(c.id) + '">' + kidsCatCover(c) + '<span class="nm">' + esc(c.title) + "</span>" + '<span class="sub">' + (wished ? "On your wishlist" : "Tap to wishlist") + "</span>" + "</button>";
+    }).join("");
     $("kidsBrowseHeading").textContent = k ? "Find something new, " + kidName(k) : "Find something new";
     $("kidsBrowseEmptyTxt").textContent = q ? "Nothing matches “" + q + "”. Try a different word." : "Nothing new to find right now — check back soon!";
-    $("kidsBrowseEmpty").hidden = list.length > 0;
+    $("kidsBrowseEmpty").hidden = list.length > 0 || more.length > 0;
     $("kidsBrowseList").hidden = list.length === 0;
     $("kidsBrowseList").innerHTML = list.map(function(b) {
       var wished = kidsIsWished(b);
@@ -5622,7 +6325,59 @@ const BookField = (() => {
       $("kidsPage").value = String(clampPage(Number(b.page) || 0, total));
       $("kidsPageOf").textContent = "of " + total;
     }
+    var reads = setting("kidsReads") === false ? "" : readButtons(b, 'data-trip-book="' + esc(b.id) + '"');
+    $("kidsOpenRow").hidden = !reads;
+    $("kidsOpenBtns").innerHTML = reads;
+    $("kidsOpenLead").textContent = kids.mode === "night" ? "Read it together here, then come back and tell us how long." : "Read it here, then come back and tell us how long.";
     kidsStep("Log");
+  }
+  function kidsCatPicks() {
+    var k = child(kids.who);
+    var likes = familyLikes();
+    var taste = { likes: likes, kids: k ? [ { name: k.name, band: k.band, likes: k.likes || [] } ] : [] };
+    var q = kidsQ("Browse");
+    return catalogueItems().filter(function(c) {
+      if (ownedCopy(c) && !kidsCatWished(c)) {
+        return false;
+      }
+      if (k && k.band && c.ages && c.ages !== k.band && setting("ageFilter")) {
+        return false;
+      }
+      return kidsHits(c, q);
+    }).map(function(c, i) {
+      return { c: c, i: i, s: discMatch(c, taste).score };
+    }).sort(function(a, b) {
+      return b.s - a.s || a.i - b.i;
+    }).slice(0, 24).map(function(x) {
+      return x.c;
+    });
+  }
+  function kidsCatWished(c) {
+    return wishlist.some(function(w) {
+      return w.catalogueId === c.id;
+    });
+  }
+  function kidsCatCover(c) {
+    var k = cat(c.category);
+    return kidsCoverHtml({ title: c.title, cover: httpsOnly(c.cover), spine: k ? k.solid : "#0A6280" });
+  }
+  function kidsToggleCat(c) {
+    var k = child(kids.who);
+    var existing = wishlist.filter(function(w) {
+      return w.catalogueId === c.id;
+    })[0];
+    if (existing) {
+      wishlist.splice(wishlist.indexOf(existing), 1);
+      note((k ? k.name + " took " : "Took ") + c.title + " off the wishlist");
+    } else {
+      var w = catalogueBook(c, true);
+      w.who = kids.who ? [ kids.who ] : [];
+      w.notes = kids.mode === "night" ? "Added from bedtime mode" : "Added from the reading space";
+      wishlist.unshift(w);
+      note((k ? k.name + " added " : "Added ") + c.title + " to the wishlist");
+    }
+    renderKidsBrowse();
+    renderAll();
   }
   var BADGES = [ {
     id: "s3", kind: "streak", n: 3, tier: "bronze", title: "On a roll", text: "3 nights in a row"
@@ -6031,6 +6786,9 @@ const BookField = (() => {
       return;
     }
     var a = e.target.closest ? e.target.closest("a[href]") : null;
+    if (a && a.hasAttribute("data-trip") && setting("kidsReads") !== false) {
+      return;
+    }
     if (a && /^(https?:|mailto:|tel:)/i.test(a.href) && a.origin !== window.location.origin) {
       e.preventDefault();
       e.stopPropagation();
@@ -6117,6 +6875,19 @@ const BookField = (() => {
       var bb = byId(books, hit.getAttribute("data-kbrowse"));
       if (bb) {
         kidsToggleWish(bb);
+      }
+      return;
+    }
+    hit = e.target.closest ? e.target.closest("[data-kcat]") : null;
+    if (hit) {
+      var kc = catalogueItem(hit.getAttribute("data-kcat"));
+      if (kc) {
+        var kcId = kc.id;
+        kidsToggleCat(kc);
+        var again = $("kidsMoreList").querySelector('[data-kcat="' + kcId + '"]');
+        if (again) {
+          again.focus();
+        }
       }
       return;
     }
@@ -6299,26 +7070,12 @@ const BookField = (() => {
       } ]
     };
   }
-  function demoShelf() {
-    return {
-      parent: {
-        name: "Sarah",
-        email: "",
-        colour: "#0D3B32"
-      },
-      children: demoChildren(),
-      books: demoBooks(),
-      wishlist: demoWishlist(),
-      sessions: demoSessions(),
-      activity: [ {
-        text: "Shelf set up with six books for Harry and Leo",
-        at: Date.now()
-      } ]
-    };
-  }
   function install(shelf) {
     parent = shelf.parent;
     children = shelf.children;
+    children.forEach(function(k) {
+      delete k.age;
+    });
     books = shelf.books;
     wishlist = shelf.wishlist;
     sessions = shelf.sessions;
@@ -6613,7 +7370,6 @@ const BookField = (() => {
     }, 60);
   }
   function sharePaint(rec) {
-    var n = rec.items.length;
     $("shareLink").value = shareUrl(rec.token);
     $("shareScopeNote").hidden = rec.scope !== "invite";
     $("shareCreated").textContent = shareLongDate(rec.created) + ".";
@@ -6632,7 +7388,7 @@ const BookField = (() => {
     sharePaint(rec);
     shareRow();
     if (!saved) {
-      shareSaid("This browser is blocking local storage, so this link will not open " + "for anyone. Turn storage on for this site and try again.");
+      shareSaid("The link was not saved, so it will not open for anyone yet. " + "Check your internet connection and try again.");
     }
     shareTrigger = $("shareWishTop");
     openDialog(shareDialog);
@@ -6665,7 +7421,7 @@ const BookField = (() => {
     var ok = shareSave(rec);
     sharePaint(rec);
     if (!ok) {
-      shareSaid("That change could not be saved — this browser is blocking local storage.");
+      shareSaid("That could not be saved. Check your internet connection and try again.");
     } else if (msg) {
       shareSaid(msg);
     }
@@ -6998,17 +7754,8 @@ const BookField = (() => {
   function esc(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
-  function svg(paths, size) {
-    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 20 20" fill="none" ' + 'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" ' + 'stroke-linejoin="round" aria-hidden="true">' + paths + "</svg>";
-  }
   function initial(name) {
     return (String(name).trim().charAt(0) || "?").toUpperCase();
-  }
-  function kidAvatar(k, cls) {
-    if (window.PTGAvatar) {
-      return window.PTGAvatar.markup(k.id, k.name, k.colour, cls || "avatar");
-    }
-    return '<span class="' + (cls || "avatar") + '" style="background:' + esc(k.colour) + '">' + esc(initial(k.name)) + "</span>";
   }
   function catName(id) {
     for (var i = 0; i < CATEGORIES.length; i++) {
@@ -7244,10 +7991,10 @@ const BookField = (() => {
       if (state.postState && p.state !== state.postState) {
         return false;
       }
-      if (state.postCat && p.category !== state.postCat) {
+      if (state.postCat && p.category && p.category !== state.postCat) {
         return false;
       }
-      if (state.postAge && p.ages !== state.postAge) {
+      if (state.postAge && p.ages && p.ages !== state.postAge) {
         return false;
       }
       return matchesQ(p.title + " " + p.body);
@@ -7328,7 +8075,12 @@ const BookField = (() => {
     }).sort(function(a, b) {
       return a.at - b.at;
     }).slice(0, 3).forEach(function(s) {
-      triage.push('<article class="triage" style="--accent:#E9A13B">' + '<span class="kind">Waiting since ' + esc(since(s.at).toLowerCase()) + "</span>" + '<span class="t">' + esc(s.title) + "</span>" + '<span class="m">' + esc(catName(s.category)) + " · Ages " + esc(s.ages) + " · from " + esc(s.from) + "</span>" + '<div class="acts">' + '<button class="btn btn--primary btn--sm" type="button" data-approve="' + esc(s.id) + '">Approve</button>' + '<button class="btn btn--ghost btn--sm" type="button" data-reject="' + esc(s.id) + '">Reject</button>' + "</div>" + "</article>");
+      triage.push('<article class="triage" style="--accent:#E9A13B">' + '<span class="kind">Waiting since ' + esc(since(s.at).toLowerCase()) + "</span>" + '<span class="t">' + esc(s.title) + "</span>" + '<span class="m">' + esc(s.category ? catName(s.category) : "All categories") + " · " + esc(s.ages ? "Ages " + s.ages : "All ages") + " · from " + esc(s.from) + "</span>" + '<div class="acts">' + '<button class="btn btn--primary btn--sm" type="button" data-approve="' + esc(s.id) + '">Approve</button>' + '<button class="btn btn--ghost btn--sm" type="button" data-reject="' + esc(s.id) + '">Reject</button>' + "</div>" + "</article>");
+    });
+    (window.PTGSupport && window.PTGSupport.list ? window.PTGSupport.list() : []).filter(function(t) {
+      return t.state === "open";
+    }).slice(0, 2).forEach(function(t) {
+      triage.push('<article class="triage" style="--accent:#0A6280">' + '<span class="kind">' + (t.source === "public" ? "Contact form message" : "Problem report") + " · " + esc(since(t.at).toLowerCase()) + "</span>" + '<span class="t">' + esc(t.area || "Support") + " · " + esc(t.ref || "") + "</span>" + '<span class="m">' + esc(String(t.body || "").slice(0, 120)) + "</span>" + '<div class="acts">' + '<button class="btn btn--primary btn--sm" type="button" data-admin-go="support">Open support</button>' + "</div>" + "</article>");
     });
     accounts().filter(function(a) {
       return a.status === "suspended";
@@ -7362,7 +8114,7 @@ const BookField = (() => {
       var s = shelfFor(a.email);
       var suspended = a.status === "suspended";
       var isMe = String(a.email).toLowerCase() === String(me()).toLowerCase();
-      return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Send reset</button>' + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + "</span>" + "</td>" + "</tr>";
+      return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Send reset</button>' + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + (isMe || a.role === "admin" ? "" : '<button class="btn btn--quiet btn--sm" type="button" data-delete-account="' + esc(a.email) + '">Delete<span class="vh"> the account ' + esc(a.email) + "</span></button>") + "</span>" + "</td>" + "</tr>";
     }).join("") + moreRow("acc", list.length, every.length, "tr");
     $("admEmptyAcc").classList.toggle("is-on", !every.length);
     $("admAccTable").parentNode.hidden = !list.length;
@@ -7380,7 +8132,7 @@ const BookField = (() => {
       } else if (s.state === "approved") {
         verdict = '<p class="verdict"><b>Approved</b> by ' + esc(s.decidedBy) + " " + esc(since(s.decidedAt).toLowerCase()) + ". It is live on family dashboards.</p>";
       }
-      return '<article class="sub-card" data-state="' + esc(s.state) + '">' + "<div>" + '<div class="head">' + '<span class="pill pill--' + esc(s.state) + '">' + (s.state === "pending" ? "Waiting" : s.state === "approved" ? "Approved" : "Rejected") + "</span>" + "<h3>" + esc(s.title) + "</h3>" + "</div>" + '<p class="body">' + esc(s.body) + "</p>" + '<p class="meta">' + esc(catName(s.category)) + " · Ages " + esc(s.ages) + " · from " + esc(s.from) + " · " + esc(since(s.at)) + (isHttpUrl(s.link) ? ' · <a href="' + esc(s.link) + '" rel="noopener nofollow" target="_blank">' + esc(s.link) + "</a>" : "") + "</p>" + verdict + "</div>" + '<div class="acts">' + acts + "</div>" + "</article>";
+      return '<article class="sub-card" data-state="' + esc(s.state) + '">' + "<div>" + '<div class="head">' + '<span class="pill pill--' + esc(s.state) + '">' + (s.state === "pending" ? "Waiting" : s.state === "approved" ? "Approved" : "Rejected") + "</span>" + "<h3>" + esc(s.title) + "</h3>" + "</div>" + '<p class="body">' + esc(s.body) + "</p>" + '<p class="meta">' + esc(s.category ? catName(s.category) : "All categories") + " · " + esc(s.ages ? "Ages " + s.ages : "All ages") + " · from " + esc(s.from) + " · " + esc(since(s.at)) + (isHttpUrl(s.link) ? ' · <a href="' + esc(s.link) + '" rel="noopener nofollow" target="_blank">' + esc(s.link) + "</a>" : "") + "</p>" + verdict + "</div>" + '<div class="acts">' + acts + "</div>" + "</article>";
     }).join("") + moreRow("mod", list.length, every.length, "div");
     $("admEmptyMod").classList.toggle("is-on", !list.length);
     $("admModList").hidden = !list.length;
@@ -7390,7 +8142,7 @@ const BookField = (() => {
     var filtered = !!(state.postState || state.postCat || state.postAge || state.q);
     $("admPostCount").textContent = list.length + (list.length === 1 ? " post" : " posts") + (filtered ? " match your filters" : "");
     $("admPostList").innerHTML = list.map(function(p) {
-      return '<article class="post-card">' + '<div class="head">' + '<span class="pill pill--' + esc(p.state) + '">' + (p.state === "published" ? "Published" : "Draft") + "</span>" + "<h3>" + esc(p.title) + "</h3>" + "</div>" + '<p class="body">' + esc(p.body) + "</p>" + '<p class="meta">' + esc(catName(p.category)) + " · Ages " + esc(p.ages) + " · " + esc(since(p.at)) + (isHttpUrl(p.link) ? ' · <a href="' + esc(p.link) + '" rel="noopener nofollow" target="_blank">Linked resource</a>' : "") + "</p>" + '<div class="acts">' + '<button class="btn btn--' + (p.state === "published" ? "ghost" : "primary") + ' btn--sm" type="button" data-' + (p.state === "published" ? "unpublish" : "publish") + '="' + esc(p.id) + '">' + (p.state === "published" ? "Unpublish" : "Publish") + "</button>" + '<button class="btn btn--quiet btn--sm" type="button" data-edit-post="' + esc(p.id) + '">Edit</button>' + "</div>" + "</article>";
+      return '<article class="post-card">' + '<div class="head">' + '<span class="pill pill--' + esc(p.state) + '">' + (p.state === "published" ? "Published" : "Draft") + "</span>" + "<h3>" + esc(p.title) + "</h3>" + "</div>" + '<p class="body">' + esc(p.body) + "</p>" + '<p class="meta">' + esc(postCatName(p)) + " · " + esc(agesText(p.ages)) + " · " + esc(since(p.at)) + (isHttpUrl(p.link) ? ' · <a href="' + esc(p.link) + '" rel="noopener nofollow" target="_blank">Linked resource</a>' : "") + "</p>" + '<div class="acts">' + '<button class="btn btn--' + (p.state === "published" ? "ghost" : "primary") + ' btn--sm" type="button" data-' + (p.state === "published" ? "unpublish" : "publish") + '="' + esc(p.id) + '">' + (p.state === "published" ? "Unpublish" : "Publish") + "</button>" + '<button class="btn btn--quiet btn--sm" type="button" data-edit-post="' + esc(p.id) + '">Edit</button>' + "</div>" + "</article>";
     }).join("");
     $("admEmptyPost").classList.toggle("is-on", !list.length);
     $("admPostList").hidden = !list.length;
@@ -7473,12 +8225,13 @@ const BookField = (() => {
     renderPosts();
     renderLog();
   }
-  var TABS = [ "overview", "accounts", "moderation", "resources", "log", "settings" ];
-  var NAV_TABS = [ "overview", "accounts", "moderation", "resources", "log" ];
+  var TABS = [ "overview", "accounts", "moderation", "support", "resources", "log", "settings" ];
+  var NAV_TABS = [ "overview", "accounts", "moderation", "support", "resources", "log" ];
   var TAB_TITLES = {
     overview: "Overview",
     accounts: "Accounts",
     moderation: "Moderation queue",
+    support: "Support messages",
     resources: "Posts & resources",
     log: "Audit log",
     settings: "Settings"
@@ -7487,12 +8240,13 @@ const BookField = (() => {
     overview: "h-adm-overview",
     accounts: "h-adm-accounts",
     moderation: "h-adm-moderation",
+    support: "h-adm-support",
     resources: "h-adm-resources",
     log: "h-adm-log",
     settings: "h-adm-settings"
   };
   function swapPanels(change, after) {
-    var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("ptg-reduce");
+    var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("ptg-reduce") || document.documentElement.classList.contains("ptg-instant");
     if (!document.startViewTransition || calm || document.hidden) {
       change();
       after();
@@ -7645,16 +8399,83 @@ const BookField = (() => {
   fillSelect($("admPostCat"), catOptions(), "All categories");
   fillSelect($("admPostAge"), ageOptions(), "Any age");
   var postDialog = $("postDialog"), postForm = $("postForm");
+  var MAIN_PROJECT = "reading-for-pleasure";
+  function projectsAll() {
+    try {
+      var v = JSON.parse(window.PTGStore.getItem("ptg-projects-v1"));
+      return v && Array.isArray(v.items) ? v.items.slice().sort(function(a, b) {
+        return (Number(a.sort) || 0) - (Number(b.sort) || 0);
+      }) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  function projectOf(slug) {
+    return projectsAll().filter(function(p) {
+      return p.slug === slug;
+    })[0] || null;
+  }
+  function postProject(p) {
+    return p && p.project || MAIN_PROJECT;
+  }
+  function postCatName(p) {
+    var slug = postProject(p);
+    if (slug === MAIN_PROJECT) {
+      return p.category ? catName(p.category) : "All categories";
+    }
+    var proj = projectOf(slug);
+    var hit = (proj && proj.categories || []).filter(function(c) {
+      return c.id === p.category;
+    })[0];
+    return (proj ? proj.title : slug) + " · " + (hit ? hit.name : "All categories");
+  }
+  function agesText(a) {
+    return a ? "Ages " + a : "All ages";
+  }
+  function fillPostCats(slug, want) {
+    if (slug === MAIN_PROJECT) {
+      fillSelect($("pCat"), catOptions(), "All categories");
+      $("pCat").value = want && catName(want) ? want : "";
+      return;
+    }
+    var proj = projectOf(slug);
+    fillSelect($("pCat"), (proj && proj.categories || []).map(function(c) {
+      return { value: c.id, label: c.name };
+    }), "All categories");
+    $("pCat").value = want || "";
+    if ($("pCat").value !== (want || "")) {
+      $("pCat").value = "";
+    }
+  }
+  function fillPostProjects(want) {
+    var list = projectsAll();
+    if (!list.some(function(p) {
+      return p.slug === MAIN_PROJECT;
+    })) {
+      list.unshift({ slug: MAIN_PROJECT, title: "Reading for pleasure", status: "open" });
+    }
+    fillSelect($("pProject"), list.map(function(p) {
+      return { value: p.slug, label: p.title + (p.status === "hidden" ? " (hidden)" : p.status === "soon" ? " (coming soon)" : "") };
+    }));
+    $("pProject").value = want;
+    if ($("pProject").value !== want) {
+      $("pProject").value = MAIN_PROJECT;
+    }
+    $("pProject").closest(".f").hidden = list.length < 2 && want === MAIN_PROJECT;
+  }
+  $("pProject").addEventListener("change", function() {
+    fillPostCats($("pProject").value, "");
+  });
   function openPost(p) {
     state.editingPost = p || null;
-    fillSelect($("pCat"), catOptions());
-    fillSelect($("pAge"), ageOptions());
+    fillPostProjects(postProject(p));
+    fillPostCats(postProject(p), p ? p.category : "");
+    fillSelect($("pAge"), ageOptions(), "All ages");
     $("postDlgTitle").textContent = p ? "Edit post" : "New post";
     $("postSave").textContent = p ? "Save changes" : "Create post";
     $("postDelete").hidden = !p;
     $("pTitle").value = p ? p.title : "";
-    $("pCat").value = p ? p.category : CATEGORIES[0].id;
-    $("pAge").value = p ? p.ages : AGE_BANDS[1];
+    $("pAge").value = p && p.ages ? p.ages : "";
     $("pBody").value = p ? p.body : "";
     $("pLink").value = p ? p.link || "" : "";
     var wanted = p ? p.state : "draft";
@@ -7708,7 +8529,8 @@ const BookField = (() => {
       category: $("pCat").value,
       ages: $("pAge").value,
       link: link,
-      state: wantState
+      state: wantState,
+      project: $("pProject").value || MAIN_PROJECT
     };
     if (state.editingPost) {
       var before = state.editingPost.state;
@@ -7956,6 +8778,11 @@ const BookField = (() => {
       say("Restored " + er);
       return;
     }
+    hit = t.closest("[data-delete-account]");
+    if (hit) {
+      openAccountDelete(hit.getAttribute("data-delete-account"));
+      return;
+    }
     hit = t.closest("[data-reset]");
     if (hit) {
       var ez = hit.getAttribute("data-reset");
@@ -7971,6 +8798,52 @@ const BookField = (() => {
       });
       return;
     }
+  });
+  var accountDeleteDialog = $("accountDeleteDialog"), accountDeleting = "";
+  function openAccountDelete(email) {
+    accountDeleting = email;
+    $("adelWho").textContent = email;
+    $("adelEmail").value = "";
+    $("adelEmail").removeAttribute("aria-invalid");
+    $("adelEmailErr").classList.remove("is-on");
+    $("adelProblem").classList.remove("is-on");
+    $("adelProblem").textContent = "";
+    $("adelSave").disabled = false;
+    $("adelSave").textContent = "Delete account";
+    openDialog(accountDeleteDialog);
+    window.setTimeout(function() {
+      $("adelEmail").focus();
+    }, 40);
+  }
+  $("accountDeleteForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var typed = $("adelEmail").value.trim().toLowerCase();
+    if (!accountDeleting || typed !== accountDeleting.toLowerCase()) {
+      $("adelEmailErr").classList.add("is-on");
+      $("adelEmail").setAttribute("aria-invalid", "true");
+      $("adelEmail").focus();
+      return;
+    }
+    $("adelEmailErr").classList.remove("is-on");
+    $("adelEmail").removeAttribute("aria-invalid");
+    if (!window.PTGBackend || !window.PTGBackend.adminDeleteAccount) {
+      return;
+    }
+    var email = accountDeleting;
+    $("adelSave").disabled = true;
+    $("adelSave").textContent = "Deleting…";
+    window.PTGBackend.adminDeleteAccount(email).then(function() {
+      accountDeleting = "";
+      closeDialog(accountDeleteDialog);
+      renderAll();
+      $("h-adm-accounts").focus();
+      say("Deleted the account " + email + " and everything in it");
+    }, function(err) {
+      $("adelSave").disabled = false;
+      $("adelSave").textContent = "Delete account";
+      $("adelProblem").textContent = err && err.message ? err.message : "The account could not be deleted. Try again.";
+      $("adelProblem").classList.add("is-on");
+    });
   });
   var searchTimer = null;
   $("admSearch").addEventListener("input", function() {
@@ -8160,6 +9033,11 @@ const BookField = (() => {
       }
     });
   }
+  window.addEventListener("ptg:contact", function() {
+    if (started && !document.getElementById("page-admin").hidden) {
+      renderOverview();
+    }
+  });
   window.PTGAdmin = {
     open: function(hash) {
       var name = String(hash || "").replace(/^#\/?/, "").toLowerCase().split("/")[0];
@@ -8198,7 +9076,7 @@ const BookField = (() => {
     },
     publishedPosts: function() {
       return posts.filter(function(p) {
-        return p.state === "published";
+        return p.state === "published" && postProject(p) === MAIN_PROJECT;
       });
     }
   };
@@ -8308,7 +9186,8 @@ const BookField = (() => {
     code: 1,
     done: 1,
     card: 1,
-    newpass: 1
+    newpass: 1,
+    "finish-setup": 1
   };
   var APP = {
     app: 1,
@@ -8324,6 +9203,7 @@ const BookField = (() => {
     overview: 1,
     accounts: 1,
     moderation: 1,
+    support: 1,
     resources: 1,
     log: 1,
     "admin-main": 1
@@ -8338,6 +9218,7 @@ const BookField = (() => {
     "view-forgot": "Reset your password",
     "view-sent": "Check your inbox",
     "view-code": "Enter your one-time code",
+    "view-welcome": "Finish setting up your account",
     "view-genres": "What do they like to read?",
     "view-done": "Signed in",
     "view-newpass": "Choose a new password"
@@ -8409,6 +9290,7 @@ const BookField = (() => {
     window.scrollTo(0, landingScroll);
   }
   function show(page) {
+    root.classList.remove("ptg-loading");
     if (page === showing) {
       if (page === "share" && window.PTGShareView) {
         window.PTGShareView.open(shareToken());
@@ -8498,7 +9380,51 @@ const BookField = (() => {
     queryView = null;
     window.history.replaceState(null, "", "#" + name);
   }, true);
+  var RETURN_KEY = "ptg-return-to";
+  function safeRoute(value, role) {
+    var r = String(value || "").replace(/^#\/?/, "").toLowerCase();
+    if (!/^[a-z0-9-]{1,40}(\/[a-z0-9-]{1,40})?$/.test(r)) {
+      return "";
+    }
+    var first = r.split("/")[0];
+    if (r.indexOf("/") !== -1 && first !== "settings") {
+      return "";
+    }
+    var ok = role === "admin" ? ADMIN[first] || SHARED[first] : role === "parent" ? APP[first] || SHARED[first] : APP[first] || ADMIN[first] || SHARED[first];
+    return ok ? r : "";
+  }
+  window.PTGReturnTo = {
+    take: function(role) {
+      var saved = "";
+      try {
+        saved = window.sessionStorage.getItem(RETURN_KEY) || "";
+        window.sessionStorage.removeItem(RETURN_KEY);
+      } catch (e) {}
+      var r = safeRoute(saved, role);
+      return r ? "#" + r : "";
+    }
+  };
+  function rememberReturn(raw) {
+    var r = safeRoute(raw);
+    if (!r) {
+      return;
+    }
+    try {
+      window.sessionStorage.setItem(RETURN_KEY, r);
+    } catch (e) {}
+  }
+  (function redirectParam() {
+    var m = /[?&]redirect=([^&#]*)/.exec(window.location.search || "");
+    var r = "";
+    try {
+      r = m ? safeRoute(decodeURIComponent(m[1])) : "";
+    } catch (e) {}
+    if (r && !window.location.hash && window.history && window.history.replaceState) {
+      window.history.replaceState(null, "", window.location.pathname + "#" + r);
+    }
+  })();
   function bounceToSignin(message) {
+    rememberReturn(window.location.hash);
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, "", "#signin");
       queryView = null;
@@ -8513,12 +9439,25 @@ const BookField = (() => {
   function route() {
     var h = hashName();
     var role = window.PTGSession ? window.PTGSession.role() : null;
-    // A saved sign-in is still being restored: wait for it ("ptg:auth").
-    if (window.PTGBackend && window.PTGBackend.restoring && (APP[h] || ADMIN[h] || SHARED[h])) {
+    if (window.PTGBackend && window.PTGBackend.restoring && (APP[h] || ADMIN[h] || SHARED[h] || root.classList.contains("ptg-loading"))) {
       return;
     }
     if (SHARE_RE.test(h)) {
       show("share");
+      return;
+    }
+    var B = window.PTGBackend;
+    var needs = (APP[h] || SHARED[h]) && B && B.setupNeeds ? B.setupNeeds() : null;
+    if (needs) {
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", "#finish-setup");
+      }
+      queryView = null;
+      show("auth");
+      if (window.PTGStartSetup) {
+        var who = B.me();
+        window.PTGStartSetup({ email: who.email, name: who.profile && who.profile.display_name || "", needs: needs });
+      }
       return;
     }
     if (SHARED[h]) {

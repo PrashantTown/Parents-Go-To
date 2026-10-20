@@ -47,7 +47,6 @@ self.addEventListener("push", function(event) {
       payload.body = event.data.text();
     }
   }
-  // An open, visible tab already shows the alert itself.
   event.waitUntil(self.clients.matchAll({
     type: "window",
     includeUncontrolled: true

@@ -47,22 +47,6 @@
     }
     window.dispatchEvent(ev);
   }
-  function token() {
-    var abc = "abcdefghijklmnopqrstuvwxyz0123456789";
-    var out = "", i;
-    if (window.crypto && window.crypto.getRandomValues) {
-      var arr = new window.Uint8Array(8);
-      window.crypto.getRandomValues(arr);
-      for (i = 0; i < 8; i++) {
-        out += abc.charAt(arr[i] % abc.length);
-      }
-    } else {
-      for (i = 0; i < 8; i++) {
-        out += abc.charAt(Math.floor(Math.random() * abc.length));
-      }
-    }
-    return out;
-  }
   var Suggest = {
     list: function() {
       return read();

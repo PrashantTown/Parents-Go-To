@@ -467,7 +467,7 @@
     swatchBox: "setColour",
     swatchName: "setColourPick",
     defaultColour: "#0D3B32",
-    minPassword: 8,
+    minPassword: 10,
     toggles: {
       setBigText: "bigText",
       setReduceMotion: "reduceMotion",
@@ -478,6 +478,7 @@
       setAgeFilter: "ageFilter",
       setHideNames: "hideNames",
       setBlockLinks: "blockLinks",
+      setKidsReads: "kidsReads",
       setAdminContact: "adminContact",
       setAnalytics: "analytics",
       setDeviceNotes: "deviceNotes",
@@ -884,19 +885,21 @@
       }
       audit("account", "Sign-in email changed", newMail, "was " + oldMail);
       account = newMail;
-      if (window.PTGBackend) {
-        window.PTGBackend.changeEmail(newMail).then(function() {
-          window.setTimeout(function() {
-            say(scope, "We sent a confirmation link to " + newMail + ". The change finishes once you open it.");
-          }, 1200);
-        }, function(err) {
-          window.setTimeout(function() {
-            say(scope, err.message);
-          }, 1200);
-        });
-      }
       return true;
     }
+    window.addEventListener("ptg:email-changed", function(e) {
+      var d = e.detail || {};
+      var S = window.PTGSession;
+      var cur = String(account).toLowerCase();
+      if (!d.from || !d.to || !S || S.role() !== scope.role || cur !== String(d.from).toLowerCase() && cur !== String(d.to).toLowerCase()) {
+        return;
+      }
+      moveAccount(d.from, d.to);
+      persist({ email: d.to });
+      fillDetails();
+      paintAll();
+      say(scope, "Your sign-in email is now " + d.to + ".");
+    });
     if (detailsForm) {
       detailsForm.addEventListener("submit", function(e) {
         e.preventDefault();
@@ -919,14 +922,28 @@
           }
         });
         var newMail = String(patch.email || "");
-        if (newMail && account !== "guest" && newMail.toLowerCase() !== String(account).toLowerCase()) {
-          if (!moveAccount(account, newMail)) {
-            setErr(emailField + "Err", true, "That email already belongs to another account.");
-            markInvalid(emailField, true);
-            $(emailField).focus();
-            say(scope, "That email is already in use.");
+        var mailPending = !!newMail && account !== "guest" && newMail.toLowerCase() !== String(account).toLowerCase();
+        if (mailPending) {
+          patch.email = account;
+          if (!window.PTGBackend) {
+            say(scope, "The site cannot reach its database right now.");
             return;
           }
+          window.PTGBackend.changeEmail(newMail).then(function() {
+            fillDetails();
+            audit("account", "Asked to change sign-in email", account, "to " + newMail);
+            window.setTimeout(function() {
+              say(scope, "We sent a confirmation link to " + newMail + ". Your sign-in email changes once you open it. Until then, keep using " + account + ".");
+            }, 1200);
+          }, function(err) {
+            if (emailField) {
+              setErr(emailField + "Err", true, /already/i.test(err.message) ? "That email already belongs to another account." : err.message);
+              markInvalid(emailField, true);
+            }
+            window.setTimeout(function() {
+              say(scope, err.message);
+            }, 1200);
+          });
         }
         persist(patch);
         var newName = patch.name;
@@ -977,7 +994,7 @@
         }
         var hint = $(pw.hint);
         if (hint) {
-          hint.textContent = newEl.value ? STRENGTH_WORDS[score] : scope.minPassword === 12 ? "At least 12 characters for an administrator. A passphrase of four unrelated words works well." : "At least 8 characters. A short phrase you will remember beats a clever one you will not.";
+          hint.textContent = newEl.value ? STRENGTH_WORDS[score] : scope.minPassword === 12 ? "At least 12 characters for an administrator. A passphrase of four unrelated words works well." : "At least 10 characters. A short phrase you will remember beats a clever one you will not.";
         }
       });
     }
@@ -999,7 +1016,6 @@
         var oldVal = String(($(pw.old) || {}).value || "");
         var newVal = String(($(pw.nw) || {}).value || "");
         var copyVal = String(($(pw.copy) || {}).value || "");
-        var ok = true;
         var ok = true;
         var oldBad = !oldVal;
         setErr(pw.old + "Err", oldBad);
@@ -1037,11 +1053,15 @@
         }
         say(scope, "Checking your current password…");
         window.PTGBackend.verifyPassword(oldVal).then(function(good) {
+          if (good === null) {
+            say(scope, "Your password could not be checked just now. Check your internet connection and try again.");
+            return;
+          }
           if (!good) {
             setErr(pw.old + "Err", true);
             markInvalid(pw.old, true);
             $(pw.old).focus();
-            say(scope, "That is not your current password.");
+            say(scope, window.PTGBackend.hasPassword && !window.PTGBackend.hasPassword() ? "You sign in with Google, so there is no current password yet. Use the option to reset with a code from your email to set one." : "That is not your current password.");
             return;
           }
           return window.PTGBackend.changePassword(newVal).then(function() {
@@ -1087,9 +1107,7 @@
       tries: 0,
       sentTo: ""
     };
-    var RESET_TTL = 10 * 60 * 1e3;
-    var RESET_TRIES = 3;
-    var RESET_HINT = scope.minPassword === 12 ? "At least 12 characters for an administrator. A passphrase of four unrelated words works well." : "At least 8 characters. A short phrase you will remember beats a clever one you will not.";
+    var RESET_HINT = scope.minPassword === 12 ? "At least 12 characters for an administrator. A passphrase of four unrelated words works well." : "At least 10 characters. A short phrase you will remember beats a clever one you will not.";
     function resetStep(n) {
       reset.forms.forEach(function(f, i) {
         if (f) {
@@ -1234,7 +1252,6 @@
         }
         setErr(rp + "ResetCodeErr", false);
         markInvalid(rp + "ResetCode", false);
-        // The code is checked by the server when the new password is saved.
         reset.code = value;
         resetStep(2);
         $(rp + "ResetPass").focus();
@@ -1307,14 +1324,6 @@
         note: "This device · " + d.screen + " · signed in " + (changed ? "and password changed " + since(changed) : "now"),
         now: true
       } ];
-      if (scope.role === "admin") {
-        rows.push({
-          icon: DEVICE_ICON,
-          name: "Console session",
-          note: "One-time code accepted · " + d.zone,
-          now: false
-        });
-      }
       box.innerHTML = rows.map(function(r) {
         return "<li>" + '<span class="dev-ico">' + r.icon + "</span>" + '<span class="dev-what"><b>' + esc(r.name) + "</b><span>" + esc(r.note) + "</span></span>" + (r.now ? '<span class="dev-now">Now</span>' : "") + "</li>";
       }).join("");
@@ -1328,12 +1337,20 @@
           yes: "Sign out other devices",
           danger: true
         }, function() {
-          if (window.PTGBackend) {
-            window.PTGBackend.signOutOthers();
+          if (!window.PTGBackend) {
+            say(scope, "The site cannot reach its database right now.");
+            return;
           }
-          audit("auth", "Signed out of all other sessions", account);
-          renderDevices();
-          say(scope, "Every other session has been signed out.");
+          window.PTGBackend.signOutOthers().then(function(res) {
+            if (res && res.error) {
+              throw res.error;
+            }
+            audit("auth", "Signed out of all other sessions", account);
+            renderDevices();
+            say(scope, "Every other session has been signed out.");
+          }).catch(function() {
+            say(scope, "Other devices could not be signed out just now. Check your connection and try again.");
+          });
         });
       });
     }
@@ -1343,7 +1360,7 @@
         return;
       }
       var d = diagnostics();
-      var rows = [ [ "Version", APP_VERSION + (scope.role === "admin" ? " (console)" : "") ], [ "Signed in as", account === "guest" ? "Not signed in" : account ], [ "Browser", d.browser + " on " + d.platform ], [ "Screen", d.screen + " at " + d.dpr + "×" ], [ "Theme", (window.PTGTheme ? window.PTGTheme.get() : "auto") + " (showing " + d.theme + ")" ], [ "Time zone", d.zone ], [ "Where your data lives", "This browser only — nothing is sent to a server" ] ];
+      var rows = [ [ "Version", APP_VERSION + (scope.role === "admin" ? " (console)" : "") ], [ "Signed in as", account === "guest" ? "Not signed in" : account ], [ "Browser", d.browser + " on " + d.platform ], [ "Screen", d.screen + " at " + d.dpr + "×" ], [ "Theme", (window.PTGTheme ? window.PTGTheme.get() : "auto") + " (showing " + d.theme + ")" ], [ "Time zone", d.zone ], [ "Where your data lives", "With your account, on servers in Australia" ] ];
       box.innerHTML = rows.map(function(r) {
         return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>";
       }).join("");
@@ -1571,7 +1588,7 @@
           }, function() {
             Support.dropShot(ticket.id);
             renderTickets();
-            say(scope, "The report was sent, but this browser would not store the screenshot.");
+            say(scope, "The report was sent, but the screenshot could not be attached.");
           });
         }
         audit("account", "Technical problem reported (" + ticket.ref + ") — " + ticket.area, ticket.from, ticket.severityText);
@@ -1581,7 +1598,7 @@
             tone: ticket.severity === "high" ? "alert" : "info",
             title: "New problem report — " + ticket.ref,
             body: ticket.area + ". Reported by " + ticket.from + "." + (ticket.shot ? " Screenshot attached." : ""),
-            go: "settings",
+            go: "support",
             tag: "report-" + ticket.id
           });
         }
@@ -1691,8 +1708,9 @@
         updateReportCounts();
       });
     }
-    if (scope.role === "admin") {
-      panel.addEventListener("click", function(e) {
+    var deskPanel = scope.role === "admin" ? $("admpanel-support") || panel : null;
+    if (deskPanel) {
+      deskPanel.addEventListener("click", function(e) {
         var t = e.target.closest ? e.target : null;
         if (!t) {
           return;
@@ -1700,7 +1718,7 @@
         var chip = t.closest("[data-rep-filter]");
         if (chip) {
           reportFilter = chip.getAttribute("data-rep-filter");
-          var chips = panel.querySelectorAll("[data-rep-filter]");
+          var chips = deskPanel.querySelectorAll("[data-rep-filter]");
           for (var i = 0; i < chips.length; i++) {
             chips[i].setAttribute("aria-pressed", chips[i] === chip ? "true" : "false");
           }
@@ -2033,7 +2051,6 @@
       }
     }
     if (rail) {
-      rail.setAttribute("aria-orientation", "vertical");
       for (var r = 0; r < railLinks.length; r++) {
         var lk = railLinks[r];
         var pid = lk.getAttribute("data-set-jump");
@@ -2470,7 +2487,6 @@
         attributes: true,
         attributeFilter: [ "hidden" ]
       });
-      var page = $(scope.pageId);
       if (page) {
         var watchPage = new MutationObserver(function() {
           if (!page.hidden) {

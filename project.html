@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Project &mdash; Parents Go To</title>
+<meta name="description" content="A Parents Go To project: trusted resources for families, checked before they are shared.">
+<link rel="icon" type="image/svg+xml" href="parents-go-to-mark.svg">
+<meta name="theme-color" content="#EDF1EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101B18" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="reveal.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap topbar__inner">
+    <a class="brand" href="index.html">
+      <img class="brand__mark" src="parents-go-to-mark.svg" alt="" width="33" height="44">
+      <span class="brand__text">Parents Go To</span>
+    </a>
+    <button class="navtoggle" id="navtoggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="reading-for-pleasure.html">Reading for pleasure</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="soon proj">
+    <div class="narrow soon__inner">
+      <p class="crumb"><a href="index.html">Home</a> &rsaquo; <span id="projCrumb">Project</span></p>
+      <span class="soon__logo" id="projLogo" hidden></span>
+      <p class="feature__tag" id="projTag" hidden></p>
+      <h1 id="projTitle">Loading&hellip;</h1>
+      <p class="soon__lede" id="projBlurb"></p>
+      <div class="actions centre soon__actions" id="projActs"></div>
+    </div>
+  </section>
+
+  <section class="section proj-res" id="projRes" aria-labelledby="projResH" hidden>
+    <div class="wrap">
+      <h2 class="proj-res__h" id="projResH">Resources</h2>
+      <p class="proj-res__sub">Guides and links checked by our team before they are shared.</p>
+      <div class="proj-tools">
+        <div class="proj-tool">
+          <label for="projCat">Category</label>
+          <select id="projCat"><option value="">All categories</option></select>
+        </div>
+        <div class="proj-tool">
+          <label for="projAge">Age band</label>
+          <select id="projAge"><option value="">Any age</option></select>
+        </div>
+      </div>
+      <p class="proj-count" id="projCount" role="status" aria-live="polite"></p>
+      <div class="proj-grid" id="projGrid"></div>
+      <p class="proj-empty" id="projEmpty" hidden></p>
+    </div>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <div class="wrap">
+    <div class="footgrid">
+      <div>
+        <p class="footbrand">
+          <img class="brand__mark" src="parents-go-to-mark.svg" alt="" width="30" height="40">
+          <span>Parents Go To</span>
+        </p>
+        <p>A trusted place to find, save and share what suits your children.</p>
+      </div>
+      <div>
+        <h4>Reading for pleasure</h4>
+        <ul>
+          <li><a href="reading-for-pleasure.html">Open the app</a></li>
+          <li><a href="reading-for-pleasure.html#included">What is included</a></li>
+          <li><a href="services.html#community">Share with other parents</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Parents Go To</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="about.html#checks">How we check what is shared</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="contact.html#questions">Common questions</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get in touch</h4>
+        <ul>
+          <li><a href="mailto:parentsgoto@gmail.com">parentsgoto@gmail.com</a></li>
+          <li>Monday to Friday, 9am to 5pm</li>
+          <li><a href="contact.html">Send us a message</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footbase">
+      <span>&copy; <span class="year">2026</span> Parents Go To. Every resource is reviewed before it is shared.</span>
+      <span>All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="site.js"></script>
+<script src="back.js"></script>
+<script src="store.js"></script>
+<script src="project.js"></script>
+
+</body>
+</html>

@@ -6,7 +6,6 @@
   var CHANNEL = "ptg-board";
   var BODY_MIN = 10;
   var BODY_MAX = 600;
-  var AGE_BANDS = [ "0–3", "3–5", "5–7", "7–9", "9–12", "12+" ];
   function verdict(row, text, link) {
     var M = window.PTGModeration;
     if ((M ? M.verdict(text, link) : "pending") === "approved") {
@@ -56,22 +55,6 @@
       ev.initEvent(EVENT, false, false);
     }
     window.dispatchEvent(ev);
-  }
-  function token() {
-    var abc = "abcdefghijklmnopqrstuvwxyz0123456789";
-    var out = "", i;
-    if (window.crypto && window.crypto.getRandomValues) {
-      var arr = new window.Uint8Array(8);
-      window.crypto.getRandomValues(arr);
-      for (i = 0; i < 8; i++) {
-        out += abc.charAt(arr[i] % abc.length);
-      }
-    } else {
-      for (i = 0; i < 8; i++) {
-        out += abc.charAt(Math.floor(Math.random() * abc.length));
-      }
-    }
-    return out;
   }
   var bc = null;
   try {
@@ -484,7 +467,7 @@
       }
       var row = submitPost(bodyVal, ages);
       if (!row) {
-        say("This browser is blocking local storage, so your message was not saved. " + "Nothing has been kept and nobody will see it.");
+        say("Your message was not saved. Check your internet connection and try again. " + "Nothing has been kept and nobody will see it.");
         return;
       }
       if (box) {
@@ -616,7 +599,7 @@
       parentId: id
     });
     if (!row) {
-      say("This browser is blocking local storage, so your reply was not saved.");
+      say("Your reply was not saved. Check your internet connection and try again.");
       return;
     }
     audit("Replied on the message board", row.state === "approved" ? "Published straight away" : "Held for review");
@@ -678,7 +661,7 @@
       });
     }
     if (!saved) {
-      say("This browser would not store the report. Nothing has been sent.");
+      say("The report was not saved. Check your internet connection and try again.");
       return;
     }
     audit("Reported a message board post", "Reference " + ticket.ref);
@@ -934,7 +917,7 @@
     }
     var by = me();
     if (!Board.decide(id, state, reason, by)) {
-      admSay("This browser would not store that decision. Nothing has changed.");
+      admSay("That decision was not saved. Nothing has changed.");
       return;
     }
     var word = state === "published" ? "Published" : state === "removed" ? "Removed" : "Put back in the queue";

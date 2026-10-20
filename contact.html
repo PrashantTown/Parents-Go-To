@@ -2,9 +2,10 @@
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Contact &mdash; Parents Go To</title>
-<meta name="description" content="Contact Parents Go To: ask a question, suggest a session, list your own service, or report a problem with a listing.">
+<meta name="description" content="Contact Parents Go To: ask a question, suggest a book or resource, or report a problem with something on the site.">
 <link rel="icon" type="image/svg+xml" href="parents-go-to-mark.svg">
 <meta name="theme-color" content="#EDF1EC" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101B18" media="(prefers-color-scheme: dark)">
@@ -42,8 +43,8 @@
     <div class="wrap">
       <p class="crumb"><a href="index.html">Home</a> &rsaquo; Contact</p>
       <h1>Get in touch</h1>
-      <p>Tell us what your family needs, suggest a service that belongs on here, or let us
-         know if something on the site is not working. A real person reads every message.</p>
+      <p>Ask a question, suggest a book or resource that belongs on here, or let us know if
+         something on the site is not working. A real person reads every message.</p>
     </div>
   </section>
 
@@ -61,7 +62,7 @@
               </span>
               <span>
                 <b>Email</b>
-                <a href="mailto:tsander2@usc.edu.au">tsander2@usc.edu.au</a>
+                <a href="mailto:parentsgoto@gmail.com">parentsgoto@gmail.com</a>
               </span>
             </li>
             <li>
@@ -71,15 +72,6 @@
               <span>
                 <b>Phone</b>
                 <a href="tel:0754565633">07 5456 5633</a>
-              </span>
-            </li>
-            <li>
-              <span class="ico" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5.4" y="2.2" width="9.2" height="15.6" rx="1.8"/><path d="M8.6 15h2.8"/></svg>
-              </span>
-              <span>
-                <b>Mobile</b>
-                <a href="tel:0407991974">0407 991 974</a>
               </span>
             </li>
             <li>
@@ -123,9 +115,9 @@
             <label for="cf-topic">What is it about?</label>
             <select id="cf-topic">
               <option>A question about Reading for pleasure</option>
-              <option>Suggesting a session or resource to list</option>
-              <option>Listing my own service</option>
-              <option>Reporting a problem with a listing</option>
+              <option>Suggesting a book or resource</option>
+              <option>A question about my account</option>
+              <option>Reporting a problem with a resource or post</option>
               <option>Accessibility barrier</option>
               <option>Something else</option>
             </select>
@@ -158,22 +150,30 @@
 
       <details>
         <summary>Who sees my family&rsquo;s details?</summary>
-        <p>Only the provider you chose to book with, and only what they need to run the
-           session. Nothing is shared with advertisers, and you can delete your profile at any
-           time.</p>
+        <p>Only you, and the family members you invite to your shelf. Children&rsquo;s profiles
+           are never public, nothing is shared with advertisers, and you can delete your account
+           at any time.</p>
       </details>
 
       <details>
-        <summary>How do I list my service?</summary>
-        <p>Use the form above and pick &ldquo;Listing my own service&rdquo;. We will ask for
-           your insurance certificate, staff clearances and an address before the listing
-           goes live &mdash; see <a href="about.html#checks">how we check providers</a>.</p>
+        <summary>How do I suggest a book or resource?</summary>
+        <p>Signed-in parents can use the suggestion board inside Reading for pleasure.
+           Otherwise, use the form above and pick &ldquo;Suggesting a book or resource&rdquo;.
+           A moderator checks every suggestion before it is shared &mdash; see
+           <a href="about.html#checks">how we check what is shared</a>.</p>
       </details>
 
       <details>
-        <summary>Something on a listing is wrong. What now?</summary>
-        <p>Tell us through the form above. The report goes to a moderator rather than to the
-           provider, and we will pause the listing while we look into it.</p>
+        <summary>Can my child have their own account?</summary>
+        <p>No. Parents Go To is a website for parents. Children can use parts of a project,
+           such as bedtime mode, only through a parent&rsquo;s account and with the parent in
+           charge.</p>
+      </details>
+
+      <details>
+        <summary>Something on the site is wrong or unsuitable. What now?</summary>
+        <p>Tell us through the form above. The report goes to a moderator, who can take the
+           resource or post down while they look into it.</p>
       </details>
 
       <details>
@@ -194,21 +194,21 @@
           <img class="brand__mark" src="parents-go-to-mark.svg" alt="" width="30" height="40">
           <span>Parents Go To</span>
         </p>
-        <p>One place to find, save and share the reading your family does.</p>
+        <p>A trusted place to find, save and share what suits your children.</p>
       </div>
       <div>
         <h4>Reading for pleasure</h4>
         <ul>
           <li><a href="reading-for-pleasure.html">Open the app</a></li>
           <li><a href="reading-for-pleasure.html#included">What is included</a></li>
-          <li><a href="services.html#sessions">Sessions near you</a></li>
+          <li><a href="services.html#community">Share with other parents</a></li>
         </ul>
       </div>
       <div>
         <h4>Parents Go To</h4>
         <ul>
           <li><a href="about.html">About us</a></li>
-          <li><a href="about.html#checks">How we check providers</a></li>
+          <li><a href="about.html#checks">How we check what is shared</a></li>
           <li><a href="contact.html">Contact</a></li>
           <li><a href="contact.html#questions">Common questions</a></li>
         </ul>
@@ -216,7 +216,7 @@
       <div>
         <h4>Get in touch</h4>
         <ul>
-          <li><a href="mailto:tsander2@usc.edu.au">tsander2@usc.edu.au</a></li>
+          <li><a href="mailto:parentsgoto@gmail.com">parentsgoto@gmail.com</a></li>
           <li>Monday to Friday, 9am to 5pm</li>
           <li><a href="contact.html">Send us a message</a></li>
         </ul>
@@ -224,7 +224,7 @@
     </div>
 
     <div class="footbase">
-      <span>&copy; <span class="year">2026</span> Parents Go To. Every provider is checked before it is listed.</span>
+      <span>&copy; <span class="year">2026</span> Parents Go To. Every resource is reviewed before it is shared.</span>
       <span>All rights reserved.</span>
     </div>
   </div>
@@ -233,9 +233,7 @@
 <script src="site.js"></script>
 <script src="back.js"></script>
 <script src="reveal.js"></script>
-<script src="vendor/supabase.js"></script>
-<script src="config.js"></script>
-<script src="backend.js"></script>
+<script src="store.js"></script>
 <script src="contact-form.js"></script>
 </body>
 </html>

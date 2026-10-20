@@ -149,3 +149,8 @@ html.ptg-reduce #kidsStepDone .kids-badge { animation: none !important; }
 html.ptg-reduce #kids .kids-badge::before,
 html.ptg-reduce #kids .kids-badge::after { animation: none !important; opacity: 0 !important; }
 html.ptg-reduce :is(#page-app, #page-admin) :is(.btn, .chip, .icon-btn, .pg-tool, .side-kid, .book, .cat, .kids-go):is(:hover, :active) { transform: none !important; }
+
+html.ptg-instant *,
+html.ptg-instant *::before,
+html.ptg-instant *::after,
+html.ptg-instant ::backdrop { animation: none !important; transition: none !important; }

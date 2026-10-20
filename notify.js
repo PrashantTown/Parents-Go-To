@@ -34,22 +34,6 @@
       return false;
     }
   }
-  function token() {
-    var abc = "abcdefghijklmnopqrstuvwxyz0123456789";
-    var out = "", i;
-    if (window.crypto && window.crypto.getRandomValues) {
-      var arr = new window.Uint8Array(10);
-      window.crypto.getRandomValues(arr);
-      for (i = 0; i < 10; i++) {
-        out += abc.charAt(arr[i] % abc.length);
-      }
-    } else {
-      for (i = 0; i < 10; i++) {
-        out += abc.charAt(Math.floor(Math.random() * abc.length));
-      }
-    }
-    return out;
-  }
   function addr(role, email) {
     return (role === "admin" ? "admin" : "parent") + "::" + (String(email || "").trim().toLowerCase() || "guest");
   }
@@ -383,6 +367,22 @@
       window.sessionStorage.setItem(seenKey(), JSON.stringify(raw));
     } catch (e) {}
   }
+  var OWN_TEXT = { system: 1, reminder: 1, news: 1 };
+  var PRIVATE_TEXT = {
+    family: "You have a new family message or invitation.",
+    moderation: "There is an update on something you posted.",
+    support: "There is a new support message.",
+    account: "There is a new sign-in alert for your account.",
+    streak: "A reader on your shelf earned a new badge.",
+    finished: "A reader on your shelf earned a new badge.",
+    minutes: "A reader on your shelf earned a new badge."
+  };
+  function lockScreen(rec) {
+    if (OWN_TEXT[rec.kind]) {
+      return { title: rec.title, body: rec.body || "" };
+    }
+    return { title: "Parents Go To", body: PRIVATE_TEXT[rec.kind] || "You have a new notification." };
+  }
   function show(rec, force) {
     if (!hasApi() || permission() !== "granted") {
       return false;
@@ -391,8 +391,9 @@
       return false;
     }
     markSeen(rec.id);
+    var shown = lockScreen(rec);
     var opts = {
-      body: rec.body || "",
+      body: shown.body,
       tag: "ptg-" + rec.tag,
       icon: makeIcon(),
       badge: makeIcon(),
@@ -406,13 +407,13 @@
     };
     if (swReg && swReg.showNotification) {
       try {
-        swReg.showNotification(rec.title, opts);
+        swReg.showNotification(shown.title, opts);
         return true;
       } catch (e) {}
     }
     if (pageRouteWorks()) {
       try {
-        var n = new window.Notification(rec.title, opts);
+        var n = new window.Notification(shown.title, opts);
         n.onclick = function() {
           openFromNotification(rec.go || "");
           n.close();
@@ -424,8 +425,6 @@
     }
     return false;
   }
-  // Once allowed, also register this device for alerts sent while the
-  // site is closed.
   function ask() {
     return askBrowser().then(function(p) {
       if (p === "granted" && window.PTGBackend && window.PTGBackend.enablePush) {
@@ -582,7 +581,7 @@
       var out = "", i, r;
       for (i = 0; i < rows.length; i++) {
         r = rows[i];
-        out += '<li class="note' + (r.read ? "" : " is-new") + '" data-tone="' + esc(r.tone) + '">' + '<button type="button" class="note-open" data-note-open="' + esc(r.id) + '"' + (r.go ? " data-" + scope.goAttr + '="' + esc(r.go) + '"' : "") + ">" + '<span class="note-ico" aria-hidden="true">' + '<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" ' + 'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + glyph(r.kind) + "</svg>" + "</span>" + '<span class="note-text">' + '<b class="note-title">' + esc(r.title) + "</b>" + (r.body ? '<span class="note-body">' + esc(r.body) + "</span>" : "") + '<span class="note-when">' + esc(since(r.at)) + (r.count > 1 ? ' <span class="note-times">' + r.count + " times</span>" : "") + (r.read ? "" : ' <span class="note-dot" aria-hidden="true"></span>' + '<span class="vh">Unread</span>') + "</span>" + "</span>" + "</button>" + '<button type="button" class="note-x" data-note-drop="' + esc(r.id) + '" ' + 'aria-label="Remove: ' + esc(r.title) + '">' + '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' + 'stroke-width="1.8" stroke-linecap="round" aria-hidden="true">' + '<path d="m4.4 4.4 7.2 7.2M11.6 4.4l-7.2 7.2"/></svg>' + "</button>" + "</li>";
+        out += '<li class="note' + (r.read ? "" : " is-new") + '" data-tone="' + esc(r.tone) + '">' + '<button type="button" class="note-open" data-note-open="' + esc(r.id) + '"' + (r.go ? " data-" + scope.goAttr + '="' + esc(scope.goAttr === "admin-go" && r.kind === "support" && r.go === "settings" ? "support" : r.go) + '"' : "") + ">" + '<span class="note-ico" aria-hidden="true">' + '<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" ' + 'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + glyph(r.kind) + "</svg>" + "</span>" + '<span class="note-text">' + '<b class="note-title">' + esc(r.title) + "</b>" + (r.body ? '<span class="note-body">' + esc(r.body) + "</span>" : "") + '<span class="note-when">' + esc(since(r.at)) + (r.count > 1 ? ' <span class="note-times">' + r.count + " times</span>" : "") + (r.read ? "" : ' <span class="note-dot" aria-hidden="true"></span>' + '<span class="vh">Unread</span>') + "</span>" + "</span>" + "</button>" + '<button type="button" class="note-x" data-note-drop="' + esc(r.id) + '" ' + 'aria-label="Remove: ' + esc(r.title) + '">' + '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' + 'stroke-width="1.8" stroke-linecap="round" aria-hidden="true">' + '<path d="m4.4 4.4 7.2 7.2M11.6 4.4l-7.2 7.2"/></svg>' + "</button>" + "</li>";
       }
       listEl.innerHTML = out;
     }

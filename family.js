@@ -315,9 +315,72 @@
       window.PTGAudit.write("account", what, whoEmail(), detail || "");
     }
   }
-  function memberCard(r) {
-    return '<article class="profile profile--carer">' + '<div class="profile-top">' + '<span class="avatar avatar--lg fam-avatar" aria-hidden="true">' + esc(initial(r.name)) + "</span>" + '<div><div class="nm">' + esc(r.name) + "</div>" + '<span class="role">Carer &middot; invited ' + esc(since(r.at)) + "</span></div>" + "</div>" + "<dl>" + "<dt>Invited as</dt><dd>" + esc(r.email) + "</dd>" + "<dt>Invited by</dt><dd>" + esc(r.byName || r.by || "the account holder") + "</dd>" + "<dt>Reference</dt><dd>" + esc(r.ref) + "</dd>" + "</dl>" + '<p class="fam-state"><span class="pill pill--pending">Invited</span>' + "<span>They can see this shelf until you withdraw access.</span></p>" + '<div class="acts">' + '<button class="btn btn--danger btn--sm" type="button" data-fam-wd="' + esc(r.id) + '">' + 'Withdraw access<span class="vh"> for ' + esc(r.name) + "</span></button>" + "</div>" + "</article>";
+  function inviteLink(r) {
+    var base = String(window.location.href).split("#")[0].split("?")[0];
+    return base + "?view=create&invite=" + encodeURIComponent(r.email);
   }
+  function inviteSubject() {
+    return whoName() + " invited you to their family reading shelf";
+  }
+  function inviteText(r) {
+    return "Hi " + (r.name || "there") + ",\n\n" + whoName() + " has invited you to join their family reading shelf on Parents Go To, so you can see what the children are reading and read along with them.\n\n" + "Create a free account, or sign in, using this email address: " + r.email + "\n" + inviteLink(r) + "\n\n" + "Once you are signed in you will be asked to accept the invitation. Your invitation code is " + r.ref + ".";
+  }
+  function shareActs(r) {
+    var mailto = "mailto:" + encodeURIComponent(r.email) + "?subject=" + encodeURIComponent(inviteSubject()) + "&body=" + encodeURIComponent(inviteText(r));
+    return '<div class="fam-share">' + '<button class="btn btn--ghost btn--sm" type="button" data-fam-copy="' + esc(r.id) + '">Copy invite<span class="vh"> for ' + esc(r.name) + "</span></button>" + '<a class="btn btn--ghost btn--sm" href="' + esc(mailto) + '">Email invite<span class="vh"> to ' + esc(r.name) + "</span></a>" + (navigator.share ? '<button class="btn btn--ghost btn--sm" type="button" data-fam-share="' + esc(r.id) + '">Share&hellip;<span class="vh"> the invite for ' + esc(r.name) + "</span></button>" : "") + "</div>";
+  }
+  function memberCard(r) {
+    var joined = r.state === "accepted";
+    return '<article class="profile profile--carer">' + '<div class="profile-top">' + '<span class="avatar avatar--lg fam-avatar" aria-hidden="true">' + esc(initial(r.name)) + "</span>" + '<div><div class="nm">' + esc(r.name) + "</div>" + '<span class="role">Carer &middot; ' + (joined ? "joined " + esc(since(r.acceptedAt || r.at)) : "invited " + esc(since(r.at))) + "</span></div>" + "</div>" + "<dl>" + "<dt>Invited as</dt><dd>" + esc(r.email) + "</dd>" + "<dt>Invited by</dt><dd>" + esc(r.byName || r.by || "the account holder") + "</dd>" + "<dt>Reference</dt><dd>" + esc(r.ref) + "</dd>" + "</dl>" + (joined ? '<p class="fam-state"><span class="pill pill--approved">Joined</span>' + "<span>They can see this shelf until you withdraw access.</span></p>" : '<p class="fam-state"><span class="pill pill--pending">Waiting to accept</span>' + "<span>They can see this shelf once they sign in with " + esc(r.email) + " and accept. Send them the invite if they have not had it.</span></p>" + shareActs(r)) + '<div class="acts">' + (joined ? '<button class="btn btn--ghost btn--sm" type="button" data-chat-link="' + esc(r.id) + '">Message<span class="vh"> ' + esc(r.name) + "</span></button>" : "") + '<button class="btn btn--danger btn--sm" type="button" data-fam-wd="' + esc(r.id) + '">' + (joined ? "Withdraw access" : "Cancel invitation") + '<span class="vh"> for ' + esc(r.name) + "</span></button>" + "</div>" + "</article>";
+  }
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function(resolve, reject) {
+      var t = document.createElement("textarea");
+      t.value = text;
+      t.setAttribute("readonly", "");
+      t.style.cssText = "position:fixed;left:-9999px;top:0";
+      document.body.appendChild(t);
+      t.select();
+      var ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {}
+      t.remove();
+      if (ok) {
+        resolve();
+      } else {
+        reject(new Error("copy"));
+      }
+    });
+  }
+  document.addEventListener("click", function(e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-fam-copy], [data-fam-share]") : null;
+    if (!t) {
+      return;
+    }
+    var r = Family.find(t.getAttribute("data-fam-copy") || t.getAttribute("data-fam-share"));
+    if (!r) {
+      return;
+    }
+    if (t.hasAttribute("data-fam-share")) {
+      navigator.share({ title: inviteSubject(), text: inviteText(r) }).catch(function() {});
+      return;
+    }
+    copyText(inviteText(r)).then(function() {
+      var label = t.firstChild;
+      var was = label.nodeValue;
+      label.nodeValue = "Copied";
+      window.setTimeout(function() {
+        label.nodeValue = was;
+      }, 2000);
+      say("The invite for " + r.name + " is copied. Paste it into a message or email to them.");
+    }, function() {
+      window.prompt("Copy this link and send it to " + r.name + ":", inviteLink(r));
+    });
+  });
   function pastRow(r) {
     return "<li>" + "<b>" + esc(r.name) + "</b> · " + esc(r.email) + '<span class="fam-past-when">Access withdrawn ' + esc(since(r.withdrawnAt)) + "</span>" + "</li>";
   }
@@ -392,7 +455,7 @@
       box.innerHTML = "There are no children on this shelf yet, so there is nothing " + "about a child for them to see. If you add one later, they will see that child.";
       return;
     }
-    box.innerHTML = "They will see " + (names.length === 1 ? "your child " : "your children ") + "<b>" + names.map(esc).join("</b>, <b>") + "</b> by name, with " + (names.length === 1 ? "their age and reading level" : "their ages and reading levels") + ", and everything on the shelf. Everywhere else in this app that stays inside " + "your account.";
+    box.innerHTML = "They will see " + (names.length === 1 ? "your child " : "your children ") + "<b>" + names.map(esc).join("</b>, <b>") + "</b> by name, with " + (names.length === 1 ? "their reading level" : "their reading levels") + ", and everything on the shelf. Everywhere else in this app that stays inside " + "your account.";
   }
   function resetInviteForm() {
     var f = $("famForm");
@@ -415,6 +478,13 @@
     markInvalid("famName", false);
     markInvalid("famEmail", false);
   }
+  function inviteNote(row) {
+    var cfg = window.PTG_CONFIG || {};
+    if (cfg.inviteEmails) {
+      return "We have emailed an invitation to " + row.email + ". If they do not have an account yet, the email shows them how to make one.";
+    }
+    return "Send them the invite below. They create an account, or sign in, with " + row.email + " and are asked to accept.";
+  }
   function showConfirmation(row) {
     var f = $("famForm");
     var wrap = $("famDoneWrap");
@@ -425,7 +495,7 @@
     if (f) {
       f.hidden = true;
     }
-    done.innerHTML = '<p class="cf-badge">' + '<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" ' + 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + '<path d="m4.4 10.4 3.6 3.6 7.6-8"/></svg> Recorded</p>' + "<h3>" + esc(row.name) + " is on your Profiles tab</h3>" + "<p>They are listed as a carer on this shelf, and you can withdraw that at any " + "time from the card.</p>" + '<p class="cf-ref">' + esc(row.ref) + "</p>";
+    done.innerHTML = '<p class="cf-badge">' + '<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" ' + 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + '<path d="m4.4 10.4 3.6 3.6 7.6-8"/></svg> Recorded</p>' + "<h3>" + esc(row.name) + " is on your Profiles tab</h3>" + "<p>" + esc(inviteNote(row)) + "</p>" + shareActs(row) + "<p>They are listed on your Profiles tab, and you can cancel the invitation at any " + "time from their card.</p>" + '<p class="cf-ref">' + esc(row.ref) + "</p>";
     if (wrap) {
       wrap.hidden = false;
     }
@@ -523,7 +593,7 @@
           }
           if (done) {
             done.className = "cf-panel cf-fail";
-            done.innerHTML = '<p class="cf-badge">' + '<svg width="15" height="15" viewBox="0 0 20 20" fill="none" ' + 'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" ' + 'stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.4"/>' + '<path d="M10 6.2v4.4M10 13.6v.1"/></svg> Not saved</p>' + "<h3>This browser would not store it</h3>" + "<p>Nothing has been kept, and there is no reference number. " + "Nobody has been added to your shelf.</p>";
+            done.innerHTML = '<p class="cf-badge">' + '<svg width="15" height="15" viewBox="0 0 20 20" fill="none" ' + 'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" ' + 'stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.4"/>' + '<path d="M10 6.2v4.4M10 13.6v.1"/></svg> Not saved</p>' + "<h3>The invitation was not saved</h3>" + "<p>Nothing has been kept, and there is no reference number. " + "Nobody has been added to your shelf.</p>";
             if (wrap2) {
               wrap2.hidden = false;
             }
@@ -574,6 +644,10 @@
         if (who) {
           who.textContent = pulling.name + " (" + pulling.email + ")";
         }
+        var joined = pulling.state === "accepted";
+        $("famwDlgTitle").textContent = joined ? "Withdraw access" : "Cancel the invitation";
+        $("famwDlgSub").textContent = joined ? "They come off the shelf straight away. Nobody is told." : "The invitation stops working straight away. Nobody is told.";
+        $("famwSave").textContent = joined ? "Withdraw access" : "Cancel invitation";
         openDialog(dlg);
         window.setTimeout(function() {
           var cancel = dlg.querySelector("[data-close]");
@@ -590,7 +664,7 @@
         }
         var name = pulling.name;
         if (!Family.withdraw(pulling.id, whoEmail())) {
-          say("This browser would not store that change. " + name + " still has access as far as this shelf is concerned.");
+          say("That change was not saved. " + name + " still has access. Check your internet connection and try again.");
           pulling = null;
           return;
         }

@@ -194,7 +194,7 @@
     var n = Math.round(18 * dust);
     ctx.save();
     ctx.fillStyle = col;
-    for (i = 0; i < n; i++) {
+    for (var i = 0; i < n; i++) {
       var mx = rnd() * w;
       var my = (rnd() * h + t * 6 * (.4 + rnd())) % h;
       var rad = (.6 + rnd() * 1.6) * (w / 220);

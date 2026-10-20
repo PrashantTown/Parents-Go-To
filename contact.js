@@ -234,6 +234,40 @@
         }
         return;
       }
+      var backend = window.PTGBackend;
+      if (backend && typeof backend.contact === "function") {
+        var btn = form.querySelector('[type="submit"]');
+        if (btn) {
+          btn.disabled = true;
+        }
+        say("Sending…");
+        backend.contact(nameVal, mailVal, AREA, bodyVal).then(function(ref) {
+          if (doneRef) {
+            doneRef.textContent = ref;
+          }
+          form.hidden = true;
+          if (done) {
+            done.hidden = false;
+            reveal(done);
+            done.focus();
+          }
+          say("Message sent. Your reference is " + ref + ".");
+        }, function(err) {
+          if (fail) {
+            fail.classList.add("is-on");
+          }
+          say("Your message was not sent. " + (err && err.message ? err.message : ""));
+          if (fail) {
+            reveal(fail);
+            fail.focus();
+          }
+        }).then(function() {
+          if (btn) {
+            btn.disabled = false;
+          }
+        });
+        return;
+      }
       var ticket = Contact.send({
         name: nameVal,
         email: mailVal,
@@ -243,7 +277,7 @@
         if (fail) {
           fail.classList.add("is-on");
         }
-        say("Your message could not be saved in this browser. Nothing has been kept.");
+        say("Your message was not sent. Nothing has been kept.");
         if (fail) {
           reveal(fail);
           fail.focus();
@@ -257,7 +291,7 @@
           tone: "info",
           title: "New message from the home page — " + ticket.ref,
           body: "Sent by " + nameVal + " (" + mailVal + "), who is not signed in.",
-          go: "settings",
+          go: "support",
           tag: "report-" + ticket.id
         });
       }
@@ -270,7 +304,7 @@
         reveal(done);
         done.focus();
       }
-      say("Message saved in this browser. Your reference is " + ticket.ref + ".");
+      say("Message sent. Your reference is " + ticket.ref + ".");
     });
     var again = $("contactAgain");
     if (again) {

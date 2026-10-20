@@ -237,3 +237,15 @@ html[data-theme="dark"] #page-app .pg{ --pg-was: #6B7C76; }
   #page-app .pg-b--was{ background: repeating-linear-gradient(-45deg, CanvasText 0 1px, Canvas 1px 4px); forced-color-adjust: none; }
   #page-app .pg-dial line.on{ stroke: Highlight; }
 }
+
+#page-app .pg-legend{ flex-wrap: wrap; }
+#page-app .pg-legend > span[hidden]{ display: none; }
+#page-app .pg-key--online{ width: 8px; height: 8px; border-radius: 50%; background: var(--marigold); }
+#page-app .pg-plot{ padding-bottom: 2.1rem; }
+#page-app .pg-o{
+  position: absolute; top: 100%; margin-top: 1.75rem;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--marigold);
+}
+@media (forced-colors: active){
+  #page-app .pg-o, #page-app .pg-key--online{ background: CanvasText; }
+}

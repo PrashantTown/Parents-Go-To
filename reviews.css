@@ -354,3 +354,5 @@
   #page-app .rv-chars.is-over{ color:CanvasText; }
   #page-admin .rv-edited{ color:CanvasText; }
 }
+#page-app .rv-intro{ flex:1 1 100%; margin:.2rem 0 0; max-width:62ch; font-size:.9rem; line-height:1.55; color:var(--ink-60); }
+#page-app .rv-intro[hidden]{ display:none; }

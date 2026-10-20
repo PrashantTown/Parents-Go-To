@@ -58,22 +58,6 @@
     }
     window.dispatchEvent(ev);
   }
-  function token() {
-    var abc = "abcdefghijklmnopqrstuvwxyz0123456789";
-    var out = "", i;
-    if (window.crypto && window.crypto.getRandomValues) {
-      var arr = new window.Uint8Array(8);
-      window.crypto.getRandomValues(arr);
-      for (i = 0; i < 8; i++) {
-        out += abc.charAt(arr[i] % abc.length);
-      }
-    } else {
-      for (i = 0; i < 8; i++) {
-        out += abc.charAt(Math.floor(Math.random() * abc.length));
-      }
-    }
-    return out;
-  }
   function norm(s) {
     return String(s == null ? "" : s).toLowerCase().replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").replace(/^ | $/g, "");
   }
@@ -613,7 +597,6 @@
     card.innerHTML = '<span class="rv-cover"' + (spine ? ' style="background:' + esc(spine) + '"' : "") + ' aria-hidden="true"></span>' + '<span class="rv-book-body">' + '<h3 class="rv-book-t">' + esc(title) + "</h3>" + '<p class="rv-book-a">' + esc(author) + "</p>" + (bits.length ? '<p class="rv-book-m">' + esc(bits.join(" · ")) + "</p>" : "") + '<p class="rv-book-s">' + line + "</p>" + "</span>";
     card.hidden = false;
   }
-  var editing = null;
   function countChars() {
     var box = $("rvBody"), out = $("rvChars");
     if (!box || !out) {
@@ -640,7 +623,6 @@
     }
     wrap.hidden = false;
     var own = Reviews.ownOn(chosen, whoEmail());
-    editing = own ? own.id : null;
     if (own) {
       if (head) {
         head.textContent = "Your review";
@@ -701,6 +683,9 @@
     var count = $("rvCount");
     var empty = $("rvEmpty");
     var wrap = $("rvListWrap");
+    if ($("rvIntro")) {
+      $("rvIntro").hidden = !!chosen;
+    }
     if (!chosen) {
       list.innerHTML = "";
       if (wrap) {
@@ -820,7 +805,7 @@
         });
       }
       if (!row) {
-        say("This browser is blocking local storage, so your review was not saved. " + "Nothing has been kept and nobody will see it.");
+        say("Your review was not saved. Check your internet connection and try again. " + "Nothing has been kept and nobody will see it.");
         return;
       }
       var live = row.state === "approved";
@@ -1067,7 +1052,7 @@
     }
     var by = me();
     if (!Reviews.decide(id, state, reason, by)) {
-      admSay("This browser would not store that decision. Nothing has changed.");
+      admSay("That decision was not saved. Nothing has changed.");
       return;
     }
     var word = state === "published" ? "Published" : state === "removed" ? "Removed" : "Put back in the queue";

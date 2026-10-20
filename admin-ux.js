@@ -83,3 +83,51 @@
     }
   });
 })();
+
+(function() {
+  var box = document.getElementById("admResViews");
+  if (!box) return;
+  var KEY = "ptg-admres";
+  var tabs = [].slice.call(box.querySelectorAll('[role="tab"]'));
+  var newPost = document.getElementById("admNewPost");
+  function pick(tab, focus) {
+    tabs.forEach(function(t) {
+      var on = t === tab;
+      var panel = document.getElementById(t.getAttribute("aria-controls"));
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      if (on) t.removeAttribute("tabindex");
+      else t.setAttribute("tabindex", "-1");
+      if (panel) panel.hidden = !on;
+    });
+    var name = tab.getAttribute("data-admres");
+    if (newPost) newPost.hidden = name !== "posts";
+    try { window.sessionStorage.setItem(KEY, name); } catch (e) {}
+    if (focus) tab.focus();
+  }
+  box.addEventListener("click", function(e) {
+    var t = e.target.closest ? e.target.closest('[role="tab"]') : null;
+    if (t && tabs.indexOf(t) !== -1) pick(t, false);
+  });
+  box.addEventListener("keydown", function(e) {
+    var at = tabs.indexOf(document.activeElement);
+    if (at === -1) return;
+    var next = -1;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (at + 1) % tabs.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (at - 1 + tabs.length) % tabs.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = tabs.length - 1;
+    if (next === -1) return;
+    e.preventDefault();
+    pick(tabs[next], true);
+  });
+  var saved = "";
+  try { saved = window.sessionStorage.getItem(KEY) || ""; } catch (e) {}
+  var start = tabs.filter(function(t) { return t.getAttribute("data-admres") === saved; })[0];
+  if (start) pick(start, false);
+  window.PTGAdminSections = {
+    show: function(name) {
+      var t = tabs.filter(function(x) { return x.getAttribute("data-admres") === name; })[0];
+      if (t) pick(t, false);
+    }
+  };
+})();

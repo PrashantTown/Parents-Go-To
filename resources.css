@@ -90,3 +90,5 @@ html[data-theme="dark"] #page-app .res-open{
   #page-app .res-open{ border-bottom:1px solid LinkText; }
   #page-app .res-open .ext{ forced-color-adjust:auto; }
 }
+#page-app .team-posts{ margin-top:2.4rem; }
+#page-app .team-empty{ margin:0; color:var(--ink-60); font-size:.94rem; }
