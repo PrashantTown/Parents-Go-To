@@ -8,7 +8,7 @@
     var saved = false;
     [ window.localStorage, window.sessionStorage ].forEach(function(s) {
       for (var i = 0; i < s.length; i++) {
-        if (/^sb-.+-auth-token$/.test(s.key(i))) {
+        if (/^sb-.+-auth-token$/.test(s.key(i)) || s.key(i) === "ptg-token-v1") {
           saved = true;
         }
       }

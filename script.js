@@ -2187,7 +2187,7 @@ const BookField = (() => {
       return;
     }
     if (!factor) {
-      showAlert("codeAlert", "codeAlertText", "Still getting your authenticator ready. Try again in a moment.");
+      showAlert("codeAlert", "codeAlertText", "Still getting ready. Try again in a moment.");
       return;
     }
     busyWhile($("codeSubmit"), "Checking the code…", function() {
@@ -2811,7 +2811,7 @@ const BookField = (() => {
         window.clearInterval(cooldown);
         resend.disabled = false;
         resendLabel.textContent = "Send it again";
-        route.textContent = sentMode === "signup" ? "You can ask for another confirmation email now." : "You can request another reset link now.";
+        route.textContent = sentMode === "signup" ? "You can ask for another confirmation email now." : "You can ask again now if you need to.";
       } else {
         resendLabel.innerHTML = 'Send it again in <span class="countdown">' + left + "</span>s";
       }
@@ -2826,7 +2826,7 @@ const BookField = (() => {
         return sentMode === "signup" ? b.resendConfirmation(sentTo) : b.resetPassword(sentTo);
       });
     }).then(function() {
-      route.textContent = sentMode === "signup" ? "Another confirmation email has been sent." : "Another reset link has been sent.";
+      route.textContent = sentMode === "signup" ? "Another confirmation email has been sent." : "We’ve reminded the administrators.";
       startCooldown(60);
     }, function(err) {
       route.textContent = err.message;
@@ -3031,7 +3031,7 @@ const BookField = (() => {
     }
     var admin = document.getElementById("role-admin");
     if (form && form.contains(admin) && admin.checked) {
-      tell("Administrators sign in with their email address, password and authenticator code.");
+      tell("Administrators sign in with their email address, password and the administrator code.");
       return;
     }
     var consent = [ "cGuardian", "cTerms" ].every(function(id) {
@@ -8114,7 +8114,7 @@ const BookField = (() => {
       var s = shelfFor(a.email);
       var suspended = a.status === "suspended";
       var isMe = String(a.email).toLowerCase() === String(me()).toLowerCase();
-      return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Send reset</button>' + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + (isMe || a.role === "admin" ? "" : '<button class="btn btn--quiet btn--sm" type="button" data-delete-account="' + esc(a.email) + '">Delete<span class="vh"> the account ' + esc(a.email) + "</span></button>") + "</span>" + "</td>" + "</tr>";
+      return '<tr data-state="' + esc(a.status) + '">' + "<td>" + '<span class="acct">' + '<span class="avatar avatar--sm" style="background:' + (a.role === "admin" ? "#123F5B" : "#0D3B32") + '">' + esc(initial(a.name || a.email)) + "</span>" + "<span>" + '<span class="nm">' + esc(a.name || "Unnamed") + (isMe ? " (you)" : "") + "</span>" + '<span class="em">' + esc(a.email) + "</span>" + "</span>" + "</span>" + "</td>" + '<td><span class="pill pill--' + esc(a.role) + '">' + (a.role === "admin" ? "Administrator" : "Parent") + "</span></td>" + '<td class="num">' + s.children + "</td>" + '<td class="num">' + s.books + "</td>" + "<td>" + esc(since(a.lastSeen)) + "</td>" + '<td><span class="pill pill--' + esc(a.status) + '">' + (suspended ? "Suspended" : "Active") + "</span></td>" + "<td>" + '<span class="row-acts">' + '<button class="btn btn--quiet btn--sm" type="button" data-reset="' + esc(a.email) + '">Temporary password</button>' + (isMe ? '<button class="btn btn--quiet btn--sm" type="button" disabled title="You cannot suspend the account you are signed in with">Suspend</button>' : '<button class="btn btn--' + (suspended ? "ghost" : "danger") + ' btn--sm" type="button" data-' + (suspended ? "restore" : "suspend") + '="' + esc(a.email) + '">' + (suspended ? "Restore" : "Suspend") + "</button>") + (isMe || a.role === "admin" ? "" : '<button class="btn btn--quiet btn--sm" type="button" data-delete-account="' + esc(a.email) + '">Delete<span class="vh"> the account ' + esc(a.email) + "</span></button>") + "</span>" + "</td>" + "</tr>";
     }).join("") + moreRow("acc", list.length, every.length, "tr");
     $("admEmptyAcc").classList.toggle("is-on", !every.length);
     $("admAccTable").parentNode.hidden = !list.length;
@@ -8789,10 +8789,15 @@ const BookField = (() => {
       if (!window.PTGBackend) {
         return;
       }
-      window.PTGBackend.sendReset(ez).then(function() {
-        log("account", "Sent a password reset link to " + ez);
+      window.PTGBackend.sendReset(ez).then(function(res) {
+        log("account", "Gave a temporary password to " + ez);
         renderAll();
-        say("A password reset link is on its way to " + ez);
+        if (res && res.password) {
+          say("Temporary password for " + ez + " is ready. Give it to them privately; they choose a new one when they sign in.");
+          window.prompt("Temporary password for " + ez + ". Copy it and give it to them privately — they will choose a new password when they sign in:", res.password);
+        } else {
+          say("A password reset is on its way to " + ez);
+        }
       }, function(err) {
         say(err.message);
       });

@@ -2,7 +2,7 @@
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://parents-go-to-api.onrender.com http://localhost:5000 http://127.0.0.1:5000; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Project &mdash; Parents Go To</title>
 <meta name="description" content="A Parents Go To project: trusted resources for families, checked before they are shared.">
@@ -101,7 +101,7 @@
       <div>
         <h4>Get in touch</h4>
         <ul>
-          <li><a href="mailto:parentsgoto@gmail.com">parentsgoto@gmail.com</a></li>
+          <li><a href="mailto:tsander2@usc.edu.au">tsander2@usc.edu.au</a></li>
           <li>Monday to Friday, 9am to 5pm</li>
           <li><a href="contact.html">Send us a message</a></li>
         </ul>
@@ -118,6 +118,10 @@
 <script src="site.js"></script>
 <script src="back.js"></script>
 <script src="store.js"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="sync.js"></script>
+<script src="backend.js"></script>
 <script src="project.js"></script>
 
 </body>

@@ -933,7 +933,7 @@
             fillDetails();
             audit("account", "Asked to change sign-in email", account, "to " + newMail);
             window.setTimeout(function() {
-              say(scope, "We sent a confirmation link to " + newMail + ". Your sign-in email changes once you open it. Until then, keep using " + account + ".");
+              say(scope, "Your sign-in email is now " + newMail + ". Use it next time you sign in.");
             }, 1200);
           }, function(err) {
             if (emailField) {
@@ -1200,6 +1200,11 @@
         return Promise.reject(new Error("The site cannot reach its database right now."));
       }
       return window.PTGBackend.sendPasswordCode();
+    }
+    if (reset.open && !(window.PTGBackend && window.PTGBackend.sendPasswordCode)) {
+      // Resetting with an emailed code needs an email service; administrators
+      // give temporary passwords instead ("Forgot your password?" on sign-in).
+      reset.open.hidden = true;
     }
     if (reset.box && pw.form) {
       if (reset.open) {
@@ -1802,15 +1807,15 @@
           title: "Delete your account?",
           body: "This removes the account and everything on the shelf, and it cannot be undone. Download a copy first if you want to keep it.",
           type: "DELETE",
+          password: true,
           yes: "Delete my account",
           danger: true
-        }, function() {
+        }, function(password) {
           if (!window.PTGBackend) {
             say(scope, "The site cannot reach its database right now.");
             return;
           }
-          audit("account", "Account deleted", account);
-          window.PTGBackend.deleteAccount().then(function() {
+          window.PTGBackend.deleteAccount(password).then(function() {
             var out = $("signOutBtn");
             if (out) {
               out.click();
@@ -2404,46 +2409,57 @@
     askDlg.className = "set-leave set-ask";
     askDlg.setAttribute("aria-labelledby", prefix + "ask-title");
     askDlg.setAttribute("aria-describedby", prefix + "ask-msg");
-    askDlg.innerHTML = '<h2 id="' + prefix + 'ask-title"></h2>' + '<p class="set-leave-msg" id="' + prefix + 'ask-msg"></p>' + '<div class="set-ask-type" hidden>' + '<label for="' + prefix + 'ask-input"></label>' + '<input id="' + prefix + 'ask-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">' + "</div>" + '<div class="set-leave-acts">' + '<button type="button" class="btn btn--ghost" data-ask="no">Cancel</button>' + '<button type="button" class="btn" data-ask="yes"></button>' + "</div>";
+    askDlg.innerHTML = '<h2 id="' + prefix + 'ask-title"></h2>' + '<p class="set-leave-msg" id="' + prefix + 'ask-msg"></p>' + '<div class="set-ask-type" hidden>' + '<label for="' + prefix + 'ask-input"></label>' + '<input id="' + prefix + 'ask-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">' + "</div>" + '<div class="set-ask-type set-ask-pw" hidden>' + '<label for="' + prefix + 'ask-pw">Your password</label>' + '<input id="' + prefix + 'ask-pw" type="password" autocomplete="current-password">' + "</div>" + '<div class="set-leave-acts">' + '<button type="button" class="btn btn--ghost" data-ask="no">Cancel</button>' + '<button type="button" class="btn" data-ask="yes"></button>' + "</div>";
     (page || document.body).appendChild(askDlg);
     var askInput = askDlg.querySelector("input");
+    var askPw = askDlg.querySelector(".set-ask-pw input");
+    var askNeedsPw = false;
     var askYes = askDlg.querySelector('[data-ask="yes"]');
     var askWord = "";
     var askThen = null;
     var askFrom = null;
+    function askReady() {
+      askYes.disabled = !!askWord && askInput.value.trim().toUpperCase() !== askWord || askNeedsPw && !askPw.value;
+    }
+    // o.password: also ask for the account password (passed to `then`).
     function ask(o, then) {
       askWord = o.type || "";
+      askNeedsPw = !!o.password;
       askThen = then;
       askFrom = document.activeElement;
       askDlg.querySelector("h2").textContent = o.title;
       askDlg.querySelector(".set-leave-msg").textContent = o.body;
       askDlg.querySelector(".set-ask-type").hidden = !askWord;
+      askDlg.querySelector(".set-ask-pw").hidden = !askNeedsPw;
       askDlg.querySelector("label").textContent = "Type " + askWord + " to confirm";
       askInput.value = "";
+      askPw.value = "";
       askYes.textContent = o.yes;
       askYes.className = "btn " + (o.danger ? "btn--danger" : "btn--primary");
-      askYes.disabled = !!askWord;
+      askReady();
       askDlg.showModal();
       (askWord ? askInput : askDlg.querySelector('[data-ask="no"]')).focus();
     }
     function askClose(ok) {
       var then = askThen;
+      var given = askPw.value;
       askThen = null;
+      askPw.value = "";
       askDlg.close();
       if (ok && then) {
-        then();
+        then(given);
       } else if (askFrom && askFrom.focus && document.contains(askFrom)) {
         askFrom.focus();
       }
     }
-    askInput.addEventListener("input", function() {
-      askYes.disabled = askInput.value.trim().toUpperCase() !== askWord;
-    });
-    askInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter" && !askYes.disabled) {
-        e.preventDefault();
-        askClose(true);
-      }
+    [ askInput, askPw ].forEach(function(input) {
+      input.addEventListener("input", askReady);
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && !askYes.disabled) {
+          e.preventDefault();
+          askClose(true);
+        }
+      });
     });
     askDlg.addEventListener("click", function(e) {
       var b = e.target.closest ? e.target.closest("[data-ask]") : null;
