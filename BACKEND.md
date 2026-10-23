@@ -16,14 +16,9 @@ The pages were written to call `window.PTGBackend` for anything that needs a ser
 
 2. **Live site.** `config.js` already points at the deployed API, `https://parents-go-to-api.onrender.com`. The backend lists the sites allowed to call it in `CORS_ORIGINS` (in its `render.yaml`), and each page's `Content-Security-Policy` lists the API under `connect-src`. If the API moves, update all three.
 
-**Demo accounts** (after `npm run seed` on the backend, with no `SEED_*` passwords set):
+**Test accounts:** `npm run seed` on the backend creates a test parent and a test administrator. Their sign-in details are in the backend's README, so they are not published with this website.
 
-| Account | Email | Password |
-|---|---|---|
-| Parent | `demo@parentsgoto.test` | `demo1234` |
-| Administrator | `admin@parentsgoto.test` | `demo1234-admin` |
-
-Administrators also enter a six-digit code. With email set up on the backend, a fresh code is emailed to the administrator's own address at every sign-in, so the demo administrator (a `.test` address) can't sign in then; use a real administrator account. Without email, it's the shared `ADMIN_LOGIN_CODE`, if one is set.
+Administrators also enter a six-digit code. With email set up on the backend, a fresh code is emailed to the administrator's own address at every sign-in. Without email, it's the shared `ADMIN_LOGIN_CODE`, if one is set.
 
 ## The four files
 
